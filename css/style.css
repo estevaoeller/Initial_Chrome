@@ -1,0 +1,283 @@
+/* css/style.css */
+body {
+    font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    margin: 0;
+    padding: 20px;
+    background-color: #f0f2f5; /* Cor de fundo temporária */
+    color: #333;
+    overflow-y: scroll; /* Para garantir a rolagem vertical se o conteúdo exceder a tela */
+}
+
+#background-filter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.3); /* Filtro escuro semi-transparente - ajuste depois */
+    z-index: -1; /* Para ficar atrás do conteúdo */
+    /* A imagem de fundo será adicionada aqui depois */
+}
+
+#top-right-corner {
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    text-align: right;
+    color: #fff; /* Cor do texto para melhor contraste com o filtro/imagem de fundo */
+}
+
+#clock-area #analog-clock-placeholder,
+#clock-area #date-placeholder,
+#clock-area #calendar-placeholder {
+    padding: 5px 10px;
+    background-color: rgba(0,0,0,0.2); /* Um leve fundo para destacar do wallpaper */
+    margin-bottom: 8px;
+    border-radius: 4px;
+}
+
+#clock-area #calendar-placeholder p {
+    margin: 0;
+    font-size: 0.9em;
+}
+
+
+#content-area {
+    margin-top: 100px; /* Ajuste para não sobrepor com o header fixo */
+    padding: 20px;
+}
+
+.bookmark-category {
+    background-color: rgba(255, 255, 255, 0.9); /* Fundo levemente transparente para categorias */
+    padding: 15px;
+    margin-bottom: 20px;
+    border-radius: 8px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.bookmark-category h2 {
+    margin-top: 0;
+    border-bottom: 1px solid #eee;
+    padding-bottom: 10px;
+    font-weight: 500;
+    color: #1a1a1a;
+}
+
+.bookmarks-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Grid responsivo */
+    gap: 10px; /* Espaçamento entre os ícones */
+}
+
+.bookmark-item {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 8px;
+    text-align: center;
+    text-decoration: none;
+    color: #333;
+    display: flex; /* Para centralizar conteúdo verticalmente se necessário */
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60px; /* Altura mínima para cada item */
+    word-break: break-word; /* Quebrar palavras longas */
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.bookmark-item:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.bookmark-item span {
+    font-size: 0.9em;
+
+
+/* ... (estilos anteriores, incluindo .bookmark-category.drag-over) ... */
+
+/* Oculta a seção de adicionar bookmark manualmente */
+
+
+#add-bookmark-section {
+    display: none;
+}
+
+
+
+.bookmark-category.drag-over {
+    border: 2px dashed #007bff;
+    background-color: rgba(0, 123, 255, 0.1);
+    transform: scale(1.02); /* Leve aumento para dar feedback */
+    transition: transform 0.1s ease-out, background-color 0.1s ease-out, border 0.1s ease-out;
+}
+
+/* Estilos para o botão de excluir bookmark 
+.delete-bookmark-btn {
+    position: absolute;
+    top: 2px; /* Pequeno espaçamento do topo 
+    right: 5px; /* Pequeno espaçamento da direita 
+    font-size: 18px; /* Tamanho do 'X' - um pouco maior para facilitar o clique 
+    font-weight: bold;
+    color: #aaa; /* Cor cinza claro inicial 
+    cursor: pointer;
+    padding: 2px 4px; /* Espaçamento interno para aumentar a área de clique 
+    line-height: 1;
+    display: none; /* Começa oculto 
+    user-select: none; /* Para não selecionar o 'X' como texto 
+    transition: color 0.2s ease;
+}
+
+.bookmark-item:hover .delete-bookmark-btn {
+    display: block; /* Mostra o botão quando o mouse está sobre o bookmark-item 
+    color: #f35454; /* Cor vermelha mais suave ao mostrar 
+}
+
+.delete-bookmark-btn:hover {
+    color: #cc0000; /* Vermelho mais escuro quando o mouse está sobre o X especificamente 
+}
+*/
+
+.test-delete-button-x {
+    border: 8px solid lime !important;
+    background-color: yellow !important;
+    font-size: 40px !important;
+
+    /* Forçando a exibição para o teste, sem se preocupar com posição absoluta ou hover ainda */
+    display: inline-block !important; 
+    margin-left: 10px !important; /* Apenas para separar um pouco do nome para o teste */
+}
+
+
+.bookmark-item.dragging {
+    opacity: 0.5;
+    border: 2px dashed #007bff;
+}
+
+/* Estilo para o placeholder visual durante o arraste para reordenar */
+.drop-placeholder {
+    background-color: rgba(0, 123, 255, 0.2); /* Azul claro semi-transparente */
+    height: 50px; /* Altura similar a um bookmark item, ajuste se necessário */
+    border: 2px dashed #007bff;
+    margin: 5px 0; /* Um pouco de margem para visualização */
+    border-radius: 6px;
+}
+
+/* Estilos para o Favicon e Nome do Bookmark */
+.bookmark-favicon {
+    width: 16px;  /* Ou 20px, 24px - experimente */
+    height: 16px; /* Ou 20px, 24px - experimente */
+    margin-right: 8px; /* Espaço entre o favicon e o nome */
+    vertical-align: middle; /* Tenta alinhar verticalmente com o texto */
+    object-fit: contain; /* Para a imagem não distorcer se o tamanho for diferente */
+}
+
+.bookmark-favicon-placeholder { /* Estilo para o placeholder se a URL for inválida */
+    display: inline-block;
+    width: 16px;
+    height: 16px;
+    margin-right: 8px;
+    text-align: center;
+    line-height: 16px; /* Para centralizar o caractere verticalmente */
+    font-size: 12px;
+    color: #ccc;
+}
+
+.bookmark-name {
+    flex-grow: 1; /* Para o nome ocupar o espaço restante */
+    text-align: left; /* Alinhar o nome à esquerda */
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Ajuste no .bookmark-item para acomodar favicon e nome lado a lado, e o X */
+.bookmark-item {
+    position: relative;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    padding: 10px;
+    text-decoration: none;
+    color: #333;
+    
+    display: flex; /* MUITO IMPORTANTE: para alinhar favicon e nome na mesma linha */
+    align-items: center; /* Alinha verticalmente favicon, nome (e o X se não fosse absolute) */
+    /* justify-content: flex-start; Removido para dar espaço ao X posicionado absolutamente */
+
+    min-height: 40px; /* Pode reduzir um pouco se não precisar de tanto espaço vertical */
+    word-break: break-word; 
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+/* O .bookmark-item span genérico pode não ser mais necessário ou pode precisar de ajuste
+   se você tiver um .bookmark-name específico.
+   Considere remover ou ajustar:
+.bookmark-item span {
+    font-size: 0.9em; 
+}
+*/
+
+/* Estilo para o campo de input durante a edição do nome do bookmark */
+.bookmark-name-edit {
+    font-size: 0.85em; /* Mesmo tamanho de fonte que .bookmark-name */
+    padding: 2px 4px;
+    border: 1px solid #007bff; /* Borda azul para indicar edição */
+    border-radius: 3px;
+    width: calc(100% - 10px); /* Tenta ocupar a largura disponível menos um pouco de padding */
+    box-sizing: border-box;
+    margin-right: 5px; /* Se houver outros elementos ao lado, como o X */
+    flex-grow: 1; /* Para tentar ocupar o espaço como o .bookmark-name */
+}
+
+/* Opcional: Ajuste no .bookmark-item para garantir que o input caiba bem */
+.bookmark-item {
+    /* ... (seus estilos existentes) ... */
+    /* Se você tiver display: flex e align-items: center, o input deve se alinhar bem.
+       Pode ser necessário ajustar o padding do .bookmark-item ou o tamanho do input
+       para que tudo fique visualmente agradável durante a edição. */
+}
+
+#background-filter {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    /* background-color: rgba(0, 0, 0, 0.3);  Mantenha seu filtro de cor aqui */
+    z-index: -1;
+
+    /* Novos estilos para a imagem de fundo */
+    background-size: cover;
+    background-position: center center;
+    background-repeat: no-repeat;
+    transition: background-image 1s ease-in-out; /* Transição suave ao mudar a imagem */
+}
+
+/* CSS para o botão de selecionar pasta (opcional, só para não ficar feio) */
+footer {
+    position: fixed;
+    bottom: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    padding: 5px;
+    background-color: rgba(0,0,0,0.1);
+    border-radius: 5px;
+}
+
+#select-wallpaper-folder-btn {
+    padding: 8px 15px;
+    background-color: #007bff;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
+#select-wallpaper-folder-btn:hover {
+    background-color: #0056b3;
+}
+
+
+/* Adicione mais estilos conforme necessário */
