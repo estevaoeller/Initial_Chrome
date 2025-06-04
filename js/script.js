@@ -380,7 +380,7 @@ document.addEventListener('DOMContentLoaded', function() {
         console.log("Bookmarks renderizados na tela!");
     }
 
-    // ----> NOVA FUNÇÃO: INÍCIO DA EDIÇÃO DO NOME DO BOOKMARK <----
+    // ----> INÍCIO DA FUNÇÃO DE EDIÇÃO DO NOME DO BOOKMARK <----
     function handleEditBookmarkName(event) {
 
         event.preventDefault();  // Impede qualquer ação padrão que o clique no span possa desencadear via link pai
@@ -468,7 +468,7 @@ document.addEventListener('DOMContentLoaded', function() {
         input.addEventListener('blur', handleBlur);
         input.addEventListener('keydown', handleKeydown);
     }
-    // ----> FIM DA NOVA FUNÇÃO: INÍCIO DA EDIÇÃO DO NOME DO BOOKMARK <----
+    // ----> FIM DA FUNÇÃO DE EDIÇÃO DO NOME DO BOOKMARK <----
 
 
     function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom) {
