@@ -349,7 +349,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     bookmarkItem.appendChild(bookmarkNameSpan);
 
                     const deleteBtn = document.createElement('span');
-                    deleteBtn.className = 'test-delete-button-x'; 
+                    deleteBtn.className = 'delete-bookmark-btn';
                     deleteBtn.innerHTML = '&times;';
                     deleteBtn.title = 'Excluir bookmark';
                     deleteBtn.dataset.urlToDelete = link.url;
@@ -407,7 +407,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Substitui o span pelo input temporariamente
         span.style.display = 'none';
         // Insere o input antes do span do botão de excluir, se ele existir, ou no final
-        const deleteButtonSibling = span.parentNode.querySelector('.test-delete-button-x');
+        const deleteButtonSibling = span.parentNode.querySelector('.delete-bookmark-btn');
         if (deleteButtonSibling) {
             span.parentNode.insertBefore(input, deleteButtonSibling);
         } else {
@@ -565,7 +565,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
         if (contentArea) {
             contentArea.addEventListener('click', function(event) {
-                if (event.target.classList.contains('test-delete-button-x')) { 
+                if (event.target.classList.contains('delete-bookmark-btn')) {
                     event.preventDefault();
                     event.stopPropagation(); 
                     const urlToDelete = event.target.dataset.urlToDelete;

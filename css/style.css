@@ -114,7 +114,8 @@ body {
     transition: transform 0.1s ease-out, background-color 0.1s ease-out, border 0.1s ease-out;
 }
 
-/* Estilos para o botão de excluir bookmark 
+
+/* Estilos para o botão de excluir bookmark */
 .delete-bookmark-btn {
     position: absolute;
     top: 2px; /* Pequeno espaçamento do topo 
@@ -138,17 +139,7 @@ body {
 .delete-bookmark-btn:hover {
     color: #cc0000; /* Vermelho mais escuro quando o mouse está sobre o X especificamente 
 }
-*/
 
-.test-delete-button-x {
-    border: 8px solid lime !important;
-    background-color: yellow !important;
-    font-size: 40px !important;
-
-    /* Forçando a exibição para o teste, sem se preocupar com posição absoluta ou hover ainda */
-    display: inline-block !important; 
-    margin-left: 10px !important; /* Apenas para separar um pouco do nome para o teste */
-}
 
 
 .bookmark-item.dragging {
