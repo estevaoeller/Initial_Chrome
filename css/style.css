@@ -114,41 +114,32 @@ body {
     transition: transform 0.1s ease-out, background-color 0.1s ease-out, border 0.1s ease-out;
 }
 
-/* Estilos para o botão de excluir bookmark 
+/* Estilos para o botão de excluir bookmark */
 .delete-bookmark-btn {
     position: absolute;
-    top: 2px; /* Pequeno espaçamento do topo 
-    right: 5px; /* Pequeno espaçamento da direita 
-    font-size: 18px; /* Tamanho do 'X' - um pouco maior para facilitar o clique 
+    top: 2px; /* Pequeno espaçamento do topo */
+    right: 5px; /* Pequeno espaçamento da direita */
+    font-size: 18px; /* Tamanho do 'X' - um pouco maior para facilitar o clique */
     font-weight: bold;
-    color: #aaa; /* Cor cinza claro inicial 
+    color: #aaa; /* Cor cinza claro inicial */
     cursor: pointer;
-    padding: 2px 4px; /* Espaçamento interno para aumentar a área de clique 
+    padding: 2px 4px; /* Espaçamento interno para aumentar a área de clique */
     line-height: 1;
-    display: none; /* Começa oculto 
-    user-select: none; /* Para não selecionar o 'X' como texto 
+    display: none; /* Começa oculto */
+    user-select: none; /* Para não selecionar o 'X' como texto */
     transition: color 0.2s ease;
 }
 
 .bookmark-item:hover .delete-bookmark-btn {
-    display: block; /* Mostra o botão quando o mouse está sobre o bookmark-item 
-    color: #f35454; /* Cor vermelha mais suave ao mostrar 
+    display: block; /* Mostra o botão quando o mouse está sobre o bookmark-item */
+    color: #f35454; /* Cor vermelha mais suave ao mostrar */
 }
 
 .delete-bookmark-btn:hover {
-    color: #cc0000; /* Vermelho mais escuro quando o mouse está sobre o X especificamente 
+    color: #cc0000; /* Vermelho mais escuro quando o mouse está sobre o X especificamente */
 }
-*/
 
-.test-delete-button-x {
-    border: 8px solid lime !important;
-    background-color: yellow !important;
-    font-size: 40px !important;
 
-    /* Forçando a exibição para o teste, sem se preocupar com posição absoluta ou hover ainda */
-    display: inline-block !important; 
-    margin-left: 10px !important; /* Apenas para separar um pouco do nome para o teste */
-}
 
 
 .bookmark-item.dragging {
@@ -240,44 +231,152 @@ body {
        para que tudo fique visualmente agradável durante a edição. */
 }
 
-#background-filter {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    /* background-color: rgba(0, 0, 0, 0.3);  Mantenha seu filtro de cor aqui */
-    z-index: -1;
 
-    /* Novos estilos para a imagem de fundo */
-    background-size: cover;
-    background-position: center center;
-    background-repeat: no-repeat;
-    transition: background-image 1s ease-in-out; /* Transição suave ao mudar a imagem */
-}
-
-/* CSS para o botão de selecionar pasta (opcional, só para não ficar feio) */
-footer {
-    position: fixed;
-    bottom: 10px;
-    left: 50%;
-    transform: translateX(-50%);
-    padding: 5px;
-    background-color: rgba(0,0,0,0.1);
-    border-radius: 5px;
-}
-
-#select-wallpaper-folder-btn {
-    padding: 8px 15px;
-    background-color: #007bff;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-}
-#select-wallpaper-folder-btn:hover {
-    background-color: #0056b3;
-}
 
 
 /* Adicione mais estilos conforme necessário */
+/* Estilos para Relógio, Data e Calendário */
+#clock-area {
+    background-color: rgba(255, 255, 255, 0.9);
+    border-radius: 8px;
+    padding: 15px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    min-width: 200px;
+}
+
+#analog-clock-placeholder {
+    font-size: 24px;
+    font-weight: bold;
+    text-align: center;
+    color: #333;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+#date-placeholder {
+    font-size: 14px;
+    text-align: center;
+    color: #555;
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 8px;
+    border-radius: 6px;
+    margin-bottom: 10px;
+}
+
+#calendar-placeholder {
+    background-color: rgba(255, 255, 255, 0.8);
+    padding: 10px;
+    border-radius: 6px;
+    color: #333;
+}
+
+#calendar-placeholder h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    text-align: center;
+    color: #333;
+}
+
+#calendar-placeholder table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+}
+
+#calendar-placeholder th,
+#calendar-placeholder td {
+    padding: 4px;
+    text-align: center;
+    border: 1px solid #ddd;
+}
+
+#calendar-placeholder th {
+    background-color: #f8f9fa;
+    font-weight: bold;
+}
+
+#calendar-placeholder a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 12px;
+}
+
+#calendar-placeholder a:hover {
+    text-decoration: underline;
+}
+
+
+
+/* Estilos para Temas */
+body.light-theme {
+    background-color: #f0f2f5;
+    color: #333;
+}
+
+body.dark-theme {
+    background-color: #222;
+    color: #eee;
+}
+
+body.dark-theme .bookmark-category {
+    background-color: rgba(50, 50, 50, 0.9);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+body.dark-theme .bookmark-category h2 {
+    color: #eee;
+    border-bottom-color: #444;
+}
+
+body.dark-theme .bookmark-item {
+    background-color: #333;
+    border-color: #555;
+    color: #eee;
+}
+
+body.dark-theme .bookmark-item:hover {
+    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
+}
+
+body.dark-theme .bookmark-favicon-placeholder {
+    color: #888;
+}
+
+body.dark-theme .bookmark-name-edit {
+    background-color: #444;
+    color: #eee;
+    border-color: #007bff;
+}
+
+body.dark-theme #clock-area {
+    background-color: rgba(50, 50, 50, 0.9);
+    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+}
+
+body.dark-theme #analog-clock-placeholder,
+body.dark-theme #date-placeholder,
+body.dark-theme #calendar-placeholder {
+    background-color: rgba(70, 70, 70, 0.8);
+    color: #eee;
+}
+
+body.dark-theme #calendar-placeholder h3 {
+    color: #eee;
+}
+
+body.dark-theme #calendar-placeholder th {
+    background-color: #444;
+    color: #eee;
+}
+
+body.dark-theme #calendar-placeholder td {
+    border-color: #555;
+}
+
+body.dark-theme #calendar-placeholder a {
+    color: #66b3ff;
+}
+
+
