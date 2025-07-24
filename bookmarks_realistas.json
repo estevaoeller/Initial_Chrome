@@ -1,0 +1,187 @@
+[
+    {
+        "name": "IA",
+        "links": [
+            {
+                "name": "ChatGPT",
+                "url": "https://chat.openai.com/"
+            },
+            {
+                "name": "Gemini",
+                "url": "https://gemini.google.com/"
+            },
+            {
+                "name": "Claude",
+                "url": "https://claude.ai/"
+            },
+            {
+                "name": "Perplexity",
+                "url": "https://www.perplexity.ai/"
+            },
+            {
+                "name": "Hugging Face",
+                "url": "https://huggingface.co/"
+            },
+            {
+                "name": "CivitAI",
+                "url": "https://civitai.com/"
+            },
+            {
+                "name": "Leonardo AI",
+                "url": "https://app.leonardo.ai/"
+            },
+            {
+                "name": "Runway ML",
+                "url": "https://runwayml.com/"
+            }
+        ]
+    },
+    {
+        "name": "Notícias",
+        "links": [
+            {
+                "name": "Google News",
+                "url": "https://news.google.com/"
+            },
+            {
+                "name": "BBC Brasil",
+                "url": "https://www.bbc.com/portuguese"
+            },
+            {
+                "name": "G1",
+                "url": "https://g1.globo.com/"
+            },
+            {
+                "name": "El País",
+                "url": "https://brasil.elpais.com/"
+            },
+            {
+                "name": "Estadão",
+                "url": "https://www.estadao.com.br/"
+            },
+            {
+                "name": "CNN Brasil",
+                "url": "https://www.cnnbrasil.com.br/"
+            },
+            {
+                "name": "Folha de S.Paulo",
+                "url": "https://www.folha.uol.com.br/"
+            },
+            {
+                "name": "O Globo",
+                "url": "https://oglobo.globo.com/"
+            }
+        ]
+    },
+    {
+        "name": "Estudos",
+        "links": [
+            {
+                "name": "Google Scholar",
+                "url": "https://scholar.google.com.br/"
+            },
+            {
+                "name": "SciELO",
+                "url": "https://www.scielo.org/"
+            },
+            {
+                "name": "JSTOR",
+                "url": "https://www.jstor.org/"
+            },
+            {
+                "name": "Coursera",
+                "url": "https://www.coursera.org/"
+            },
+            {
+                "name": "Khan Academy",
+                "url": "https://pt.khanacademy.org/"
+            },
+            {
+                "name": "edX",
+                "url": "https://www.edx.org/"
+            },
+            {
+                "name": "Google Acadêmico",
+                "url": "https://scholar.google.com.br/"
+            },
+            {
+                "name": "Revista Fapesp",
+                "url": "https://revistapesquisa.fapesp.br/"
+            }
+        ]
+    },
+    {
+        "name": "Programação",
+        "links": [
+            {
+                "name": "Stack Overflow",
+                "url": "https://stackoverflow.com/"
+            },
+            {
+                "name": "GitHub",
+                "url": "https://github.com/"
+            },
+            {
+                "name": "DevDocs",
+                "url": "https://devdocs.io/"
+            },
+            {
+                "name": "W3Schools",
+                "url": "https://www.w3schools.com/"
+            },
+            {
+                "name": "MDN Web Docs",
+                "url": "https://developer.mozilla.org/"
+            },
+            {
+                "name": "FreeCodeCamp",
+                "url": "https://www.freecodecamp.org/"
+            },
+            {
+                "name": "GeeksforGeeks",
+                "url": "https://www.geeksforgeeks.org/"
+            },
+            {
+                "name": "LeetCode",
+                "url": "https://leetcode.com/"
+            }
+        ]
+    },
+    {
+        "name": "Cotidiano",
+        "links": [
+            {
+                "name": "Google Calendar",
+                "url": "https://calendar.google.com/"
+            },
+            {
+                "name": "Gmail",
+                "url": "https://mail.google.com/"
+            },
+            {
+                "name": "Notion",
+                "url": "https://www.notion.so/"
+            },
+            {
+                "name": "Trello",
+                "url": "https://trello.com/"
+            },
+            {
+                "name": "Spotify",
+                "url": "https://www.spotify.com/"
+            },
+            {
+                "name": "YouTube",
+                "url": "https://www.youtube.com/"
+            },
+            {
+                "name": "Outlook",
+                "url": "https://outlook.live.com/"
+            },
+            {
+                "name": "Drive",
+                "url": "https://drive.google.com/"
+            }
+        ]
+    }
+]

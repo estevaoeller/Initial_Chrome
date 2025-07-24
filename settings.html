@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurações da Extensão</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        body {
+            padding: 20px;
+            background-color: #f0f2f5;
+            color: #333;
+        }
+        .settings-container {
+            max-width: 800px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #007bff;
+            border-bottom: 1px solid #eee;
+            padding-bottom: 15px;
+            margin-bottom: 20px;
+        }
+        .setting-section {
+            margin-bottom: 25px;
+            padding-bottom: 15px;
+            border-bottom: 1px dashed #eee;
+        }
+        .setting-section:last-child {
+            border-bottom: none;
+        }
+        .setting-section h2 {
+            color: #555;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        .setting-item {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #444;
+        }
+        input[type="range"] {
+            width: 100%;
+            margin-top: 5px;
+        }
+        input[type="color"] {
+            width: 80px;
+            height: 30px;
+            border: none;
+            padding: 0;
+            cursor: pointer;
+        }
+        button {
+            padding: 10px 20px;
+            background-color: #007bff;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            margin-right: 10px;
+        }
+        button:hover {
+            background-color: #0056b3;
+        }
+        .button-group {
+            margin-top: 30px;
+            text-align: right;
+        }
+    </style>
+</head>
+<body>
+    <div class="settings-container">
+        <h1>Configurações da Extensão</h1>
+
+        <div class="setting-section">
+            <h2>Fundo Dinâmico</h2>
+            <div class="setting-item">
+                <label for="wallpaper-folder-path">Pasta de Wallpapers:</label>
+                <input type="text" id="wallpaper-folder-path" value="C:\Users\estev\OneDrive\Imagens\Wallpapers" readonly style="width: calc(100% - 120px); display: inline-block;">
+                <button id="select-wallpaper-folder-btn">Selecionar</button>
+            </div>
+            <div class="setting-item">
+                <label for="wallpaper-frequency">Frequência de Troca (horas):</label>
+                <input type="range" id="wallpaper-frequency" min="0.5" max="24" step="0.5" value="1">
+                <span id="wallpaper-frequency-value">1 hora</span>
+            </div>
+            <div class="setting-item">
+                <label for="filter-color">Cor do Filtro:</label>
+                <input type="color" id="filter-color" value="#000000">
+            </div>
+            <div class="setting-item">
+                <label for="filter-opacity">Opacidade do Filtro:</label>
+                <input type="range" id="filter-opacity" min="0" max="1" step="0.05" value="0.3">
+                <span id="filter-opacity-value">30%</span>
+            </div>
+        </div>
+
+        <div class="setting-section">
+            <h2>Bookmarks</h2>
+            <div class="setting-item">
+                <label for="icon-size">Tamanho dos Ícones:</label>
+                <input type="range" id="icon-size" min="16" max="64" step="4" value="32">
+                <span id="icon-size-value">32px</span>
+            </div>
+            <div class="setting-item">
+                <label for="name-display">Exibição do Nome:</label>
+                <select id="name-display">
+                    <option value="always">Sempre Visível</option>
+                    <option value="hover">Ao Passar o Mouse</option>
+                </select>
+            </div>
+        </div>
+
+        <div class="setting-section">
+            <h2>Dados</h2>
+            <div class="setting-item">
+                <button id="export-data-btn">Exportar Dados</button>
+                <button id="import-data-btn">Importar Dados</button>
+                <input type="file" id="import-file-input" accept=".json" style="display: none;">
+            </div>
+            <div class="setting-item">
+                <button id="reset-settings-btn">Reiniciar Configurações</button>
+            </div>
+        </div>
+
+        <div class="button-group">
+            <button id="save-settings-btn">Salvar Configurações</button>
+            <button id="close-settings-btn">Fechar</button>
+        </div>
+    </div>
+
+    <script src="js/settings.js"></script>
+</body>
+</html>
+
