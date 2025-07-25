@@ -16,6 +16,27 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: "Ferramentas", links: [{ name: "Photopea", url: "https://www.photopea.com/" }] }
     ];
     let currentBookmarks = [];
+    let iconSize = 32;
+
+    function applyIconSizeSetting(size) {
+        document.documentElement.style.setProperty('--icon-size', `${size}px`);
+        document.querySelectorAll('.bookmark-favicon').forEach(img => {
+            if (img.dataset.url) {
+                img.src = `https://www.google.com/s2/favicons?domain=${img.dataset.url}&sz=${size}`;
+            }
+        });
+    }
+
+    function loadSettings(callback) {
+        chrome.storage.local.get(['extensionSettings'], result => {
+            const settings = result.extensionSettings || {};
+            if (settings.iconSize) {
+                iconSize = settings.iconSize;
+            }
+            applyIconSizeSetting(iconSize);
+            if (callback) callback();
+        });
+    }
 
     // ---- FUNÇÕES PRINCIPAIS ----
 
@@ -60,7 +81,8 @@ document.addEventListener('DOMContentLoaded', function() {
 
                 const favicon = document.createElement('img');
                 favicon.className = 'bookmark-favicon';
-                favicon.src = `https://www.google.com/s2/favicons?domain=${link.url}&sz=32`;
+                favicon.dataset.url = link.url;
+                favicon.src = `https://www.google.com/s2/favicons?domain=${link.url}&sz=${iconSize}`;
                 favicon.alt = '';
 
                 const bookmarkName = document.createElement('span');
@@ -112,5 +134,15 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // ---- PONTO DE ENTRADA ----
-    initialize();
+    loadSettings(initialize);
+
+    chrome.storage.onChanged.addListener((changes, area) => {
+        if (area === 'local' && changes.extensionSettings) {
+            const newSettings = changes.extensionSettings.newValue || {};
+            if (newSettings.iconSize && newSettings.iconSize !== iconSize) {
+                iconSize = newSettings.iconSize;
+                applyIconSizeSetting(iconSize);
+            }
+        }
+    });
 });

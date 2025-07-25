@@ -1,0 +1,7 @@
+{
+  "name": "initial_chrome",
+  "version": "1.0.0",
+  "scripts": {
+    "build": "node scripts/updateManifest.js"
+  }
+}
