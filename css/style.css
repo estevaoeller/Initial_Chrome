@@ -194,13 +194,13 @@ body {
     padding: 10px;
     text-decoration: none;
     color: #333;
-    
+
     display: flex; /* MUITO IMPORTANTE: para alinhar favicon e nome na mesma linha */
     align-items: center; /* Alinha verticalmente favicon, nome (e o X se não fosse absolute) */
     /* justify-content: flex-start; Removido para dar espaço ao X posicionado absolutamente */
 
     min-height: 40px; /* Pode reduzir um pouco se não precisar de tanto espaço vertical */
-    word-break: break-word; 
+    word-break: break-word;
     transition: transform 0.2s ease, box-shadow 0.2s ease;
 }
 
@@ -208,7 +208,7 @@ body {
    se você tiver um .bookmark-name específico.
    Considere remover ou ajustar:
 .bookmark-item span {
-    font-size: 0.9em; 
+    font-size: 0.9em;
 }
 */
 

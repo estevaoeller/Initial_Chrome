@@ -34,7 +34,7 @@ document.addEventListener('DOMContentLoaded', function() {
     function loadSettings() {
         chrome.storage.local.get(['extensionSettings'], function(result) {
             const settings = result.extensionSettings || defaultSettings;
-            
+
             wallpaperFolderPath.value = settings.wallpaperFolderPath;
             wallpaperFrequency.value = settings.wallpaperFrequency;
             updateFrequencyDisplay(settings.wallpaperFrequency);
@@ -114,12 +114,12 @@ document.addEventListener('DOMContentLoaded', function() {
             const dataStr = JSON.stringify(exportData, null, 2);
             const dataBlob = new Blob([dataStr], { type: 'application/json' });
             const url = URL.createObjectURL(dataBlob);
-            
+
             const link = document.createElement('a');
             link.href = url;
             link.download = `extensao-bookmarks-${new Date().toISOString().split('T')[0]}.json`;
             link.click();
-            
+
             URL.revokeObjectURL(url);
         });
     });
@@ -136,18 +136,18 @@ document.addEventListener('DOMContentLoaded', function() {
             reader.onload = function(e) {
                 try {
                     const importData = JSON.parse(e.target.result);
-                    
+
                     if (confirm("Tem certeza que deseja importar os dados? Isso substituirá todas as configurações e bookmarks atuais.")) {
                         const dataToSave = {};
-                        
+
                         if (importData.bookmarks) {
                             dataToSave.userBookmarks = importData.bookmarks;
                         }
-                        
+
                         if (importData.settings) {
                             dataToSave.extensionSettings = importData.settings;
                         }
-                        
+
                         chrome.storage.local.set(dataToSave, function() {
                             if (chrome.runtime.lastError) {
                                 console.error("Erro ao importar dados:", chrome.runtime.lastError.message);

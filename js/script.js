@@ -16,7 +16,7 @@ document.addEventListener('DOMContentLoaded', function() {
         { name: "Ferramentas", links: [{ name: "Photopea", url: "https://www.photopea.com/" }] }
     ];
     let currentBookmarks = [];
-    
+
     // ---- FUNÇÕES PRINCIPAIS ----
 
     function renderBookmarks(bookmarks) {
@@ -56,7 +56,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     handleDeleteBookmark(link.url, category.name, currentBookmarks, renderBookmarks);
                 });
 
-                
+
 
                 const favicon = document.createElement('img');
                 favicon.className = 'bookmark-favicon';
@@ -66,10 +66,10 @@ document.addEventListener('DOMContentLoaded', function() {
                 const bookmarkName = document.createElement('span');
                 bookmarkName.className = 'bookmark-name';
                 bookmarkName.textContent = link.name;
-                
+
                 bookmarkItem.appendChild(favicon);
                 bookmarkItem.appendChild(bookmarkName);
-                bookmarkItem.appendChild(deleteBtn); 
+                bookmarkItem.appendChild(deleteBtn);
                 gridDiv.appendChild(bookmarkItem);
             });
             contentArea.appendChild(categoryDiv);
