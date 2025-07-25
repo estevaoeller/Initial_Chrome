@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let iconBorderColor = '#ddd';
     let iconBgColor = '#fff';
     let iconSpacing = 8;
+    let nameDisplay = 'always';
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -41,6 +42,17 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-spacing', `${spacing}px`);
     }
 
+    function updateNameDisplayClasses() {
+        document.querySelectorAll('.bookmark-item').forEach(item => {
+            item.classList.remove('name-hidden', 'name-hover');
+            if (nameDisplay === 'never') {
+                item.classList.add('name-hidden');
+            } else if (nameDisplay === 'hover') {
+                item.classList.add('name-hover');
+            }
+        });
+    }
+
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
@@ -59,9 +71,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (settings.iconSpacing !== undefined) {
                 iconSpacing = settings.iconSpacing;
             }
+            if (settings.nameDisplay) {
+                nameDisplay = settings.nameDisplay;
+            }
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
             applyIconSpacingSetting(iconSpacing);
+            updateNameDisplayClasses();
             if (callback) callback();
         });
     }
@@ -88,6 +104,11 @@ document.addEventListener('DOMContentLoaded', function() {
             category.links.forEach(link => {
                 const bookmarkItem = document.createElement('a');
                 bookmarkItem.className = 'bookmark-item';
+                if (nameDisplay === 'never') {
+                    bookmarkItem.classList.add('name-hidden');
+                } else if (nameDisplay === 'hover') {
+                    bookmarkItem.classList.add('name-hover');
+                }
                 bookmarkItem.href = link.url;
                 bookmarkItem.target = '_blank';
 
@@ -124,6 +145,7 @@ document.addEventListener('DOMContentLoaded', function() {
             });
             contentArea.appendChild(categoryDiv);
         });
+        updateNameDisplayClasses();
     }
 
     function initialize() {
@@ -183,6 +205,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newSettings.iconSpacing !== undefined && newSettings.iconSpacing !== iconSpacing) {
                 iconSpacing = newSettings.iconSpacing;
                 applyIconSpacingSetting(iconSpacing);
+            }
+            if (newSettings.nameDisplay && newSettings.nameDisplay !== nameDisplay) {
+                nameDisplay = newSettings.nameDisplay;
+                updateNameDisplayClasses();
             }
             applyIconAppearance();
         }
