@@ -12,6 +12,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterOpacityValue = document.getElementById('filter-opacity-value');
     const iconSize = document.getElementById('icon-size');
     const iconSizeValue = document.getElementById('icon-size-value');
+    const iconSpacing = document.getElementById('icon-spacing');
+    const iconSpacingValue = document.getElementById('icon-spacing-value');
     const iconBorderRadius = document.getElementById('icon-border-radius');
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
@@ -31,6 +33,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filterColor: "#000000",
         filterOpacity: 0.3,
         iconSize: 32,
+        iconSpacing: 8,
         iconBorderRadius: 6,
         iconBorderColor: "#ddd",
         iconBgColor: "#fff",
@@ -50,6 +53,8 @@ document.addEventListener('DOMContentLoaded', function() {
             updateOpacityDisplay(settings.filterOpacity);
             iconSize.value = settings.iconSize;
             updateIconSizeDisplay(settings.iconSize);
+            iconSpacing.value = settings.iconSpacing;
+            updateIconSpacingDisplay(settings.iconSpacing);
             iconBorderRadius.value = settings.iconBorderRadius;
             updateBorderRadiusDisplay(settings.iconBorderRadius);
             iconBorderColor.value = settings.iconBorderColor;
@@ -66,6 +71,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filterColor: filterColor.value,
             filterOpacity: parseFloat(filterOpacity.value),
             iconSize: parseInt(iconSize.value),
+            iconSpacing: parseInt(iconSpacing.value),
             iconBorderRadius: parseInt(iconBorderRadius.value),
             iconBorderColor: iconBorderColor.value,
             iconBgColor: iconBgColor.value,
@@ -103,6 +109,10 @@ document.addEventListener('DOMContentLoaded', function() {
         iconSizeValue.textContent = `${value}px`;
     }
 
+    function updateIconSpacingDisplay(value) {
+        iconSpacingValue.textContent = `${value}px`;
+    }
+
     function updateBorderRadiusDisplay(value) {
         iconBorderRadiusValue.textContent = `${value}px`;
     }
@@ -118,6 +128,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     iconSize.addEventListener('input', function() {
         updateIconSizeDisplay(this.value);
+    });
+
+    iconSpacing.addEventListener('input', function() {
+        updateIconSpacingDisplay(this.value);
     });
 
     iconBorderRadius.addEventListener('input', function() {

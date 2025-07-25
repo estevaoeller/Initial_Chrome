@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let iconBorderRadius = 6;
     let iconBorderColor = '#ddd';
     let iconBgColor = '#fff';
+    let iconSpacing = 8;
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -34,6 +35,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-border-radius', `${iconBorderRadius}px`);
         document.documentElement.style.setProperty('--icon-border-color', iconBorderColor);
         document.documentElement.style.setProperty('--icon-bg-color', iconBgColor);
+    }
+
+    function applyIconSpacingSetting(spacing) {
+        document.documentElement.style.setProperty('--icon-spacing', `${spacing}px`);
     }
 
     function loadSettings(callback) {
@@ -51,8 +56,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (settings.iconBgColor) {
                 iconBgColor = settings.iconBgColor;
             }
+            if (settings.iconSpacing !== undefined) {
+                iconSpacing = settings.iconSpacing;
+            }
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
+            applyIconSpacingSetting(iconSpacing);
             if (callback) callback();
         });
     }
@@ -170,6 +179,10 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (newSettings.iconBgColor && newSettings.iconBgColor !== iconBgColor) {
                 iconBgColor = newSettings.iconBgColor;
+            }
+            if (newSettings.iconSpacing !== undefined && newSettings.iconSpacing !== iconSpacing) {
+                iconSpacing = newSettings.iconSpacing;
+                applyIconSpacingSetting(iconSpacing);
             }
             applyIconAppearance();
         }
