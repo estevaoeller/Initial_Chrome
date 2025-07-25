@@ -1,5 +1,7 @@
 // js/modules.js
 
+export const ROOT_FOLDER_NAME = 'Pagina Inicial';
+
 export function saveBookmarks(bookmarksToSave) {
     chrome.storage.local.set({ 'userBookmarks': bookmarksToSave }, function() {
         if (chrome.runtime.lastError) {
@@ -22,6 +24,82 @@ export function loadBookmarks(callback) {
         } else {
             callback(null); 
         }
+    });
+}
+
+export function getRootFolder(callback) {
+    chrome.bookmarks.getTree(nodes => {
+        const queue = [...nodes];
+        while (queue.length) {
+            const node = queue.shift();
+            if (!node.url && node.title === ROOT_FOLDER_NAME) {
+                callback(node);
+                return;
+            }
+            if (node.children) queue.push(...node.children);
+        }
+        callback(null);
+    });
+}
+
+export function loadBookmarksFromChrome(callback) {
+    getRootFolder(folder => {
+        if (!folder) {
+            callback([]);
+            return;
+        }
+        chrome.bookmarks.getSubTree(folder.id, nodes => {
+            const categories = [];
+            if (nodes[0].children) {
+                nodes[0].children.forEach(catNode => {
+                    if (!catNode.url) {
+                        const category = { name: catNode.title, links: [] };
+                        (catNode.children || []).forEach(child => {
+                            if (child.url) {
+                                category.links.push({ name: child.title, url: child.url });
+                            }
+                        });
+                        categories.push(category);
+                    }
+                });
+            }
+            callback(categories);
+        });
+    });
+}
+
+export function addBookmarkToChrome(categoryName, bookmark, callback) {
+    getRootFolder(root => {
+        if (!root) { if (callback) callback(); return; }
+        chrome.bookmarks.getChildren(root.id, children => {
+            let category = children.find(c => c.title === categoryName && !c.url);
+            const createBookmark = folderId => chrome.bookmarks.create({ parentId: folderId, title: bookmark.name, url: bookmark.url }, () => callback && callback());
+            if (category) {
+                createBookmark(category.id);
+            } else {
+                chrome.bookmarks.create({ parentId: root.id, title: categoryName }, newFolder => {
+                    createBookmark(newFolder.id);
+                });
+            }
+        });
+    });
+}
+
+export function removeBookmarkFromChrome(categoryName, bookmarkUrl, callback) {
+    getRootFolder(root => {
+        if (!root) { if (callback) callback(); return; }
+        chrome.bookmarks.getChildren(root.id, children => {
+            const category = children.find(c => c.title === categoryName && !c.url);
+            if (!category) { if (callback) callback(); return; }
+            chrome.bookmarks.getChildren(category.id, bookmarks => {
+                const bm = bookmarks.find(b => b.url === bookmarkUrl);
+                if (bm) {
+                    chrome.bookmarks.remove(bm.id, () => callback && callback());
+                } else {
+                    if (callback) callback();
+                }
+            });
+        });
     });
 }
 
@@ -50,19 +128,20 @@ export function getDragAfterElement(container, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-export function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom, currentBookmarks, saveBookmarks, renderBookmarks) {
+export function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom, currentBookmarks, renderBookmarks) {
     const categoryIndex = currentBookmarks.findIndex(cat => cat.name === categoryNameToDeleteFrom);
     if (categoryIndex > -1) {
         const category = currentBookmarks[categoryIndex];
         const linkIndex = category.links.findIndex(link => link.url === urlToDelete);
         if (linkIndex > -1) {
             if (confirm(`Tem certeza que deseja excluir o bookmark "${category.links[linkIndex].name}"?`)) {
-                category.links.splice(linkIndex, 1);
-                saveBookmarks(currentBookmarks);
-                renderBookmarks(currentBookmarks);
+                removeBookmarkFromChrome(category.name, urlToDelete, () => {
+                    category.links.splice(linkIndex, 1);
+                    renderBookmarks(currentBookmarks);
+                });
             }
         } else {
-             console.warn("Link não encontrado para exclusão no array de dados:", urlToDelete);
+            console.warn("Link não encontrado para exclusão no array de dados:", urlToDelete);
         }
     } else {
         console.warn("Categoria não encontrada para exclusão no array de dados:", categoryNameToDeleteFrom);

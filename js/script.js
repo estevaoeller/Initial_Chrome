@@ -1,5 +1,5 @@
 // js/script.js (versão final limpa)
-import { saveBookmarks, loadBookmarks, applyTheme, toggleTheme, updateClock, updateDate, updateCalendar, handleDeleteBookmark } from './modules.js';
+import { loadBookmarksFromChrome, addBookmarkToChrome, removeBookmarkFromChrome, applyTheme, toggleTheme, updateClock, updateDate, updateCalendar, handleDeleteBookmark } from './modules.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // ---- CONSTANTES E VARIÁVEIS ----
@@ -53,7 +53,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
                     // Chama a função que você já tem em modules.js
                     // mas agora passando os parâmetros corretos
-                    handleDeleteBookmark(link.url, category.name, currentBookmarks, saveBookmarks, renderBookmarks);
+                    handleDeleteBookmark(link.url, category.name, currentBookmarks, renderBookmarks);
                 });
 
                 
@@ -77,14 +77,20 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     function initialize() {
-        loadBookmarks(savedBookmarks => {
-            if (savedBookmarks) {
-                currentBookmarks = savedBookmarks;
+        loadBookmarksFromChrome(bookmarks => {
+            if (bookmarks && bookmarks.length > 0) {
+                currentBookmarks = bookmarks;
+                renderBookmarks(currentBookmarks);
             } else {
                 currentBookmarks = defaultBookmarkCategories;
-                saveBookmarks(currentBookmarks);
+                const tasks = [];
+                currentBookmarks.forEach(cat => {
+                    cat.links.forEach(link => {
+                        tasks.push(new Promise(res => addBookmarkToChrome(cat.name, link, res)));
+                    });
+                });
+                Promise.all(tasks).then(() => renderBookmarks(currentBookmarks));
             }
-            renderBookmarks(currentBookmarks);
         });
 
         // Inicialização de outros componentes
