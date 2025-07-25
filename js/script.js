@@ -1,5 +1,5 @@
 // js/script.js (versão final limpa)
-import { saveBookmarks, loadBookmarks, applyTheme, toggleTheme, updateClock, updateDate, updateCalendar } from './modules.js';
+import { saveBookmarks, loadBookmarks, applyTheme, toggleTheme, updateClock, updateDate, updateCalendar, handleDeleteBookmark } from './modules.js';
 
 document.addEventListener('DOMContentLoaded', function() {
     // ---- CONSTANTES E VARIÁVEIS ----
