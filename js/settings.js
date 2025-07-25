@@ -59,7 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
             updateBorderRadiusDisplay(settings.iconBorderRadius);
             iconBorderColor.value = settings.iconBorderColor;
             iconBgColor.value = settings.iconBgColor;
-            nameDisplay.value = settings.nameDisplay;
+            nameDisplay.value = settings.nameDisplay !== undefined ? settings.nameDisplay : defaultSettings.nameDisplay;
         });
     }
 

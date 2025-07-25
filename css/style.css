@@ -192,6 +192,18 @@ body {
     white-space: nowrap;
 }
 
+.bookmark-item.name-hidden .bookmark-name {
+    display: none;
+}
+
+.bookmark-item.name-hover .bookmark-name {
+    opacity: 0;
+}
+
+.bookmark-item.name-hover:hover .bookmark-name {
+    opacity: 1;
+}
+
 /* Ajuste no .bookmark-item para acomodar favicon e nome lado a lado, e o X */
 .bookmark-item {
     position: relative;
