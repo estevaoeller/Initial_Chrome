@@ -12,6 +12,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const filterOpacityValue = document.getElementById('filter-opacity-value');
     const iconSize = document.getElementById('icon-size');
     const iconSizeValue = document.getElementById('icon-size-value');
+    const iconBorderRadius = document.getElementById('icon-border-radius');
+    const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
+    const iconBorderColor = document.getElementById('icon-border-color');
+    const iconBgColor = document.getElementById('icon-bg-color');
     const nameDisplay = document.getElementById('name-display');
     const exportDataBtn = document.getElementById('export-data-btn');
     const importDataBtn = document.getElementById('import-data-btn');
@@ -27,6 +31,9 @@ document.addEventListener('DOMContentLoaded', function() {
         filterColor: "#000000",
         filterOpacity: 0.3,
         iconSize: 32,
+        iconBorderRadius: 6,
+        iconBorderColor: "#ddd",
+        iconBgColor: "#fff",
         nameDisplay: "always"
     };
 
@@ -43,6 +50,10 @@ document.addEventListener('DOMContentLoaded', function() {
             updateOpacityDisplay(settings.filterOpacity);
             iconSize.value = settings.iconSize;
             updateIconSizeDisplay(settings.iconSize);
+            iconBorderRadius.value = settings.iconBorderRadius;
+            updateBorderRadiusDisplay(settings.iconBorderRadius);
+            iconBorderColor.value = settings.iconBorderColor;
+            iconBgColor.value = settings.iconBgColor;
             nameDisplay.value = settings.nameDisplay;
         });
     }
@@ -55,6 +66,9 @@ document.addEventListener('DOMContentLoaded', function() {
             filterColor: filterColor.value,
             filterOpacity: parseFloat(filterOpacity.value),
             iconSize: parseInt(iconSize.value),
+            iconBorderRadius: parseInt(iconBorderRadius.value),
+            iconBorderColor: iconBorderColor.value,
+            iconBgColor: iconBgColor.value,
             nameDisplay: nameDisplay.value
         };
 
@@ -89,6 +103,10 @@ document.addEventListener('DOMContentLoaded', function() {
         iconSizeValue.textContent = `${value}px`;
     }
 
+    function updateBorderRadiusDisplay(value) {
+        iconBorderRadiusValue.textContent = `${value}px`;
+    }
+
     // Event listeners para atualizar displays
     wallpaperFrequency.addEventListener('input', function() {
         updateFrequencyDisplay(this.value);
@@ -100,6 +118,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     iconSize.addEventListener('input', function() {
         updateIconSizeDisplay(this.value);
+    });
+
+    iconBorderRadius.addEventListener('input', function() {
+        updateBorderRadiusDisplay(this.value);
     });
 
     // Exportar dados

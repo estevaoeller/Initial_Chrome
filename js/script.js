@@ -17,6 +17,9 @@ document.addEventListener('DOMContentLoaded', function() {
     ];
     let currentBookmarks = [];
     let iconSize = 32;
+    let iconBorderRadius = 6;
+    let iconBorderColor = '#ddd';
+    let iconBgColor = '#fff';
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -27,13 +30,29 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
 
+    function applyIconAppearance() {
+        document.documentElement.style.setProperty('--icon-border-radius', `${iconBorderRadius}px`);
+        document.documentElement.style.setProperty('--icon-border-color', iconBorderColor);
+        document.documentElement.style.setProperty('--icon-bg-color', iconBgColor);
+    }
+
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
             if (settings.iconSize) {
                 iconSize = settings.iconSize;
             }
+            if (settings.iconBorderRadius !== undefined) {
+                iconBorderRadius = settings.iconBorderRadius;
+            }
+            if (settings.iconBorderColor) {
+                iconBorderColor = settings.iconBorderColor;
+            }
+            if (settings.iconBgColor) {
+                iconBgColor = settings.iconBgColor;
+            }
             applyIconSizeSetting(iconSize);
+            applyIconAppearance();
             if (callback) callback();
         });
     }
@@ -143,6 +162,16 @@ document.addEventListener('DOMContentLoaded', function() {
                 iconSize = newSettings.iconSize;
                 applyIconSizeSetting(iconSize);
             }
+            if (newSettings.iconBorderRadius !== undefined && newSettings.iconBorderRadius !== iconBorderRadius) {
+                iconBorderRadius = newSettings.iconBorderRadius;
+            }
+            if (newSettings.iconBorderColor && newSettings.iconBorderColor !== iconBorderColor) {
+                iconBorderColor = newSettings.iconBorderColor;
+            }
+            if (newSettings.iconBgColor && newSettings.iconBgColor !== iconBgColor) {
+                iconBgColor = newSettings.iconBgColor;
+            }
+            applyIconAppearance();
         }
     });
 });

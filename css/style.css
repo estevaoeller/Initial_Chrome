@@ -1,6 +1,9 @@
 /* css/style.css */
 :root {
     --icon-size: 32px;
+    --icon-border-radius: 6px;
+    --icon-border-color: #ddd;
+    --icon-bg-color: #fff;
 }
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -74,9 +77,9 @@ body {
 
 .bookmark-item {
     position: relative;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    background-color: var(--icon-bg-color);
+    border: 1px solid var(--icon-border-color);
+    border-radius: var(--icon-border-radius);
     padding: 8px;
     text-align: center;
     text-decoration: none;
@@ -191,9 +194,9 @@ body {
 /* Ajuste no .bookmark-item para acomodar favicon e nome lado a lado, e o X */
 .bookmark-item {
     position: relative;
-    background-color: #fff;
-    border: 1px solid #ddd;
-    border-radius: 6px;
+    background-color: var(--icon-bg-color);
+    border: 1px solid var(--icon-border-color);
+    border-radius: var(--icon-border-radius);
     padding: 10px;
     text-decoration: none;
     color: #333;
@@ -335,8 +338,8 @@ body.dark-theme .bookmark-category h2 {
 }
 
 body.dark-theme .bookmark-item {
-    background-color: #333;
-    border-color: #555;
+    background-color: var(--icon-bg-color);
+    border-color: var(--icon-border-color);
     color: #eee;
 }
 
