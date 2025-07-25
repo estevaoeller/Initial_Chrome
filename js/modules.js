@@ -22,7 +22,7 @@ export function loadBookmarks(callback) {
         if (data.userBookmarks && data.userBookmarks.length > 0) {
             callback(data.userBookmarks);
         } else {
-            callback(null); 
+            callback(null);
         }
     });
 }
