@@ -5,6 +5,11 @@
     --icon-border-color: #ddd;
     --icon-bg-color: #fff;
     --icon-spacing: 8px;
+    --icon-gap: 8px;
+    --bookmark-font-family: sans-serif;
+    --bookmark-font-size: 14px;
+    --bookmark-font-color: #333;
+    --bookmark-min-width: 100px;
 }
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -72,8 +77,9 @@ body {
 
 .bookmarks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Grid responsivo */
-    gap: var(--icon-spacing); /* Espaçamento entre os ícones */
+    grid-template-columns: repeat(auto-fill, minmax(var(--bookmark-min-width), 1fr));
+    gap: var(--icon-gap);
+    transition: gap 0.3s ease;
 }
 
 .bookmark-item {
@@ -91,7 +97,7 @@ body {
     justify-content: center;
     min-height: 60px; /* Altura mínima para cada item */
     word-break: break-word; /* Quebrar palavras longas */
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, padding 0.3s ease;
 }
 
 .bookmark-item:hover {
@@ -186,6 +192,9 @@ body {
 
 .bookmark-name {
     flex-grow: 1; /* Para o nome ocupar o espaço restante */
+    font-family: var(--bookmark-font-family);
+    font-size: var(--bookmark-font-size);
+    color: var(--bookmark-font-color);
     text-align: left; /* Alinhar o nome à esquerda */
     overflow: hidden;
     text-overflow: ellipsis;
@@ -208,7 +217,7 @@ body {
 
     min-height: 40px; /* Pode reduzir um pouco se não precisar de tanto espaço vertical */
     word-break: break-word;
-    transition: transform 0.2s ease, box-shadow 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, padding 0.3s ease;
 }
 
 /* O .bookmark-item span genérico pode não ser mais necessário ou pode precisar de ajuste
@@ -326,6 +335,7 @@ body.light-theme {
 body.dark-theme {
     background-color: #222;
     color: #eee;
+    --bookmark-font-color: #eee;
 }
 
 body.dark-theme .bookmark-category {

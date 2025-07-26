@@ -14,10 +14,18 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconSizeValue = document.getElementById('icon-size-value');
     const iconSpacing = document.getElementById('icon-spacing');
     const iconSpacingValue = document.getElementById('icon-spacing-value');
+    const bookmarkMinWidth = document.getElementById('bookmark-min-width');
+    const bookmarkMinWidthValue = document.getElementById('bookmark-min-width-value');
+    const iconGap = document.getElementById('icon-gap');
+    const iconGapValue = document.getElementById('icon-gap-value');
     const iconBorderRadius = document.getElementById('icon-border-radius');
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
     const iconBgColor = document.getElementById('icon-bg-color');
+    const bookmarkFontFamily = document.getElementById('bookmark-font-family');
+    const bookmarkFontSize = document.getElementById('bookmark-font-size');
+    const bookmarkFontSizeValue = document.getElementById('bookmark-font-size-value');
+    const bookmarkFontColor = document.getElementById('bookmark-font-color');
     const nameDisplay = document.getElementById('name-display');
     const exportDataBtn = document.getElementById('export-data-btn');
     const importDataBtn = document.getElementById('import-data-btn');
@@ -34,9 +42,14 @@ document.addEventListener('DOMContentLoaded', function() {
         filterOpacity: 0.3,
         iconSize: 32,
         iconSpacing: 8,
+        iconGap: 8,
+        bookmarkMinWidth: 100,
         iconBorderRadius: 6,
         iconBorderColor: "#ddd",
         iconBgColor: "#fff",
+        bookmarkFontFamily: "sans-serif",
+        bookmarkFontSize: 14,
+        bookmarkFontColor: "#333333",
         nameDisplay: "always"
     };
 
@@ -55,10 +68,18 @@ document.addEventListener('DOMContentLoaded', function() {
             updateIconSizeDisplay(settings.iconSize);
             iconSpacing.value = settings.iconSpacing;
             updateIconSpacingDisplay(settings.iconSpacing);
+            iconGap.value = settings.iconGap !== undefined ? settings.iconGap : settings.iconSpacing;
+            updateIconGapDisplay(iconGap.value);
+            bookmarkMinWidth.value = settings.bookmarkMinWidth;
+            updateBookmarkMinWidthDisplay(settings.bookmarkMinWidth);
             iconBorderRadius.value = settings.iconBorderRadius;
             updateBorderRadiusDisplay(settings.iconBorderRadius);
             iconBorderColor.value = settings.iconBorderColor;
             iconBgColor.value = settings.iconBgColor;
+            bookmarkFontFamily.value = settings.bookmarkFontFamily;
+            bookmarkFontSize.value = settings.bookmarkFontSize;
+            updateBookmarkFontSizeDisplay(settings.bookmarkFontSize);
+            bookmarkFontColor.value = settings.bookmarkFontColor;
             nameDisplay.value = settings.nameDisplay;
         });
     }
@@ -72,9 +93,14 @@ document.addEventListener('DOMContentLoaded', function() {
             filterOpacity: parseFloat(filterOpacity.value),
             iconSize: parseInt(iconSize.value),
             iconSpacing: parseInt(iconSpacing.value),
+            iconGap: parseInt(iconGap.value),
+            bookmarkMinWidth: parseInt(bookmarkMinWidth.value),
             iconBorderRadius: parseInt(iconBorderRadius.value),
             iconBorderColor: iconBorderColor.value,
             iconBgColor: iconBgColor.value,
+            bookmarkFontFamily: bookmarkFontFamily.value,
+            bookmarkFontSize: parseInt(bookmarkFontSize.value),
+            bookmarkFontColor: bookmarkFontColor.value,
             nameDisplay: nameDisplay.value
         };
 
@@ -113,8 +139,20 @@ document.addEventListener('DOMContentLoaded', function() {
         iconSpacingValue.textContent = `${value}px`;
     }
 
+    function updateBookmarkMinWidthDisplay(value) {
+        bookmarkMinWidthValue.textContent = `${value}px`;
+    }
+
+    function updateIconGapDisplay(value) {
+        iconGapValue.textContent = `${value}px`;
+    }
+
     function updateBorderRadiusDisplay(value) {
         iconBorderRadiusValue.textContent = `${value}px`;
+    }
+
+    function updateBookmarkFontSizeDisplay(value) {
+        bookmarkFontSizeValue.textContent = `${value}px`;
     }
 
     // Event listeners para atualizar displays
@@ -134,8 +172,20 @@ document.addEventListener('DOMContentLoaded', function() {
         updateIconSpacingDisplay(this.value);
     });
 
+    iconGap.addEventListener('input', function() {
+        updateIconGapDisplay(this.value);
+    });
+
+    bookmarkMinWidth.addEventListener('input', function() {
+        updateBookmarkMinWidthDisplay(this.value);
+    });
+
     iconBorderRadius.addEventListener('input', function() {
         updateBorderRadiusDisplay(this.value);
+    });
+
+    bookmarkFontSize.addEventListener('input', function() {
+        updateBookmarkFontSizeDisplay(this.value);
     });
 
     // Exportar dados
