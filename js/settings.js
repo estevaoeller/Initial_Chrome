@@ -14,6 +14,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconSizeValue = document.getElementById('icon-size-value');
     const iconSpacing = document.getElementById('icon-spacing');
     const iconSpacingValue = document.getElementById('icon-spacing-value');
+    const bookmarkMinWidth = document.getElementById('bookmark-min-width');
+    const bookmarkMinWidthValue = document.getElementById('bookmark-min-width-value');
     const iconBorderRadius = document.getElementById('icon-border-radius');
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
@@ -34,6 +36,7 @@ document.addEventListener('DOMContentLoaded', function() {
         filterOpacity: 0.3,
         iconSize: 32,
         iconSpacing: 8,
+        bookmarkMinWidth: 100,
         iconBorderRadius: 6,
         iconBorderColor: "#ddd",
         iconBgColor: "#fff",
@@ -55,6 +58,8 @@ document.addEventListener('DOMContentLoaded', function() {
             updateIconSizeDisplay(settings.iconSize);
             iconSpacing.value = settings.iconSpacing;
             updateIconSpacingDisplay(settings.iconSpacing);
+            bookmarkMinWidth.value = settings.bookmarkMinWidth;
+            updateBookmarkMinWidthDisplay(settings.bookmarkMinWidth);
             iconBorderRadius.value = settings.iconBorderRadius;
             updateBorderRadiusDisplay(settings.iconBorderRadius);
             iconBorderColor.value = settings.iconBorderColor;
@@ -72,6 +77,7 @@ document.addEventListener('DOMContentLoaded', function() {
             filterOpacity: parseFloat(filterOpacity.value),
             iconSize: parseInt(iconSize.value),
             iconSpacing: parseInt(iconSpacing.value),
+            bookmarkMinWidth: parseInt(bookmarkMinWidth.value),
             iconBorderRadius: parseInt(iconBorderRadius.value),
             iconBorderColor: iconBorderColor.value,
             iconBgColor: iconBgColor.value,
@@ -113,6 +119,10 @@ document.addEventListener('DOMContentLoaded', function() {
         iconSpacingValue.textContent = `${value}px`;
     }
 
+    function updateBookmarkMinWidthDisplay(value) {
+        bookmarkMinWidthValue.textContent = `${value}px`;
+    }
+
     function updateBorderRadiusDisplay(value) {
         iconBorderRadiusValue.textContent = `${value}px`;
     }
@@ -132,6 +142,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     iconSpacing.addEventListener('input', function() {
         updateIconSpacingDisplay(this.value);
+    });
+
+    bookmarkMinWidth.addEventListener('input', function() {
+        updateBookmarkMinWidthDisplay(this.value);
     });
 
     iconBorderRadius.addEventListener('input', function() {

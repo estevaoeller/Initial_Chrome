@@ -21,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let iconBorderColor = '#ddd';
     let iconBgColor = '#fff';
     let iconSpacing = 8;
+    let bookmarkMinWidth = 100;
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -41,6 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-spacing', `${spacing}px`);
     }
 
+    function applyBookmarkMinWidthSetting(width) {
+        document.documentElement.style.setProperty('--bookmark-min-width', `${width}px`);
+    }
+
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
@@ -59,9 +64,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (settings.iconSpacing !== undefined) {
                 iconSpacing = settings.iconSpacing;
             }
+            if (settings.bookmarkMinWidth !== undefined) {
+                bookmarkMinWidth = settings.bookmarkMinWidth;
+            }
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
             applyIconSpacingSetting(iconSpacing);
+            applyBookmarkMinWidthSetting(bookmarkMinWidth);
             if (callback) callback();
         });
     }
@@ -183,6 +192,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newSettings.iconSpacing !== undefined && newSettings.iconSpacing !== iconSpacing) {
                 iconSpacing = newSettings.iconSpacing;
                 applyIconSpacingSetting(iconSpacing);
+            }
+            if (newSettings.bookmarkMinWidth !== undefined && newSettings.bookmarkMinWidth !== bookmarkMinWidth) {
+                bookmarkMinWidth = newSettings.bookmarkMinWidth;
+                applyBookmarkMinWidthSetting(bookmarkMinWidth);
             }
             applyIconAppearance();
         }
