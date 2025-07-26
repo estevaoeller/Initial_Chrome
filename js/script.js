@@ -26,6 +26,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let bookmarkFontSize = 14;
     let bookmarkFontColor = '#333333';
 
+
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
         document.querySelectorAll('.bookmark-favicon').forEach(img => {
@@ -49,11 +50,13 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-gap', `${gap}px`);
     }
 
+
     function applyBookmarkFontSettings() {
         document.documentElement.style.setProperty('--bookmark-font-family', bookmarkFontFamily);
         document.documentElement.style.setProperty('--bookmark-font-size', `${bookmarkFontSize}px`);
         document.documentElement.style.setProperty('--bookmark-font-color', bookmarkFontColor);
     }
+
 
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
@@ -78,6 +81,7 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 iconGap = iconSpacing;
             }
+
             if (settings.bookmarkFontFamily) {
                 bookmarkFontFamily = settings.bookmarkFontFamily;
             }
@@ -87,11 +91,13 @@ document.addEventListener('DOMContentLoaded', function() {
             if (settings.bookmarkFontColor) {
                 bookmarkFontColor = settings.bookmarkFontColor;
             }
+
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
             applyIconSpacingSetting(iconSpacing);
             applyIconGapSetting(iconGap);
             applyBookmarkFontSettings();
+
             if (callback) callback();
         });
     }
@@ -218,6 +224,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 iconGap = newSettings.iconGap;
                 applyIconGapSetting(iconGap);
             }
+
             if (newSettings.bookmarkFontFamily && newSettings.bookmarkFontFamily !== bookmarkFontFamily) {
                 bookmarkFontFamily = newSettings.bookmarkFontFamily;
             }
@@ -227,6 +234,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newSettings.bookmarkFontColor && newSettings.bookmarkFontColor !== bookmarkFontColor) {
                 bookmarkFontColor = newSettings.bookmarkFontColor;
             }
+
             applyIconAppearance();
             applyBookmarkFontSettings();
         }
