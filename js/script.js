@@ -20,7 +20,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let iconBorderRadius = 6;
     let iconBorderColor = '#ddd';
     let iconBgColor = '#fff';
-    let iconSpacing = 8;
+    let iconSpacing = 8; // padding inside each bookmark
+    let iconGap = 8; // space between bookmark items
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -41,6 +42,10 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-spacing', `${spacing}px`);
     }
 
+    function applyIconGapSetting(gap) {
+        document.documentElement.style.setProperty('--icon-gap', `${gap}px`);
+    }
+
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
@@ -59,9 +64,15 @@ document.addEventListener('DOMContentLoaded', function() {
             if (settings.iconSpacing !== undefined) {
                 iconSpacing = settings.iconSpacing;
             }
+            if (settings.iconGap !== undefined) {
+                iconGap = settings.iconGap;
+            } else {
+                iconGap = iconSpacing;
+            }
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
             applyIconSpacingSetting(iconSpacing);
+            applyIconGapSetting(iconGap);
             if (callback) callback();
         });
     }
@@ -183,6 +194,10 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newSettings.iconSpacing !== undefined && newSettings.iconSpacing !== iconSpacing) {
                 iconSpacing = newSettings.iconSpacing;
                 applyIconSpacingSetting(iconSpacing);
+            }
+            if (newSettings.iconGap !== undefined && newSettings.iconGap !== iconGap) {
+                iconGap = newSettings.iconGap;
+                applyIconGapSetting(iconGap);
             }
             applyIconAppearance();
         }
