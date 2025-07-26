@@ -25,7 +25,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let bookmarkFontFamily = 'sans-serif';
     let bookmarkFontSize = 14;
     let bookmarkFontColor = '#333333';
-
+    let bookmarkMinWidth = 100;
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -46,17 +46,19 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-spacing', `${spacing}px`);
     }
 
+    function applyBookmarkMinWidthSetting(width) {
+        document.documentElement.style.setProperty('--bookmark-min-width', `${width}px`);
+    }
+
     function applyIconGapSetting(gap) {
         document.documentElement.style.setProperty('--icon-gap', `${gap}px`);
     }
-
 
     function applyBookmarkFontSettings() {
         document.documentElement.style.setProperty('--bookmark-font-family', bookmarkFontFamily);
         document.documentElement.style.setProperty('--bookmark-font-size', `${bookmarkFontSize}px`);
         document.documentElement.style.setProperty('--bookmark-font-color', bookmarkFontColor);
     }
-
 
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
@@ -92,11 +94,17 @@ document.addEventListener('DOMContentLoaded', function() {
                 bookmarkFontColor = settings.bookmarkFontColor;
             }
 
+            if (settings.bookmarkMinWidth !== undefined) {
+                bookmarkMinWidth = settings.bookmarkMinWidth;
+            }
+
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
             applyIconSpacingSetting(iconSpacing);
             applyIconGapSetting(iconGap);
             applyBookmarkFontSettings();
+            applyBookmarkMinWidthSetting(bookmarkMinWidth);
+
 
             if (callback) callback();
         });
@@ -233,6 +241,11 @@ document.addEventListener('DOMContentLoaded', function() {
             }
             if (newSettings.bookmarkFontColor && newSettings.bookmarkFontColor !== bookmarkFontColor) {
                 bookmarkFontColor = newSettings.bookmarkFontColor;
+            }
+
+            if (newSettings.bookmarkMinWidth !== undefined && newSettings.bookmarkMinWidth !== bookmarkMinWidth) {
+                bookmarkMinWidth = newSettings.bookmarkMinWidth;
+                applyBookmarkMinWidthSetting(bookmarkMinWidth);
             }
 
             applyIconAppearance();

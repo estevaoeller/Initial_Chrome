@@ -9,7 +9,7 @@
     --bookmark-font-family: sans-serif;
     --bookmark-font-size: 14px;
     --bookmark-font-color: #333;
-
+    --bookmark-min-width: 100px;
 
 }
 body {
@@ -78,8 +78,8 @@ body {
 
 .bookmarks-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(100px, 1fr)); /* Grid responsivo */
-    gap: var(--icon-gap); /* Espaçamento entre os ícones */
+    grid-template-columns: repeat(auto-fill, minmax(var(--bookmark-min-width), 1fr));
+    gap: var(--icon-gap);
     transition: gap 0.3s ease;
 }
 
