@@ -20,6 +20,10 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
     const iconBgColor = document.getElementById('icon-bg-color');
+    const bookmarkFontFamily = document.getElementById('bookmark-font-family');
+    const bookmarkFontSize = document.getElementById('bookmark-font-size');
+    const bookmarkFontSizeValue = document.getElementById('bookmark-font-size-value');
+    const bookmarkFontColor = document.getElementById('bookmark-font-color');
     const nameDisplay = document.getElementById('name-display');
     const exportDataBtn = document.getElementById('export-data-btn');
     const importDataBtn = document.getElementById('import-data-btn');
@@ -40,6 +44,9 @@ document.addEventListener('DOMContentLoaded', function() {
         iconBorderRadius: 6,
         iconBorderColor: "#ddd",
         iconBgColor: "#fff",
+        bookmarkFontFamily: "sans-serif",
+        bookmarkFontSize: 14,
+        bookmarkFontColor: "#333333",
         nameDisplay: "always"
     };
 
@@ -64,6 +71,10 @@ document.addEventListener('DOMContentLoaded', function() {
             updateBorderRadiusDisplay(settings.iconBorderRadius);
             iconBorderColor.value = settings.iconBorderColor;
             iconBgColor.value = settings.iconBgColor;
+            bookmarkFontFamily.value = settings.bookmarkFontFamily;
+            bookmarkFontSize.value = settings.bookmarkFontSize;
+            updateBookmarkFontSizeDisplay(settings.bookmarkFontSize);
+            bookmarkFontColor.value = settings.bookmarkFontColor;
             nameDisplay.value = settings.nameDisplay;
         });
     }
@@ -81,6 +92,9 @@ document.addEventListener('DOMContentLoaded', function() {
             iconBorderRadius: parseInt(iconBorderRadius.value),
             iconBorderColor: iconBorderColor.value,
             iconBgColor: iconBgColor.value,
+            bookmarkFontFamily: bookmarkFontFamily.value,
+            bookmarkFontSize: parseInt(bookmarkFontSize.value),
+            bookmarkFontColor: bookmarkFontColor.value,
             nameDisplay: nameDisplay.value
         };
 
@@ -127,6 +141,10 @@ document.addEventListener('DOMContentLoaded', function() {
         iconBorderRadiusValue.textContent = `${value}px`;
     }
 
+    function updateBookmarkFontSizeDisplay(value) {
+        bookmarkFontSizeValue.textContent = `${value}px`;
+    }
+
     // Event listeners para atualizar displays
     wallpaperFrequency.addEventListener('input', function() {
         updateFrequencyDisplay(this.value);
@@ -150,6 +168,10 @@ document.addEventListener('DOMContentLoaded', function() {
 
     iconBorderRadius.addEventListener('input', function() {
         updateBorderRadiusDisplay(this.value);
+    });
+
+    bookmarkFontSize.addEventListener('input', function() {
+        updateBookmarkFontSizeDisplay(this.value);
     });
 
     // Exportar dados

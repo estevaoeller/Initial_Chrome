@@ -22,6 +22,10 @@ document.addEventListener('DOMContentLoaded', function() {
     let iconBgColor = '#fff';
     let iconSpacing = 8; // padding inside each bookmark
     let iconGap = 8; // space between bookmark items
+    let bookmarkFontFamily = 'sans-serif';
+    let bookmarkFontSize = 14;
+    let bookmarkFontColor = '#333333';
+
 
     function applyIconSizeSetting(size) {
         document.documentElement.style.setProperty('--icon-size', `${size}px`);
@@ -46,6 +50,14 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--icon-gap', `${gap}px`);
     }
 
+
+    function applyBookmarkFontSettings() {
+        document.documentElement.style.setProperty('--bookmark-font-family', bookmarkFontFamily);
+        document.documentElement.style.setProperty('--bookmark-font-size', `${bookmarkFontSize}px`);
+        document.documentElement.style.setProperty('--bookmark-font-color', bookmarkFontColor);
+    }
+
+
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
@@ -69,10 +81,23 @@ document.addEventListener('DOMContentLoaded', function() {
             } else {
                 iconGap = iconSpacing;
             }
+
+            if (settings.bookmarkFontFamily) {
+                bookmarkFontFamily = settings.bookmarkFontFamily;
+            }
+            if (settings.bookmarkFontSize !== undefined) {
+                bookmarkFontSize = settings.bookmarkFontSize;
+            }
+            if (settings.bookmarkFontColor) {
+                bookmarkFontColor = settings.bookmarkFontColor;
+            }
+
             applyIconSizeSetting(iconSize);
             applyIconAppearance();
             applyIconSpacingSetting(iconSpacing);
             applyIconGapSetting(iconGap);
+            applyBookmarkFontSettings();
+
             if (callback) callback();
         });
     }
@@ -199,7 +224,19 @@ document.addEventListener('DOMContentLoaded', function() {
                 iconGap = newSettings.iconGap;
                 applyIconGapSetting(iconGap);
             }
+
+            if (newSettings.bookmarkFontFamily && newSettings.bookmarkFontFamily !== bookmarkFontFamily) {
+                bookmarkFontFamily = newSettings.bookmarkFontFamily;
+            }
+            if (newSettings.bookmarkFontSize !== undefined && newSettings.bookmarkFontSize !== bookmarkFontSize) {
+                bookmarkFontSize = newSettings.bookmarkFontSize;
+            }
+            if (newSettings.bookmarkFontColor && newSettings.bookmarkFontColor !== bookmarkFontColor) {
+                bookmarkFontColor = newSettings.bookmarkFontColor;
+            }
+
             applyIconAppearance();
+            applyBookmarkFontSettings();
         }
     });
 });
