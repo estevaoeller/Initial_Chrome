@@ -59,6 +59,7 @@ document.addEventListener('DOMContentLoaded', function() {
         document.documentElement.style.setProperty('--bookmark-font-size', `${bookmarkFontSize}px`);
         document.documentElement.style.setProperty('--bookmark-font-color', bookmarkFontColor);
     }
+
     function loadSettings(callback) {
         chrome.storage.local.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
@@ -92,6 +93,7 @@ document.addEventListener('DOMContentLoaded', function() {
             if (settings.bookmarkFontColor) {
                 bookmarkFontColor = settings.bookmarkFontColor;
             }
+
             if (settings.bookmarkMinWidth !== undefined) {
                 bookmarkMinWidth = settings.bookmarkMinWidth;
             }
@@ -102,6 +104,8 @@ document.addEventListener('DOMContentLoaded', function() {
             applyIconGapSetting(iconGap);
             applyBookmarkFontSettings();
             applyBookmarkMinWidthSetting(bookmarkMinWidth);
+
+
             if (callback) callback();
         });
     }
@@ -238,10 +242,12 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newSettings.bookmarkFontColor && newSettings.bookmarkFontColor !== bookmarkFontColor) {
                 bookmarkFontColor = newSettings.bookmarkFontColor;
             }
+
             if (newSettings.bookmarkMinWidth !== undefined && newSettings.bookmarkMinWidth !== bookmarkMinWidth) {
                 bookmarkMinWidth = newSettings.bookmarkMinWidth;
                 applyBookmarkMinWidthSetting(bookmarkMinWidth);
             }
+
             applyIconAppearance();
             applyBookmarkFontSettings();
         }

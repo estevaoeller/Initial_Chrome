@@ -10,6 +10,7 @@
     --bookmark-font-size: 14px;
     --bookmark-font-color: #333;
     --bookmark-min-width: 100px;
+
 }
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
