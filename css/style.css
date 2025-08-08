@@ -197,9 +197,8 @@ body {
     font-size: var(--bookmark-font-size);
     color: var(--bookmark-font-color);
     text-align: left; /* Alinhar o nome à esquerda */
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    white-space: normal;
+    word-break: break-word;
 }
 
 /* Ajuste no .bookmark-item para acomodar favicon e nome lado a lado, e o X */
