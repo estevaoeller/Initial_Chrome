@@ -199,6 +199,11 @@ body {
     text-align: left; /* Alinhar o nome à esquerda */
     white-space: normal;
     word-break: break-word;
+    display: -webkit-box;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 2; /* mantém no máximo duas linhas */
+    overflow: hidden;      /* evita que o texto transborde */
+    text-overflow: ellipsis; /* reticências ao truncar o texto */
 }
 
 /* Ajuste no .bookmark-item para acomodar favicon e nome lado a lado, e o X */
