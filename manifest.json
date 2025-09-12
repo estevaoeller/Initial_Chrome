@@ -2,7 +2,7 @@
   "manifest_version": 3,
   "name": "Página Inicial Personalizada",
   "version": "0.1.0",
-  "description": "Uma página inicial personalizada para otimizar o acesso a bookmarks e oferecer uma experiência visual única. 2025-07-25T15:07:46.705Z work 2025-07-25T16:27:56.485Z work 2025-07-25T20:57:05.401Z work 2025-07-26T14:37:28.682Z work",
+  "description": "250925 1133 Uma página inicial personalizada para otimizar o acesso a bookmarks e oferecer uma experiência visual única. 2025-07-25T15:07:46.705Z work 2025-07-25T16:27:56.485Z work 2025-07-25T20:57:05.401Z work 2025-07-26T14:37:28.682Z work",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },
@@ -17,4 +17,5 @@
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
   }
+
 }
