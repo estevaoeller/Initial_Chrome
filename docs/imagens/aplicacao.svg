@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450">
+  <rect width="800" height="450" fill="#333333"/>
+  <circle cx="100" cy="100" r="40" fill="#ffffff" stroke="#dddddd"/>
+  <text x="160" y="110" font-size="16" fill="#ffffff">Bookmark</text>
+  <text x="400" y="40" font-size="24" text-anchor="middle" fill="#ffffff">Exemplo após aplicar as configurações</text>
+</svg>

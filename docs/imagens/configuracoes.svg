@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg xmlns="http://www.w3.org/2000/svg" width="800" height="450">
+  <rect width="800" height="450" fill="#f0f2f5"/>
+  <rect x="50" y="50" width="700" height="350" rx="8" fill="#ffffff" stroke="#cccccc"/>
+  <text x="400" y="90" font-size="24" text-anchor="middle" fill="#007bff">Configurações da Extensão</text>
+  <text x="80" y="140" font-size="18" fill="#333333">Exemplo de tela de configurações</text>
+</svg>
