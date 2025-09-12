@@ -2,6 +2,12 @@
   "name": "initial_chrome",
   "version": "1.0.0",
   "scripts": {
-    "build": "node scripts/updateManifest.js"
+    "build": "node scripts/updateManifest.js",
+    "lint": "eslint .",
+    "format": "prettier --write ."
+  },
+  "devDependencies": {
+    "eslint": "^8.57.0",
+    "prettier": "^3.3.2"
   }
 }
