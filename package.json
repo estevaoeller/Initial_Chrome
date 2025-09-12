@@ -1,13 +1,16 @@
 {
   "name": "initial_chrome",
   "version": "1.0.0",
+  "type": "module",
   "scripts": {
-    "build": "node scripts/updateManifest.js",
+    "build": "node scripts/updateManifest.cjs",
     "lint": "eslint .",
-    "format": "prettier --write ."
+    "format": "prettier --write .",
+    "test": "node --experimental-vm-modules node_modules/jest/bin/jest.js"
   },
   "devDependencies": {
     "eslint": "^8.57.0",
-    "prettier": "^3.3.2"
+    "prettier": "^3.3.2",
+    "jest": "^29.7.0"
   }
 }
