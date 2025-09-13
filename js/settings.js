@@ -121,7 +121,9 @@ document.addEventListener('DOMContentLoaded', function() {
     // Atualizar displays dos valores
     function updateFrequencyDisplay(value) {
         const hours = parseFloat(value);
-        if (hours === 1) {
+        if (hours === 0) {
+            wallpaperFrequencyValue.textContent = "0 horas";
+        } else if (hours === 1) {
             wallpaperFrequencyValue.textContent = "1 hora";
         } else if (hours < 1) {
             wallpaperFrequencyValue.textContent = `${hours * 60} minutos`;
