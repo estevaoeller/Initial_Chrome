@@ -148,16 +148,24 @@ export function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom, curr
     }
 }
 
+const THEME_LIST = ["light", "dark", "solar", "minimal"];
+const THEME_CLASSES = THEME_LIST.map(t => `${t}-theme`);
+
 export function applyTheme(theme) {
-    document.body.classList.remove("light-theme", "dark-theme");
-    document.body.classList.add(`${theme}-theme`);
+    const validTheme = THEME_LIST.includes(theme) ? theme : "light";
+    document.body.classList.remove(...THEME_CLASSES);
+    document.body.classList.add(`${validTheme}-theme`);
 }
 
 export function toggleTheme() {
-    const currentTheme = document.body.classList.contains("dark-theme") ? "dark" : "light";
-    const newTheme = currentTheme === "dark" ? "light" : "dark";
-    applyTheme(newTheme);
-    chrome.storage.local.set({ theme: newTheme });
+    const current = THEME_LIST.find(t => document.body.classList.contains(`${t}-theme`)) || "light";
+    const next = THEME_LIST[(THEME_LIST.indexOf(current) + 1) % THEME_LIST.length];
+    applyTheme(next);
+    chrome.storage.local.get(["extensionSettings"], data => {
+        const settings = data.extensionSettings || {};
+        settings.themePreset = next;
+        chrome.storage.local.set({ extensionSettings: settings });
+    });
 }
 
 export function updateClock(analogClockPlaceholder) {
