@@ -10,14 +10,55 @@
     --bookmark-font-size: 14px;
     --bookmark-font-color: #333;
     --bookmark-min-width: 100px;
-
+    /* Theme variables (default to light) */
+    --bg: #f5f5f5;
+    --card: #ffffff;
+    --text: #333333;
+    --accent: #007bff;
 }
+
+body.light-theme {
+    --bg: #f5f5f5;
+    --card: #ffffff;
+    --text: #333333;
+    --accent: #007bff;
+    --icon-bg-color: #ffffff;
+    --icon-border-color: #dddddd;
+}
+
+body.dark-theme {
+    --bg: #121212;
+    --card: #1e1e1e;
+    --text: #e0e0e0;
+    --accent: #bb86fc;
+    --icon-bg-color: #1e1e1e;
+    --icon-border-color: #333333;
+}
+
+body.solar-theme {
+    --bg: #fdf6e3;
+    --card: #eee8d5;
+    --text: #657b83;
+    --accent: #268bd2;
+    --icon-bg-color: #eee8d5;
+    --icon-border-color: #d0c5b5;
+}
+
+body.minimal-theme {
+    --bg: #fafafa;
+    --card: #ffffff;
+    --text: #111111;
+    --accent: #ff4081;
+    --icon-bg-color: #ffffff;
+    --icon-border-color: #dddddd;
+}
+
 body {
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
     margin: 0;
     padding: 20px;
-    background-color: #f0f2f5; /* Cor de fundo temporária */
-    color: #333;
+    background-color: var(--bg);
+    color: var(--text);
     overflow-y: scroll; /* Para garantir a rolagem vertical se o conteúdo exceder a tela */
 }
 
@@ -37,21 +78,13 @@ body {
     top: 20px;
     right: 20px;
     text-align: right;
-    color: #fff; /* Cor do texto para melhor contraste com o filtro/imagem de fundo */
-}
-
-#clock-area #analog-clock-placeholder,
-#clock-area #date-placeholder,
-#clock-area #calendar-placeholder {
-    padding: 5px 10px;
-    background-color: rgba(0,0,0,0.2); /* Um leve fundo para destacar do wallpaper */
-    margin-bottom: 8px;
-    border-radius: 4px;
+    color: var(--text); /* Cor do texto para melhor contraste com o filtro/imagem de fundo */
 }
 
 #clock-area #calendar-placeholder p {
     margin: 0;
     font-size: 0.9em;
+    color: var(--text);
 }
 
 
@@ -61,7 +94,8 @@ body {
 }
 
 .bookmark-category {
-    background-color: rgba(255, 255, 255, 0.9); /* Fundo levemente transparente para categorias */
+    background-color: var(--card);
+    color: var(--text);
     padding: 15px;
     margin-bottom: 20px;
     border-radius: 8px;
@@ -70,10 +104,10 @@ body {
 
 .bookmark-category h2 {
     margin-top: 0;
-    border-bottom: 1px solid #eee;
+    border-bottom: 1px solid var(--accent);
     padding-bottom: 10px;
     font-weight: 500;
-    color: #1a1a1a;
+    color: var(--text);
 }
 
 .bookmarks-grid {
@@ -91,7 +125,7 @@ body {
     padding: var(--icon-spacing);
     text-align: center;
     text-decoration: none;
-    color: #333;
+    color: var(--text);
     display: flex; /* Para centralizar conteúdo verticalmente se necessário */
     flex-direction: column;
     align-items: center;
@@ -123,8 +157,8 @@ body {
 
 
 .bookmark-category.drag-over {
-    border: 2px dashed #007bff;
-    background-color: rgba(0, 123, 255, 0.1);
+    border: 2px dashed var(--accent);
+    background-color: color-mix(in srgb, var(--accent) 10%, var(--card));
     transform: scale(1.02); /* Leve aumento para dar feedback */
     transition: transform 0.1s ease-out, background-color 0.1s ease-out, border 0.1s ease-out;
 }
@@ -159,14 +193,14 @@ body {
 
 .bookmark-item.dragging {
     opacity: 0.5;
-    border: 2px dashed #007bff;
+    border: 2px dashed var(--accent);
 }
 
 /* Estilo para o placeholder visual durante o arraste para reordenar */
 .drop-placeholder {
-    background-color: rgba(0, 123, 255, 0.2); /* Azul claro semi-transparente */
+    background-color: color-mix(in srgb, var(--accent) 20%, transparent);
     height: 50px; /* Altura similar a um bookmark item, ajuste se necessário */
-    border: 2px dashed #007bff;
+    border: 2px dashed var(--accent);
     margin: 5px 0; /* Um pouco de margem para visualização */
     border-radius: 6px;
 }
@@ -214,7 +248,7 @@ body {
     border-radius: var(--icon-border-radius);
     padding: var(--icon-spacing);
     text-decoration: none;
-    color: #333;
+    color: var(--text);
 
     display: flex; /* MUITO IMPORTANTE: para alinhar favicon e nome na mesma linha */
     align-items: center; /* Alinha verticalmente favicon, nome (e o X se não fosse absolute) */
@@ -237,7 +271,7 @@ body {
 .bookmark-name-edit {
     font-size: 0.85em; /* Mesmo tamanho de fonte que .bookmark-name */
     padding: 2px 4px;
-    border: 1px solid #007bff; /* Borda azul para indicar edição */
+    border: 1px solid var(--accent); /* Borda para indicar edição */
     border-radius: 3px;
     width: calc(100% - 10px); /* Tenta ocupar a largura disponível menos um pouco de padding */
     box-sizing: border-box;
@@ -259,19 +293,20 @@ body {
 /* Adicione mais estilos conforme necessário */
 /* Estilos para Relógio, Data e Calendário */
 #clock-area {
-    background-color: rgba(255, 255, 255, 0.9);
+    background-color: var(--card);
     border-radius: 8px;
     padding: 15px;
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
     min-width: 200px;
+    color: var(--text);
 }
 
 #analog-clock-placeholder {
     font-size: 24px;
     font-weight: bold;
     text-align: center;
-    color: #333;
-    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--text);
+    background-color: var(--card);
     padding: 10px;
     border-radius: 6px;
     margin-bottom: 10px;
@@ -280,25 +315,25 @@ body {
 #date-placeholder {
     font-size: 14px;
     text-align: center;
-    color: #555;
-    background-color: rgba(255, 255, 255, 0.8);
+    color: var(--text);
+    background-color: var(--card);
     padding: 8px;
     border-radius: 6px;
     margin-bottom: 10px;
 }
 
 #calendar-placeholder {
-    background-color: rgba(255, 255, 255, 0.8);
+    background-color: var(--card);
     padding: 10px;
     border-radius: 6px;
-    color: #333;
+    color: var(--text);
 }
 
 #calendar-placeholder h3 {
     margin: 0 0 10px 0;
     font-size: 16px;
     text-align: center;
-    color: #333;
+    color: var(--text);
 }
 
 #calendar-placeholder table {
@@ -311,16 +346,17 @@ body {
 #calendar-placeholder td {
     padding: 4px;
     text-align: center;
-    border: 1px solid #ddd;
+    border: 1px solid var(--icon-border-color);
 }
 
 #calendar-placeholder th {
-    background-color: #f8f9fa;
+    background-color: var(--bg);
     font-weight: bold;
+    color: var(--text);
 }
 
 #calendar-placeholder a {
-    color: #007bff;
+    color: var(--accent);
     text-decoration: none;
     font-size: 12px;
 }
@@ -329,77 +365,5 @@ body {
     text-decoration: underline;
 }
 
-
-
-/* Estilos para Temas */
-body.light-theme {
-    background-color: #f0f2f5;
-    color: #333;
-}
-
-body.dark-theme {
-    background-color: #222;
-    color: #eee;
-    --bookmark-font-color: #eee;
-}
-
-body.dark-theme .bookmark-category {
-    background-color: rgba(50, 50, 50, 0.9);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-body.dark-theme .bookmark-category h2 {
-    color: #eee;
-    border-bottom-color: #444;
-}
-
-body.dark-theme .bookmark-item {
-    background-color: var(--icon-bg-color);
-    border-color: var(--icon-border-color);
-    color: #eee;
-}
-
-body.dark-theme .bookmark-item:hover {
-    box-shadow: 0 4px 8px rgba(0,0,0,0.5);
-}
-
-body.dark-theme .bookmark-favicon-placeholder {
-    color: #888;
-}
-
-body.dark-theme .bookmark-name-edit {
-    background-color: #444;
-    color: #eee;
-    border-color: #007bff;
-}
-
-body.dark-theme #clock-area {
-    background-color: rgba(50, 50, 50, 0.9);
-    box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-}
-
-body.dark-theme #analog-clock-placeholder,
-body.dark-theme #date-placeholder,
-body.dark-theme #calendar-placeholder {
-    background-color: rgba(70, 70, 70, 0.8);
-    color: #eee;
-}
-
-body.dark-theme #calendar-placeholder h3 {
-    color: #eee;
-}
-
-body.dark-theme #calendar-placeholder th {
-    background-color: #444;
-    color: #eee;
-}
-
-body.dark-theme #calendar-placeholder td {
-    border-color: #555;
-}
-
-body.dark-theme #calendar-placeholder a {
-    color: #66b3ff;
-}
 
 

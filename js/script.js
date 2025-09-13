@@ -44,7 +44,8 @@ document.addEventListener('DOMContentLoaded', function() {
         bookmarkFontFamily: 'sans-serif',
         bookmarkFontSize: 14,
         bookmarkFontColor: '#333333',
-        bookmarkMinWidth: 100
+        bookmarkMinWidth: 100,
+        themePreset: 'light'
     };
 
     // ---- FUNÇÃO PRINCIPAL ----
@@ -66,7 +67,20 @@ document.addEventListener('DOMContentLoaded', function() {
         });
 
         // Inicialização de outros componentes
-        chrome.storage.local.get(['theme'], result => applyTheme(result.theme || 'light'));
+        chrome.storage.local.get(['extensionSettings', 'theme'], result => {
+            const settings = result.extensionSettings || {};
+            let theme = settings.themePreset;
+            if (!theme && result.theme && ['light', 'dark'].includes(result.theme)) {
+                theme = result.theme;
+                settings.themePreset = theme;
+                chrome.storage.local.set({ extensionSettings: settings }, () => {
+                    chrome.storage.local.remove('theme');
+                });
+            }
+            theme = theme || 'light';
+            settingsState.themePreset = theme;
+            applyTheme(theme);
+        });
         if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
         if (settingsBtn) settingsBtn.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') }));
         if (analogClockPlaceholder) {
@@ -124,6 +138,11 @@ document.addEventListener('DOMContentLoaded', function() {
             if (newSettings.bookmarkMinWidth !== undefined && newSettings.bookmarkMinWidth !== settingsState.bookmarkMinWidth) {
                 settingsState.bookmarkMinWidth = newSettings.bookmarkMinWidth;
                 applyBookmarkMinWidthSetting(settingsState.bookmarkMinWidth);
+            }
+
+            if (newSettings.themePreset && newSettings.themePreset !== settingsState.themePreset) {
+                settingsState.themePreset = newSettings.themePreset;
+                applyTheme(settingsState.themePreset);
             }
 
             applyIconAppearance(settingsState.iconBorderRadius, settingsState.iconBorderColor, settingsState.iconBgColor);

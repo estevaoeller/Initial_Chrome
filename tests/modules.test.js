@@ -1,3 +1,4 @@
+import { jest, describe, beforeEach, test, expect } from '@jest/globals';
 import {
   loadBookmarksFromChrome,
   addBookmarkToChrome,
@@ -6,7 +7,7 @@ import {
 
 describe('Chrome bookmark functions', () => {
   beforeEach(() => {
-    global.chrome = {
+    globalThis.chrome = {
       bookmarks: {
         getTree: jest.fn(),
         getSubTree: jest.fn(),

@@ -4,7 +4,6 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Elementos da interface
     const wallpaperFolderPath = document.getElementById('wallpaper-folder-path');
-    const selectWallpaperFolderBtn = document.getElementById('select-wallpaper-folder-btn');
     const wallpaperFrequency = document.getElementById('wallpaper-frequency');
     const wallpaperFrequencyValue = document.getElementById('wallpaper-frequency-value');
     const filterColor = document.getElementById('filter-color');
@@ -22,6 +21,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
     const iconBgColor = document.getElementById('icon-bg-color');
+    const themePreset = document.getElementById('theme-preset');
     const bookmarkFontFamily = document.getElementById('bookmark-font-family');
     const bookmarkFontSize = document.getElementById('bookmark-font-size');
     const bookmarkFontSizeValue = document.getElementById('bookmark-font-size-value');
@@ -50,7 +50,8 @@ document.addEventListener('DOMContentLoaded', function() {
         bookmarkFontFamily: "sans-serif",
         bookmarkFontSize: 14,
         bookmarkFontColor: "#333333",
-        nameDisplay: "always"
+        nameDisplay: "always",
+        themePreset: "light"
     };
 
     // Carregar configurações salvas
@@ -81,6 +82,9 @@ document.addEventListener('DOMContentLoaded', function() {
             updateBookmarkFontSizeDisplay(settings.bookmarkFontSize);
             bookmarkFontColor.value = settings.bookmarkFontColor;
             nameDisplay.value = settings.nameDisplay;
+            themePreset.value = settings.themePreset || 'light';
+            document.body.classList.remove('light-theme','dark-theme','solar-theme','minimal-theme');
+            document.body.classList.add(`${themePreset.value}-theme`);
         });
     }
 
@@ -101,7 +105,8 @@ document.addEventListener('DOMContentLoaded', function() {
             bookmarkFontFamily: bookmarkFontFamily.value,
             bookmarkFontSize: parseInt(bookmarkFontSize.value),
             bookmarkFontColor: bookmarkFontColor.value,
-            nameDisplay: nameDisplay.value
+            nameDisplay: nameDisplay.value,
+            themePreset: themePreset.value
         };
 
         chrome.storage.local.set({ extensionSettings: settings }, function() {
@@ -186,6 +191,17 @@ document.addEventListener('DOMContentLoaded', function() {
 
     bookmarkFontSize.addEventListener('input', function() {
         updateBookmarkFontSizeDisplay(this.value);
+    });
+
+    themePreset.addEventListener('change', function() {
+        const newTheme = this.value;
+        document.body.classList.remove('light-theme','dark-theme','solar-theme','minimal-theme');
+        document.body.classList.add(`${newTheme}-theme`);
+        chrome.storage.local.get(['extensionSettings'], function(result) {
+            const settings = result.extensionSettings || defaultSettings;
+            settings.themePreset = newTheme;
+            chrome.storage.local.set({ extensionSettings: settings });
+        });
     });
 
     // Exportar dados
