@@ -15,7 +15,8 @@ import {
     applyIconSpacingSetting,
     applyBookmarkMinWidthSetting,
     applyIconGapSetting,
-    applyBookmarkFontSettings
+    applyBookmarkFontSettings,
+    applyBackgroundFilter
 } from './settings-handlers.js';
 import { renderBookmarks } from './bookmark-renderer.js';
 
@@ -45,6 +46,8 @@ document.addEventListener('DOMContentLoaded', function() {
         bookmarkFontSize: 14,
         bookmarkFontColor: '#333333',
         bookmarkMinWidth: 100,
+        filterColor: '#000000',
+        filterOpacity: 0.3,
         themePreset: 'light'
     };
 
@@ -103,7 +106,7 @@ document.addEventListener('DOMContentLoaded', function() {
     chrome.storage.onChanged.addListener((changes, area) => {
         if (area === 'local' && changes.extensionSettings) {
             const newSettings = changes.extensionSettings.newValue || {};
-            if (newSettings.iconSize && newSettings.iconSize !== settingsState.iconSize) {
+            if (newSettings.iconSize !== undefined && newSettings.iconSize !== settingsState.iconSize) {
                 settingsState.iconSize = newSettings.iconSize;
                 applyIconSizeSetting(settingsState.iconSize);
             }
@@ -140,6 +143,13 @@ document.addEventListener('DOMContentLoaded', function() {
                 applyBookmarkMinWidthSetting(settingsState.bookmarkMinWidth);
             }
 
+            if (newSettings.filterColor && newSettings.filterColor !== settingsState.filterColor) {
+                settingsState.filterColor = newSettings.filterColor;
+            }
+            if (newSettings.filterOpacity !== undefined && newSettings.filterOpacity !== settingsState.filterOpacity) {
+                settingsState.filterOpacity = newSettings.filterOpacity;
+            }
+
             if (newSettings.themePreset && newSettings.themePreset !== settingsState.themePreset) {
                 settingsState.themePreset = newSettings.themePreset;
                 applyTheme(settingsState.themePreset);
@@ -151,6 +161,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 settingsState.bookmarkFontSize,
                 settingsState.bookmarkFontColor
             );
+            applyBackgroundFilter(settingsState.filterColor, settingsState.filterOpacity);
         }
     });
 });
