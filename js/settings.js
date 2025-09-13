@@ -112,10 +112,8 @@ document.addEventListener('DOMContentLoaded', function() {
         chrome.storage.local.set({ extensionSettings: settings }, function() {
             if (chrome.runtime.lastError) {
                 console.error("Erro ao salvar configurações:", chrome.runtime.lastError.message);
-                alert("Erro ao salvar configurações!");
             } else {
                 console.log("Configurações salvas com sucesso!");
-                alert("Configurações salvas com sucesso!");
             }
         });
     }
@@ -163,45 +161,63 @@ document.addEventListener('DOMContentLoaded', function() {
     // Event listeners para atualizar displays
     wallpaperFrequency.addEventListener('input', function() {
         updateFrequencyDisplay(this.value);
+        saveSettings();
     });
 
     filterOpacity.addEventListener('input', function() {
         updateOpacityDisplay(this.value);
+        saveSettings();
     });
 
     iconSize.addEventListener('input', function() {
         updateIconSizeDisplay(this.value);
+        saveSettings();
     });
 
     iconSpacing.addEventListener('input', function() {
         updateIconSpacingDisplay(this.value);
+        saveSettings();
     });
 
     iconGap.addEventListener('input', function() {
         updateIconGapDisplay(this.value);
+        saveSettings();
     });
 
     bookmarkMinWidth.addEventListener('input', function() {
         updateBookmarkMinWidthDisplay(this.value);
+        saveSettings();
     });
 
     iconBorderRadius.addEventListener('input', function() {
         updateBorderRadiusDisplay(this.value);
+        saveSettings();
     });
 
     bookmarkFontSize.addEventListener('input', function() {
         updateBookmarkFontSizeDisplay(this.value);
+        saveSettings();
     });
 
     themePreset.addEventListener('change', function() {
         const newTheme = this.value;
         document.body.classList.remove('light-theme','dark-theme','solar-theme','minimal-theme');
         document.body.classList.add(`${newTheme}-theme`);
-        chrome.storage.local.get(['extensionSettings'], function(result) {
-            const settings = result.extensionSettings || defaultSettings;
-            settings.themePreset = newTheme;
-            chrome.storage.local.set({ extensionSettings: settings });
-        });
+        saveSettings();
+    });
+
+    // Auto-save para campos sem display
+    [
+        wallpaperFolderPath,
+        filterColor,
+        iconBorderColor,
+        iconBgColor,
+        bookmarkFontFamily,
+        bookmarkFontColor,
+        nameDisplay
+    ].forEach(element => {
+        element.addEventListener('input', saveSettings);
+        element.addEventListener('change', saveSettings);
     });
 
     // Exportar dados
@@ -253,16 +269,14 @@ document.addEventListener('DOMContentLoaded', function() {
                         chrome.storage.local.set(dataToSave, function() {
                             if (chrome.runtime.lastError) {
                                 console.error("Erro ao importar dados:", chrome.runtime.lastError.message);
-                                alert("Erro ao importar dados!");
                             } else {
-                                alert("Dados importados com sucesso! Recarregue a página para ver as mudanças.");
+                                console.log("Dados importados com sucesso!");
                                 loadSettings(); // Recarregar configurações na interface
                             }
                         });
                     }
                 } catch (error) {
                     console.error("Erro ao processar arquivo:", error);
-                    alert("Erro ao processar arquivo. Verifique se é um arquivo JSON válido.");
                 }
             };
             reader.readAsText(file);
@@ -275,9 +289,8 @@ document.addEventListener('DOMContentLoaded', function() {
             chrome.storage.local.set({ extensionSettings: defaultSettings }, function() {
                 if (chrome.runtime.lastError) {
                     console.error("Erro ao reiniciar configurações:", chrome.runtime.lastError.message);
-                    alert("Erro ao reiniciar configurações!");
                 } else {
-                    alert("Configurações reiniciadas com sucesso!");
+                    console.log("Configurações reiniciadas com sucesso!");
                     loadSettings(); // Recarregar configurações na interface
                 }
             });
