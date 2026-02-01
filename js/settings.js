@@ -1,5 +1,5 @@
 // js/settings.js
-document.addEventListener('DOMContentLoaded', function() {
+document.addEventListener('DOMContentLoaded', function () {
     console.log("Página de configurações carregada.");
 
     // Elementos da interface
@@ -17,6 +17,8 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookmarkMinWidthValue = document.getElementById('bookmark-min-width-value');
     const iconGap = document.getElementById('icon-gap');
     const iconGapValue = document.getElementById('icon-gap-value');
+    const categoryGap = document.getElementById('category-gap'); // Fixed
+    const categoryGapValue = document.getElementById('category-gap-value'); // Fixed
     const iconBorderRadius = document.getElementById('icon-border-radius');
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
@@ -27,6 +29,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const bookmarkFontSizeValue = document.getElementById('bookmark-font-size-value');
     const bookmarkFontColor = document.getElementById('bookmark-font-color');
     const nameDisplay = document.getElementById('name-display');
+    const textBehavior = document.getElementById('text-behavior');
+    const iconLayout = document.getElementById('icon-layout'); // New
+    const layoutMode = document.getElementById('layout-mode');
+    const columnCountContainer = document.getElementById('column-count-container');
+    const columnCount = document.getElementById('column-count');
+    const columnCountValue = document.getElementById('column-count-value');
+    const sidebarWidth = document.getElementById('sidebar-width');
+    const sidebarWidthValue = document.getElementById('sidebar-width-value');
+
     const exportDataBtn = document.getElementById('export-data-btn');
     const importDataBtn = document.getElementById('import-data-btn');
     const importFileInput = document.getElementById('import-file-input');
@@ -43,6 +54,7 @@ document.addEventListener('DOMContentLoaded', function() {
         iconSize: 32,
         iconSpacing: 8,
         iconGap: 8,
+        categoryGap: 20,
         bookmarkMinWidth: 100,
         iconBorderRadius: 6,
         iconBorderColor: "#ddd",
@@ -51,12 +63,25 @@ document.addEventListener('DOMContentLoaded', function() {
         bookmarkFontSize: 14,
         bookmarkFontColor: "#333333",
         nameDisplay: "always",
-        themePreset: "light"
+        textBehavior: "truncate",
+        iconLayout: "row", // Default
+        themePreset: "light",
+        layoutMode: "list",
+        columnCount: 3,
+        sidebarWidth: 200
     };
+
+    function toggleColumnCountDisplay(mode) {
+        if (mode === 'columns') {
+            columnCountContainer.style.display = 'block';
+        } else {
+            columnCountContainer.style.display = 'none';
+        }
+    }
 
     // Carregar configurações salvas
     function loadSettings() {
-        chrome.storage.local.get(['extensionSettings'], function(result) {
+        chrome.storage.local.get(['extensionSettings'], function (result) {
             const settings = result.extensionSettings || defaultSettings;
 
             wallpaperFolderPath.value = settings.wallpaperFolderPath;
@@ -71,6 +96,8 @@ document.addEventListener('DOMContentLoaded', function() {
             updateIconSpacingDisplay(settings.iconSpacing);
             iconGap.value = settings.iconGap !== undefined ? settings.iconGap : settings.iconSpacing;
             updateIconGapDisplay(iconGap.value);
+            categoryGap.value = settings.categoryGap !== undefined ? settings.categoryGap : 20;
+            updateCategoryGapDisplay(categoryGap.value);
             bookmarkMinWidth.value = settings.bookmarkMinWidth;
             updateBookmarkMinWidthDisplay(settings.bookmarkMinWidth);
             iconBorderRadius.value = settings.iconBorderRadius;
@@ -82,8 +109,23 @@ document.addEventListener('DOMContentLoaded', function() {
             updateBookmarkFontSizeDisplay(settings.bookmarkFontSize);
             bookmarkFontColor.value = settings.bookmarkFontColor;
             nameDisplay.value = settings.nameDisplay;
+            textBehavior.value = settings.textBehavior || 'truncate';
+            iconLayout.value = settings.iconLayout || 'row'; // New
+            layoutMode.value = settings.layoutMode || 'list';
+            toggleColumnCountDisplay(layoutMode.value);
+
+            if (settings.columnCount) {
+                columnCount.value = settings.columnCount;
+                columnCountValue.textContent = settings.columnCount;
+            }
+
+            if (settings.sidebarWidth) {
+                sidebarWidth.value = settings.sidebarWidth;
+                sidebarWidthValue.textContent = settings.sidebarWidth + 'px';
+            }
+
             themePreset.value = settings.themePreset || 'light';
-            document.body.classList.remove('light-theme','dark-theme','solar-theme','minimal-theme');
+            document.body.classList.remove('light-theme', 'dark-theme', 'solar-theme', 'minimal-theme');
             document.body.classList.add(`${themePreset.value}-theme`);
         });
     }
@@ -98,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function() {
             iconSize: parseInt(iconSize.value),
             iconSpacing: parseInt(iconSpacing.value),
             iconGap: parseInt(iconGap.value),
+            categoryGap: parseInt(categoryGap.value),
             bookmarkMinWidth: parseInt(bookmarkMinWidth.value),
             iconBorderRadius: parseInt(iconBorderRadius.value),
             iconBorderColor: iconBorderColor.value,
@@ -106,10 +149,15 @@ document.addEventListener('DOMContentLoaded', function() {
             bookmarkFontSize: parseInt(bookmarkFontSize.value),
             bookmarkFontColor: bookmarkFontColor.value,
             nameDisplay: nameDisplay.value,
-            themePreset: themePreset.value
+            textBehavior: textBehavior.value,
+            iconLayout: iconLayout.value, // New
+            themePreset: themePreset.value,
+            layoutMode: layoutMode.value,
+            columnCount: parseInt(columnCount.value),
+            sidebarWidth: parseInt(sidebarWidth.value)
         };
 
-        chrome.storage.local.set({ extensionSettings: settings }, function() {
+        chrome.storage.local.set({ extensionSettings: settings }, function () {
             if (chrome.runtime.lastError) {
                 console.error("Erro ao salvar configurações:", chrome.runtime.lastError.message);
             } else {
@@ -152,6 +200,10 @@ document.addEventListener('DOMContentLoaded', function() {
         iconGapValue.textContent = `${value}px`;
     }
 
+    function updateCategoryGapDisplay(value) { // New
+        categoryGapValue.textContent = `${value}px`;
+    }
+
     function updateBorderRadiusDisplay(value) {
         iconBorderRadiusValue.textContent = `${value}px`;
     }
@@ -161,50 +213,72 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Event listeners para atualizar displays
-    wallpaperFrequency.addEventListener('input', function() {
+    wallpaperFrequency.addEventListener('input', function () {
         updateFrequencyDisplay(this.value);
         saveSettings();
     });
 
-    filterOpacity.addEventListener('input', function() {
+    filterOpacity.addEventListener('input', function () {
         updateOpacityDisplay(this.value);
         saveSettings();
     });
 
-    iconSize.addEventListener('input', function() {
+    iconSize.addEventListener('input', function () {
         updateIconSizeDisplay(this.value);
         saveSettings();
     });
 
-    iconSpacing.addEventListener('input', function() {
+    iconSpacing.addEventListener('input', function () {
         updateIconSpacingDisplay(this.value);
         saveSettings();
     });
 
-    iconGap.addEventListener('input', function() {
+    iconGap.addEventListener('input', function () {
         updateIconGapDisplay(this.value);
         saveSettings();
     });
 
-    bookmarkMinWidth.addEventListener('input', function() {
+    categoryGap.addEventListener('input', function () { // New
+        updateCategoryGapDisplay(this.value);
+        saveSettings();
+    });
+
+    bookmarkMinWidth.addEventListener('input', function () {
         updateBookmarkMinWidthDisplay(this.value);
         saveSettings();
     });
 
-    iconBorderRadius.addEventListener('input', function() {
+    iconBorderRadius.addEventListener('input', function () {
         updateBorderRadiusDisplay(this.value);
         saveSettings();
     });
 
-    bookmarkFontSize.addEventListener('input', function() {
+    bookmarkFontSize.addEventListener('input', function () {
         updateBookmarkFontSizeDisplay(this.value);
         saveSettings();
     });
 
-    themePreset.addEventListener('change', function() {
+    themePreset.addEventListener('change', function () {
         const newTheme = this.value;
-        document.body.classList.remove('light-theme','dark-theme','solar-theme','minimal-theme');
+        document.body.classList.remove('light-theme', 'dark-theme', 'solar-theme', 'minimal-theme');
         document.body.classList.add(`${newTheme}-theme`);
+        saveSettings();
+    });
+
+    layoutMode.addEventListener('change', function () {
+        toggleColumnCountDisplay(this.value);
+        saveSettings();
+    });
+
+    iconLayout.addEventListener('change', saveSettings); // New
+
+    columnCount.addEventListener('input', function () {
+        columnCountValue.textContent = this.value;
+        saveSettings();
+    });
+
+    sidebarWidth.addEventListener('input', function () {
+        sidebarWidthValue.textContent = this.value + 'px';
         saveSettings();
     });
 
@@ -216,15 +290,17 @@ document.addEventListener('DOMContentLoaded', function() {
         iconBgColor,
         bookmarkFontFamily,
         bookmarkFontColor,
-        nameDisplay
+        nameDisplay,
+        textBehavior,
+        layoutMode // New
     ].forEach(element => {
         element.addEventListener('input', saveSettings);
         element.addEventListener('change', saveSettings);
     });
 
     // Exportar dados
-    exportDataBtn.addEventListener('click', function() {
-        chrome.storage.local.get(['userBookmarks', 'extensionSettings'], function(result) {
+    exportDataBtn.addEventListener('click', function () {
+        chrome.storage.local.get(['userBookmarks', 'extensionSettings'], function (result) {
             const exportData = {
                 bookmarks: result.userBookmarks || [],
                 settings: result.extensionSettings || defaultSettings,
@@ -245,15 +321,15 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Importar dados
-    importDataBtn.addEventListener('click', function() {
+    importDataBtn.addEventListener('click', function () {
         importFileInput.click();
     });
 
-    importFileInput.addEventListener('change', function(event) {
+    importFileInput.addEventListener('change', function (event) {
         const file = event.target.files[0];
         if (file) {
             const reader = new FileReader();
-            reader.onload = function(e) {
+            reader.onload = function (e) {
                 try {
                     const importData = JSON.parse(e.target.result);
 
@@ -268,7 +344,7 @@ document.addEventListener('DOMContentLoaded', function() {
                             dataToSave.extensionSettings = importData.settings;
                         }
 
-                        chrome.storage.local.set(dataToSave, function() {
+                        chrome.storage.local.set(dataToSave, function () {
                             if (chrome.runtime.lastError) {
                                 console.error("Erro ao importar dados:", chrome.runtime.lastError.message);
                             } else {
@@ -286,9 +362,9 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Reiniciar configurações
-    resetSettingsBtn.addEventListener('click', function() {
+    resetSettingsBtn.addEventListener('click', function () {
         if (confirm("Tem certeza que deseja reiniciar todas as configurações para os valores padrão?")) {
-            chrome.storage.local.set({ extensionSettings: defaultSettings }, function() {
+            chrome.storage.local.set({ extensionSettings: defaultSettings }, function () {
                 if (chrome.runtime.lastError) {
                     console.error("Erro ao reiniciar configurações:", chrome.runtime.lastError.message);
                 } else {
@@ -303,7 +379,7 @@ document.addEventListener('DOMContentLoaded', function() {
     saveSettingsBtn.addEventListener('click', saveSettings);
 
     // Fechar configurações
-    closeSettingsBtn.addEventListener('click', function() {
+    closeSettingsBtn.addEventListener('click', function () {
         window.close();
     });
 

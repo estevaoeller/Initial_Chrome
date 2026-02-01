@@ -3,7 +3,7 @@
 export const ROOT_FOLDER_NAME = 'Pagina Inicial';
 
 export function saveBookmarks(bookmarksToSave) {
-    chrome.storage.local.set({ 'userBookmarks': bookmarksToSave }, function() {
+    chrome.storage.local.set({ 'userBookmarks': bookmarksToSave }, function () {
         if (chrome.runtime.lastError) {
             console.error("Erro ao salvar bookmarks:", chrome.runtime.lastError.message);
         } else {
@@ -13,7 +13,7 @@ export function saveBookmarks(bookmarksToSave) {
 }
 
 export function loadBookmarks(callback) {
-    chrome.storage.local.get('userBookmarks', function(data) {
+    chrome.storage.local.get('userBookmarks', function (data) {
         if (chrome.runtime.lastError) {
             console.error("Erro ao carregar bookmarks:", chrome.runtime.lastError.message);
             callback(null);
@@ -42,6 +42,12 @@ export function getRootFolder(callback) {
     });
 }
 
+export function renameBookmark(bookmarkId, newTitle, callback) {
+    chrome.bookmarks.update(bookmarkId, { title: newTitle }, () => {
+        if (callback) callback();
+    });
+}
+
 export function loadBookmarksFromChrome(callback) {
     getRootFolder(folder => {
         if (!folder) {
@@ -53,10 +59,10 @@ export function loadBookmarksFromChrome(callback) {
             if (nodes[0].children) {
                 nodes[0].children.forEach(catNode => {
                     if (!catNode.url) {
-                        const category = { name: catNode.title, links: [] };
+                        const category = { id: catNode.id, name: catNode.title, links: [] };
                         (catNode.children || []).forEach(child => {
                             if (child.url) {
-                                category.links.push({ name: child.title, url: child.url });
+                                category.links.push({ id: child.id, name: child.title, url: child.url });
                             }
                         });
                         categories.push(category);
@@ -68,12 +74,216 @@ export function loadBookmarksFromChrome(callback) {
     });
 }
 
+// ========== SPACES FUNCTIONALITY ==========
+
+const DEFAULT_SPACE_ICON = '📁';
+const DEFAULT_SPACE_ICONS = ['🏠', '💼', '📋', '🎯', '📚', '🔧', '🎨', '🎵', '🎮', '📰'];
+
+/**
+ * Load all spaces (first-level folders inside root)
+ */
+export function loadSpacesFromChrome(callback) {
+    getRootFolder(folder => {
+        if (!folder) {
+            callback([]);
+            return;
+        }
+        chrome.bookmarks.getChildren(folder.id, children => {
+            const spaces = [];
+            children.forEach(child => {
+                if (!child.url) {
+                    // Extract icon from title if present (format: "emoji Name" or just "Name")
+                    const titleParts = child.title.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s*(.+)$/u);
+                    let icon = DEFAULT_SPACE_ICON;
+                    let name = child.title;
+                    if (titleParts) {
+                        icon = titleParts[1];
+                        name = titleParts[2];
+                    }
+                    spaces.push({
+                        id: child.id,
+                        name: name,
+                        icon: icon,
+                        fullTitle: child.title
+                    });
+                }
+            });
+            callback(spaces);
+        });
+    });
+}
+
+/**
+ * Load groups (categories) from a specific space
+ */
+export function loadGroupsFromSpace(spaceId, callback) {
+    chrome.bookmarks.getChildren(spaceId, children => {
+        const groups = [];
+        children.forEach(child => {
+            if (!child.url) {
+                const group = { id: child.id, name: child.title, links: [] };
+                chrome.bookmarks.getChildren(child.id, bookmarks => {
+                    bookmarks.forEach(bm => {
+                        if (bm.url) {
+                            group.links.push({ id: bm.id, name: bm.title, url: bm.url });
+                        }
+                    });
+                });
+                groups.push(group);
+            }
+        });
+        // Need to wait for all getChildren calls
+        // Using a simpler approach with getSubTree
+        chrome.bookmarks.getSubTree(spaceId, nodes => {
+            const categories = [];
+            if (nodes[0].children) {
+                nodes[0].children.forEach(catNode => {
+                    if (!catNode.url) {
+                        const category = { id: catNode.id, name: catNode.title, links: [] };
+                        (catNode.children || []).forEach(child => {
+                            if (child.url) {
+                                category.links.push({ id: child.id, name: child.title, url: child.url });
+                            }
+                        });
+                        categories.push(category);
+                    }
+                });
+            }
+            callback(categories);
+        });
+    });
+}
+
+/**
+ * Create a new space
+ */
+export function createSpace(name, icon, callback) {
+    getRootFolder(root => {
+        if (!root) {
+            if (callback) callback(null);
+            return;
+        }
+        const fullTitle = icon ? `${icon} ${name}` : name;
+        chrome.bookmarks.create({ parentId: root.id, title: fullTitle }, newFolder => {
+            if (callback) callback({
+                id: newFolder.id,
+                name: name,
+                icon: icon || DEFAULT_SPACE_ICON,
+                fullTitle: fullTitle
+            });
+        });
+    });
+}
+
+/**
+ * Delete a space (and all its contents)
+ */
+export function deleteSpace(spaceId, callback) {
+    chrome.bookmarks.removeTree(spaceId, () => {
+        if (callback) callback();
+    });
+}
+
+/**
+ * Rename a space
+ */
+export function renameSpace(spaceId, newName, newIcon, callback) {
+    const fullTitle = newIcon ? `${newIcon} ${newName}` : newName;
+    chrome.bookmarks.update(spaceId, { title: fullTitle }, () => {
+        if (callback) callback();
+    });
+}
+
+/**
+ * Check if migration is needed (old structure -> new spaces structure)
+ * Old structure: Root > Categories > Bookmarks
+ * New structure: Root > Spaces > Groups > Bookmarks
+ */
+export function checkAndMigrateToSpaces(callback) {
+    getRootFolder(root => {
+        if (!root) {
+            if (callback) callback(false);
+            return;
+        }
+        chrome.bookmarks.getChildren(root.id, children => {
+            // Check if any child has bookmarks directly (old structure)
+            // or if all children are folders with folders inside (new structure)
+            let hasDirectBookmarks = false;
+            let hasGroups = false;
+
+            const checkPromises = children.map(child => {
+                return new Promise(resolve => {
+                    if (child.url) {
+                        hasDirectBookmarks = true;
+                        resolve();
+                    } else {
+                        chrome.bookmarks.getChildren(child.id, grandchildren => {
+                            const hasUrls = grandchildren.some(gc => gc.url);
+                            if (hasUrls) {
+                                hasDirectBookmarks = true;
+                            }
+                            const hasFolders = grandchildren.some(gc => !gc.url);
+                            if (hasFolders) {
+                                hasGroups = true;
+                            }
+                            resolve();
+                        });
+                    }
+                });
+            });
+
+            Promise.all(checkPromises).then(() => {
+                // If we have direct bookmarks but no nested groups, we need to migrate
+                if (hasDirectBookmarks && !hasGroups) {
+                    migrateToSpacesStructure(root.id, children, callback);
+                } else {
+                    if (callback) callback(false);
+                }
+            });
+        });
+    });
+}
+
+/**
+ * Migrate old structure to new spaces structure
+ */
+function migrateToSpacesStructure(rootId, existingCategories, callback) {
+    // Create "Home" space and move all existing categories into it
+    chrome.bookmarks.create({ parentId: rootId, title: '🏠 Home', index: 0 }, homeSpace => {
+        const movePromises = existingCategories.map(cat => {
+            return new Promise(resolve => {
+                chrome.bookmarks.move(cat.id, { parentId: homeSpace.id }, () => {
+                    resolve();
+                });
+            });
+        });
+
+        Promise.all(movePromises).then(() => {
+            console.log('Migration to Spaces structure complete!');
+            if (callback) callback(true);
+        });
+    });
+}
+
+/**
+ * Get a random icon for new spaces
+ */
+export function getRandomSpaceIcon() {
+    return DEFAULT_SPACE_ICONS[Math.floor(Math.random() * DEFAULT_SPACE_ICONS.length)];
+}
+
+export function moveBookmark(bookmarkId, destinationFolderId, index, callback) {
+    chrome.bookmarks.move(bookmarkId, { parentId: destinationFolderId, index: index }, () => {
+        if (callback) callback();
+    });
+}
+
 export function addBookmarkToChrome(categoryName, bookmark, callback) {
     getRootFolder(root => {
         if (!root) { if (callback) callback(); return; }
         chrome.bookmarks.getChildren(root.id, children => {
             let category = children.find(c => c.title === categoryName && !c.url);
-            const createBookmark = folderId => chrome.bookmarks.create({ parentId: folderId, title: bookmark.name, url: bookmark.url }, () => callback && callback());
+            const createBookmark = folderId => chrome.bookmarks.create({ parentId: folderId, title: bookmark.name, url: bookmark.url }, (newNode) => callback && callback(newNode));
             if (category) {
                 createBookmark(category.id);
             } else {
