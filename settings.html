@@ -4,259 +4,703 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações da Extensão</title>
+    <title>Configurações</title>
+    <!-- Use variables from main style -->
     <link rel="stylesheet" href="css/style.css">
     <style>
         body {
-            padding: 20px;
-            background-color: var(--bg);
-            color: var(--text);
+            /* Define variables here so they can inherit from body.theme classes */
+            --settings-bg: var(--bg);
+            --settings-sidebar-bg: var(--card);
+            --settings-text: var(--text);
+            --settings-border: var(--icon-border-color);
+            --input-bg: var(--bg);
+
+            margin: 0;
+            padding: 0;
+            background-color: var(--settings-bg);
+            color: var(--settings-text);
+            font-family: system-ui, -apple-system, sans-serif;
+            height: 100vh;
+            display: flex;
+            overflow: hidden;
         }
 
-        .settings-container {
-            max-width: 800px;
-            margin: 20px auto;
-            background-color: var(--card);
-            padding: 30px;
-            border-radius: 8px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        /* LAYOUT */
+        .settings-layout {
+            display: flex;
+            width: 100%;
+            height: 100%;
         }
 
-        h1 {
+        /* SIDEBAR */
+        .settings-sidebar {
+            width: 250px;
+            background-color: var(--settings-sidebar-bg);
+            border-right: 1px solid var(--settings-border);
+            display: flex;
+            flex-direction: column;
+            padding: 20px 0;
+            flex-shrink: 0;
+        }
+
+        .settings-logo {
+            padding: 0 24px 20px;
+            font-size: 1.2rem;
+            font-weight: 700;
             color: var(--accent);
-            border-bottom: 1px solid var(--accent);
-            padding-bottom: 15px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            border-bottom: 1px solid var(--settings-border);
+            margin-bottom: 10px;
+        }
+
+        .nav-items {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 12px;
+        }
+
+        .nav-btn {
+            background: none;
+            border: none;
+            padding: 12px 16px;
+            text-align: left;
+            border-radius: 8px;
+            cursor: pointer;
+            color: var(--settings-text);
+            font-size: 0.95rem;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            transition: all 0.2s ease;
+            opacity: 0.7;
+        }
+
+        .nav-btn:hover {
+            background-color: var(--input-bg);
+            opacity: 1;
+        }
+
+        .nav-btn.active {
+            background-color: var(--accent);
+            color: white;
+            opacity: 1;
+            font-weight: 500;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+
+        .sidebar-footer {
+            padding: 20px;
+            border-top: 1px solid var(--settings-border);
+        }
+
+        /* CONTENT AREA */
+        .settings-content-wrapper {
+            flex: 1;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            background-color: var(--settings-bg);
+        }
+
+        .settings-content {
+            flex: 1;
+            padding: 40px;
+            overflow-y: auto;
+            max-width: 900px;
+            margin: 0 auto;
+            width: 100%;
+            box-sizing: border-box;
+        }
+
+        .tab-pane {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .tab-pane.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .section-header {
+            margin-bottom: 30px;
+        }
+
+        .section-title {
+            font-size: 1.8rem;
+            font-weight: 700;
+            margin: 0 0 10px;
+        }
+
+        .section-desc {
+            color: var(--settings-text);
+            opacity: 0.6;
+            margin: 0;
+        }
+
+        /* CARDS & GROUPS */
+        .settings-group {
+            background-color: var(--card);
+            border: 1px solid var(--settings-border);
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+
+        .group-title {
+            font-size: 1.1rem;
+            font-weight: 600;
             margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--settings-border);
+            color: var(--accent);
         }
 
-        .setting-section {
-            margin-bottom: 25px;
-            padding-bottom: 15px;
-            border-bottom: 1px dashed var(--accent);
+        /* CONTROLS GRID */
+        .controls-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 24px;
         }
 
-        .setting-section:last-child {
-            border-bottom: none;
+        .control-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
         }
 
-        .setting-section h2 {
-            color: var(--text);
-            margin-top: 0;
-            margin-bottom: 15px;
-        }
-
-        .setting-item {
-            margin-bottom: 15px;
+        .control-item.full-width {
+            grid-column: 1 / -1;
         }
 
         label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: var(--text);
+            font-weight: 500;
+            font-size: 0.9rem;
+            color: var(--settings-text);
+        }
+
+        /* INPUT STYLES */
+        input[type="text"],
+        input[type="number"],
+        select {
+            padding: 10px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--settings-border);
+            background-color: var(--input-bg);
+            color: var(--settings-text);
+            font-size: 0.95rem;
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        input[type="text"]:focus,
+        input[type="number"]:focus,
+        select:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+        }
+
+        /* RANGE SLIDER */
+        .range-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 15px;
         }
 
         input[type="range"] {
-            width: 100%;
-            margin-top: 5px;
+            flex: 1;
+            height: 6px;
+            border-radius: 5px;
+            accent-color: var(--accent);
+            background: var(--input-bg);
+            border: 1px solid var(--settings-border);
+        }
+
+        .range-value {
+            font-family: monospace;
+            font-size: 0.9rem;
+            padding: 4px 8px;
+            background-color: var(--input-bg);
+            border-radius: 4px;
+            min-width: 45px;
+            text-align: center;
+            border: 1px solid var(--settings-border);
+        }
+
+        /* COLOR INPUT */
+        .color-wrapper {
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
         input[type="color"] {
-            width: 80px;
-            height: 30px;
+            -webkit-appearance: none;
+            width: 40px;
+            height: 40px;
             border: none;
+            border-radius: 50%;
+            cursor: pointer;
             padding: 0;
-            cursor: pointer;
+            overflow: hidden;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
         }
 
-        button {
+        input[type="color"]::-webkit-color-swatch-wrapper {
+            padding: 0;
+        }
+
+        input[type="color"]::-webkit-color-swatch {
+            border: 2px solid var(--settings-border);
+            border-radius: 50%;
+        }
+
+        /* BUTTONS */
+        .btn {
             padding: 10px 20px;
-            background-color: var(--accent);
-            color: #fff;
+            border-radius: 8px;
             border: none;
-            border-radius: 5px;
             cursor: pointer;
-            font-size: 16px;
-            margin-right: 10px;
+            font-weight: 500;
+            font-size: 0.95rem;
+            transition: all 0.2s;
         }
 
-        button:hover {
-            filter: brightness(0.85);
+        .btn-primary {
+            background-color: var(--accent);
+            color: white;
+            box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 40%, transparent);
         }
 
-        .button-group {
-            margin-top: 30px;
-            text-align: right;
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 15px color-mix(in srgb, var(--accent) 50%, transparent);
+        }
+
+        .btn-secondary {
+            background-color: var(--input-bg);
+            border: 1px solid var(--settings-border);
+            color: var(--settings-text);
+        }
+
+        .btn-secondary:hover {
+            border-color: var(--accent);
+            color: var(--accent);
+        }
+
+        /* BOTTOM BAR */
+        .save-bar {
+            padding: 15px 30px;
+            background-color: var(--card);
+            border-top: 1px solid var(--settings-border);
+            display: flex;
+            justify-content: flex-end;
+            align-items: center;
+            gap: 15px;
+        }
+
+        #save-status {
+            color: #10b981;
+            font-weight: 500;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        #save-status.show {
+            opacity: 1;
         }
     </style>
 </head>
 
 <body>
-    <div class="settings-container">
-        <h1>Configurações da Extensão</h1>
-
-        <div class="setting-section">
-            <h2>Tema</h2>
-            <div class="setting-item">
-                <label for="theme-preset">Tema:</label>
-                <select id="theme-preset">
-                    <option value="light">Claro</option>
-                    <option value="dark">Escuro</option>
-                    <option value="solar">Solar</option>
-                    <option value="minimal">Minimal</option>
-                </select>
+    <div class="settings-layout">
+        <!-- SIDEBAR NAV -->
+        <aside class="settings-sidebar">
+            <div class="settings-logo">
+                <span>⚙️</span> Configurações
             </div>
-        </div>
-
-        <div class="setting-section">
-            <h2>Menu Lateral (Sidebar)</h2>
-            <div class="setting-item">
-                <label for="sidebar-width">Largura do Sidebar:</label>
-                <input type="range" id="sidebar-width" min="120" max="320" step="10" value="200">
-                <span id="sidebar-width-value">200px</span>
+            <nav class="nav-items">
+                <button class="nav-btn active" data-tab="general">
+                    <span>🎨</span> Aparência
+                </button>
+                <button class="nav-btn" data-tab="layout">
+                    <span>📐</span> Layout & Sidebar
+                </button>
+                <button class="nav-btn" data-tab="bookmarks">
+                    <span>🔖</span> Cartões e Ícones
+                </button>
+                <button class="nav-btn" data-tab="links">
+                    <span>🔗</span> Links Rápidos
+                </button>
+                <button class="nav-btn" data-tab="system">
+                    <span>💾</span> Sistema
+                </button>
+            </nav>
+            <div class="sidebar-footer">
+                <button id="close-settings-btn" class="btn btn-secondary" style="width: 100%">Voltar para Nova
+                    Aba</button>
             </div>
-        </div>
+        </aside>
 
-        <div class="setting-section">
-            <h2>Visualização</h2>
-            <div class="setting-item">
-                <label for="layout-mode">Disposição das Categorias:</label>
-                <select id="layout-mode">
-                    <option value="list">Lista Vertical (Padrão)</option>
-                    <option value="columns">Grade / Masonry</option>
-                </select>
-            </div>
-            <div class="setting-item" id="column-count-container" style="display: none;">
-                <label for="column-count">Número de Colunas:</label>
-                <div class="range-container">
-                    <input type="range" id="column-count" min="1" max="6" step="1" value="3">
-                    <span id="column-count-value">3</span>
+        <div class="settings-content-wrapper">
+            <main class="settings-content">
+
+                <!-- TAB: GENERAL -->
+                <div id="tab-general" class="tab-pane active">
+                    <div class="section-header">
+                        <h2 class="section-title">Aparência Geral</h2>
+                        <p class="section-desc">Personalize as cores e o fundo da sua nova aba.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Tema Principal</div>
+                        <div class="control-item">
+                            <label for="theme-preset">Selecione o Tema</label>
+                            <select id="theme-preset" style="width: 100%; max-width: 300px;">
+                                <option value="light">☀️ Claro (Padrão)</option>
+                                <option value="dark">🌙 Escuro</option>
+                                <option value="solar">🌅 Solar</option>
+                                <option value="minimal">⚪ Minimal</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Fundo Dinâmico</div>
+                        <div class="controls-grid">
+                            <div class="control-item full-width">
+                                <label for="wallpaper-folder-path">Caminho da Pasta de Wallpapers</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="wallpaper-folder-path"
+                                        value="C:\Users\estev\OneDrive\Imagens\Wallpapers" readonly style="flex: 1;">
+                                    <button id="select-wallpaper-folder-btn"
+                                        class="btn btn-secondary">Selecionar</button>
+                                </div>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="wallpaper-frequency">Trocar a cada (horas)</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="wallpaper-frequency" min="0" max="24" step="0.5" value="1">
+                                    <span id="wallpaper-frequency-value" class="range-value">1h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Filtro de Fundo (Overlay)</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="filter-color">Cor da Camada</label>
+                                <div class="color-wrapper">
+                                    <input type="color" id="filter-color" value="#000000">
+                                    <span>Escolher cor</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="filter-opacity">Opacidade</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="filter-opacity" min="0" max="1" step="0.05" value="0.3">
+                                    <span id="filter-opacity-value" class="range-value">0.30</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
-            </div>
-        </div>
 
-        <div class="setting-section">
-            <h2>Fundo Dinâmico</h2>
-            <div class="setting-item">
-                <label for="wallpaper-folder-path">Pasta de Wallpapers:</label>
-                <input type="text" id="wallpaper-folder-path" value="C:\Users\estev\OneDrive\Imagens\Wallpapers"
-                    readonly style="width: calc(100% - 120px); display: inline-block;">
-                <button id="select-wallpaper-folder-btn">Selecionar</button>
-            </div>
-            <div class="setting-item">
-                <label for="wallpaper-frequency">Frequência de Troca (horas):</label>
-                <input type="range" id="wallpaper-frequency" min="0" max="24" step="0.5" value="1">
-                <span id="wallpaper-frequency-value">1 hora</span>
-            </div>
-            <div class="setting-item">
-                <label for="filter-color">Cor do Filtro:</label>
-                <input type="color" id="filter-color" value="#000000">
-            </div>
-            <div class="setting-item">
-                <label for="filter-opacity">Opacidade do Filtro:</label>
-                <input type="range" id="filter-opacity" min="0" max="1" step="0.05" value="0.3">
-                <span id="filter-opacity-value">30%</span>
-            </div>
-        </div>
+                <!-- TAB: LAYOUT -->
+                <div id="tab-layout" class="tab-pane">
+                    <div class="section-header">
+                        <h2 class="section-title">Layout & Estrutura</h2>
+                        <p class="section-desc">Defina como os elementos são organizados na tela.</p>
+                    </div>
 
-        <div class="setting-section">
-            <h2>Bookmarks</h2>
-            <div class="setting-item">
-                <label for="icon-size">Tamanho dos Ícones:</label>
-                <input type="range" id="icon-size" min="0" max="64" step="4" value="32">
-                <span id="icon-size-value">32px</span>
-            </div>
-            <div class="setting-item">
-                <label for="icon-spacing">Espaçamento dos Ícones:</label>
-                <input type="range" id="icon-spacing" min="0" max="20" step="1" value="8">
-                <span id="icon-spacing-value">8px</span>
-            </div>
-            <div class="setting-item">
-                <input type="range" id="icon-gap" min="0" max="40" step="1" value="8">
-                <span id="icon-gap-value">8px</span>
-            </div>
-            <div class="setting-item">
-                <label for="category-gap">Distância entre Grupos (Categorias):</label>
-                <input type="range" id="category-gap" min="0" max="60" step="2" value="20">
-                <span id="category-gap-value">20px</span>
-            </div>
-            <div class="setting-item">
-                <label for="bookmark-min-width">Largura Mínima do Bookmark:</label>
-                <input type="range" id="bookmark-min-width" min="50" max="150" step="5" value="100">
-                <span id="bookmark-min-width-value">100px</span>
-            </div>
-            <div class="setting-item">
-                <label for="icon-layout">Posição do Texto:</label>
-                <select id="icon-layout">
-                    <option value="row">Ao Lado (Direita)</option>
-                    <option value="column">Abaixo (Vertical)</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <label for="name-display">Exibição do Nome:</label>
-                <select id="name-display">
-                    <option value="always">Sempre Visível</option>
-                    <option value="hover">Ao Passar o Mouse</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <label for="text-behavior">Comportamento do Texto:</label>
-                <select id="text-behavior">
-                    <option value="truncate">Cortar (2 Linhas - Padrão)</option>
-                    <option value="single">Cortar (1 Linha)</option>
-                    <option value="expand">Expandir (Mostrar Tudo)</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <label for="icon-border-radius">Arredondamento do Ícone:</label>
-                <input type="range" id="icon-border-radius" min="0" max="32" step="1" value="6">
-                <span id="icon-border-radius-value">6px</span>
-            </div>
-            <div class="setting-item">
-                <label for="icon-border-color">Cor da Borda:</label>
-                <input type="color" id="icon-border-color" value="#dddddd">
-            </div>
-            <div class="setting-item">
-                <label for="icon-bg-color">Cor de Fundo do Ícone:</label>
-                <input type="color" id="icon-bg-color" value="#ffffff">
-            </div>
-            <div class="setting-item">
-                <label for="bookmark-font-family">Fonte dos Favoritos:</label>
-                <select id="bookmark-font-family">
-                    <option value="sans-serif">Sans-serif</option>
-                    <option value="serif">Serif</option>
-                    <option value="monospace">Monospace</option>
-                    <option value="cursive">Cursive</option>
-                </select>
-            </div>
-            <div class="setting-item">
-                <label for="bookmark-font-size">Tamanho da Fonte:</label>
-                <input type="number" id="bookmark-font-size" min="0" max="30" value="14">
-                <span id="bookmark-font-size-value">14px</span>
-            </div>
-            <div class="setting-item">
-                <label for="bookmark-font-color">Cor da Fonte:</label>
-                <input type="color" id="bookmark-font-color" value="#333333">
-            </div>
-        </div>
+                    <div class="settings-group">
+                        <div class="group-title">Menu Lateral (Sidebar)</div>
+                        <div class="control-item">
+                            <label for="sidebar-width">Largura do Menu</label>
+                            <div class="range-wrapper">
+                                <input type="range" id="sidebar-width" min="120" max="320" step="10" value="200">
+                                <span id="sidebar-width-value" class="range-value">200px</span>
+                            </div>
+                        </div>
+                    </div>
 
-        <div class="setting-section">
-            <h2>Dados</h2>
-            <div class="setting-item">
-                <button id="export-data-btn">Exportar Dados</button>
-                <button id="import-data-btn">Importar Dados</button>
-                <input type="file" id="import-file-input" accept=".json" style="display: none;">
-            </div>
-            <div class="setting-item">
-                <button id="reset-settings-btn">Reiniciar Configurações</button>
-            </div>
-        </div>
+                    <div class="settings-group">
+                        <div class="group-title">Organização da Grade</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="layout-mode">Modo de Exibição</label>
+                                <select id="layout-mode">
+                                    <option value="list">Lista Vertical (Uma abaixo da outra)</option>
+                                    <option value="columns">Colunas (Masonry / Grade)</option>
+                                </select>
+                            </div>
 
-        <div class="button-group">
-            <button id="save-settings-btn">Salvar Configurações</button>
-            <button id="close-settings-btn">Fechar</button>
+                            <div class="control-item" id="column-count-container" style="display: none;">
+                                <label for="column-count">Quantidade de Colunas</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="column-count" min="1" max="6" step="1" value="3">
+                                    <span id="column-count-value" class="range-value">3</span>
+                                </div>
+                            </div>
+
+                            <div class="control-item full-width">
+                                <label for="category-gap">Espaço entre Grupos</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="category-gap" min="0" max="60" step="2" value="20">
+                                    <span id="category-gap-value" class="range-value">20px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: BOOKMARKS -->
+                <div id="tab-bookmarks" class="tab-pane">
+                    <div class="section-header">
+                        <h2 class="section-title">Cartões e Ícones</h2>
+                        <p class="section-desc">Personalize o visual individual de cada bookmark.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Dimensões</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="icon-size">Tamanho do Ícone</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="icon-size" min="0" max="64" step="4" value="32">
+                                    <span id="icon-size-value" class="range-value">32px</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="icon-spacing">Padding (Interno)</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="icon-spacing" min="0" max="20" step="1" value="8">
+                                    <span id="icon-spacing-value" class="range-value">8px</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="icon-gap">Gap (Entre Ícone e Texto)</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="icon-gap" min="0" max="40" step="1" value="8">
+                                    <span id="icon-gap-value" class="range-value">8px</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="bookmark-min-width">Largura Mínima do Cartão</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="bookmark-min-width" min="50" max="150" step="5" value="100">
+                                    <span id="bookmark-min-width-value" class="range-value">100px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Estilo do Cartão</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="icon-border-radius">Arredondamento</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="icon-border-radius" min="0" max="32" step="1" value="6">
+                                    <span id="icon-border-radius-value" class="range-value">6px</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="icon-bg-color">Cor de Fundo</label>
+                                <div class="color-wrapper">
+                                    <input type="color" id="icon-bg-color" value="#ffffff">
+                                    <span>Fundo Card</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="icon-border-color">Cor da Borda</label>
+                                <div class="color-wrapper">
+                                    <input type="color" id="icon-border-color" value="#dddddd">
+                                    <span>Borda Card</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Texto e Exibição</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="icon-layout">Orientação</label>
+                                <select id="icon-layout">
+                                    <option value="row">➡️ Ícone ao Lado do Texto</option>
+                                    <option value="column">⬇️ Ícone Acima do Texto</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label for="name-display">Visibilidade do Nome</label>
+                                <select id="name-display">
+                                    <option value="always">Sempre Visível</option>
+                                    <option value="hover">Apenas ao Passar o Mouse</option>
+                                </select>
+                            </div>
+                            <div class="control-item full-width">
+                                <label for="text-behavior">Comportamento de Texto Longo</label>
+                                <select id="text-behavior">
+                                    <option value="truncate">Cortar em 2 Linhas (Padrão)</option>
+                                    <option value="single">Cortar em 1 Linha (Mais compacto)</option>
+                                    <option value="expand">Expandir (Mostrar texto completo)</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Tipografia</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="bookmark-font-family">Fonte</label>
+                                <select id="bookmark-font-family">
+                                    <option value="sans-serif">Sans-serif (Padrão)</option>
+                                    <option value="serif">Serif (Clássica)</option>
+                                    <option value="monospace">Monospace (Código)</option>
+                                    <option value="cursive">Cursive (Manuscrita)</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label for="bookmark-font-size">Tamanho (px)</label>
+                                <div class="range-wrapper">
+                                    <input type="number" id="bookmark-font-size" min="8" max="30" value="14"
+                                        style="width: 70px">
+                                    <span id="bookmark-font-size-value" class="range-value"
+                                        style="display:none">14px</span> <!-- Mantendo ID para compatibilidade -->
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="bookmark-font-color">Cor da Fonte</label>
+                                <div class="color-wrapper">
+                                    <input type="color" id="bookmark-font-color" value="#333333">
+                                    <span>Cor Texto</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: LINKS (NEW) -->
+                <div id="tab-links" class="tab-pane">
+                    <div class="section-header">
+                        <h2 class="section-title">Links Rápidos</h2>
+                        <p class="section-desc">Gerencie os atalhos fixos no topo da tela.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-header">
+                            <h3>Aparência</h3>
+                        </div>
+                        <div class="controls-grid">
+                            <div class="control-item full-width">
+                                <label for="quick-links-size">Tamanho da Fonte</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="quick-links-size" min="10" max="20" step="1" value="13">
+                                    <span id="quick-links-size-value" class="range-value">13px</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-header">
+                            <h3>Gerenciar Links</h3>
+                        </div>
+
+                        <div id="quick-links-list"
+                            style="margin-bottom: 20px; border: 1px solid var(--settings-border); border-radius: 8px; overflow: hidden;">
+                            <!-- Populated by JS -->
+                            <div style="padding: 15px; text-align: center; color: var(--settings-text); opacity: 0.7;">
+                                Carregando links...</div>
+                        </div>
+
+                        <div class="controls-grid"
+                            style="grid-template-columns: 1fr 2fr auto; align-items: end; gap: 10px;">
+                            <div class="control-item" style="margin-bottom: 0;">
+                                <label for="new-link-name">Nome</label>
+                                <input type="text" id="new-link-name" placeholder="Ex: Gmail">
+                            </div>
+                            <div class="control-item" style="margin-bottom: 0;">
+                                <label for="new-link-url">URL</label>
+                                <input type="text" id="new-link-url" placeholder="https://...">
+                            </div>
+                            <button id="add-link-btn" class="btn btn-primary" style="height: 42px;">Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: SYSTEM -->
+                <div id="tab-system" class="tab-pane">
+                    <div class="section-header">
+                        <h2 class="section-title">Dados e Sistema</h2>
+                        <p class="section-desc">Gerencie seus dados e restaure configurações.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Backup e Restauração</div>
+                        <p style="margin-bottom: 15px; font-size: 0.9rem; color: var(--settings-text); opacity: 0.8;">
+                            Exporte suas configurações e bookmarks para um arquivo JSON ou importe de um backup.
+                        </p>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <button id="export-data-btn" class="btn btn-primary"
+                                    style="background-color: #10b981;">📥 Baixar Backup (Exportar)</button>
+                            </div>
+                            <div class="control-item">
+                                <button id="import-data-btn" class="btn btn-secondary">📤 Restaurar Backup
+                                    (Importar)</button>
+                                <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group" style="border-color: #ef4444;">
+                        <div class="group-title" style="color: #ef4444;">Zona de Perigo</div>
+                        <div class="control-item">
+                            <p style="margin-bottom: 15px; font-size: 0.9rem;">
+                                Isso irá redefinir todas as configurações visuais para o padrão original. Seus bookmarks
+                                não serão apagados.
+                            </p>
+                            <button id="reset-settings-btn" class="btn btn-secondary"
+                                style="border-color: #ef4444; color: #ef4444;">⚠️ Restaurar Configurações
+                                Padrão</button>
+                        </div>
+                    </div>
+                </div>
+
+            </main>
+
+            <!-- Sticky Save Bar -->
+            <div class="save-bar">
+                <span id="save-status">Alterações salvas!</span>
+                <button id="save-settings-btn" class="btn btn-primary">Salvar Todas as Alterações</button>
+            </div>
         </div>
     </div>
+
+    <!-- Simple script for Tab Switching inside settings page -->
 
     <script src="js/settings.js"></script>
 </body>

@@ -38,12 +38,44 @@ document.addEventListener('DOMContentLoaded', function () {
     const sidebarWidth = document.getElementById('sidebar-width');
     const sidebarWidthValue = document.getElementById('sidebar-width-value');
 
+    // Quick Links Elements
+    const quickLinksSize = document.getElementById('quick-links-size');
+    const quickLinksSizeValue = document.getElementById('quick-links-size-value');
+    const quickLinksList = document.getElementById('quick-links-list');
+    const newLinkName = document.getElementById('new-link-name');
+    const newLinkUrl = document.getElementById('new-link-url');
+    const addLinkBtn = document.getElementById('add-link-btn');
+
+
+
     const exportDataBtn = document.getElementById('export-data-btn');
     const importDataBtn = document.getElementById('import-data-btn');
     const importFileInput = document.getElementById('import-file-input');
     const resetSettingsBtn = document.getElementById('reset-settings-btn');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
+
+    // TAB NAVIGATION LOGIC
+    const tabs = document.querySelectorAll('.nav-btn');
+    const pages = document.querySelectorAll('.tab-pane');
+
+    tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+            const targetId = tab.dataset.tab;
+
+            // Update Active Tab
+            tabs.forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+
+            // Show Active Page
+            pages.forEach(p => {
+                p.classList.remove('active');
+                if (p.id === 'tab-' + targetId) {
+                    p.classList.add('active');
+                }
+            });
+        });
+    });
 
     // Configurações padrão
     const defaultSettings = {
@@ -57,8 +89,8 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryGap: 20,
         bookmarkMinWidth: 100,
         iconBorderRadius: 6,
-        iconBorderColor: "#ddd",
-        iconBgColor: "#fff",
+        iconBorderColor: "#dddddd",
+        iconBgColor: "#ffffff",
         bookmarkFontFamily: "sans-serif",
         bookmarkFontSize: 14,
         bookmarkFontColor: "#333333",
@@ -68,7 +100,10 @@ document.addEventListener('DOMContentLoaded', function () {
         themePreset: "light",
         layoutMode: "list",
         columnCount: 3,
-        sidebarWidth: 200
+        layoutMode: "list",
+        columnCount: 3,
+        sidebarWidth: 200,
+        quickLinksSize: 13
     };
 
     function toggleColumnCountDisplay(mode) {
@@ -84,10 +119,19 @@ document.addEventListener('DOMContentLoaded', function () {
         chrome.storage.local.get(['extensionSettings'], function (result) {
             const settings = result.extensionSettings || defaultSettings;
 
+            // Helper to ensure full hex for color inputs
+            const ensureFullHex = (hex) => {
+                if (!hex) return "#000000";
+                if (hex.length === 4) {
+                    return "#" + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+                }
+                return hex;
+            };
+
             wallpaperFolderPath.value = settings.wallpaperFolderPath;
             wallpaperFrequency.value = settings.wallpaperFrequency;
             updateFrequencyDisplay(settings.wallpaperFrequency);
-            filterColor.value = settings.filterColor;
+            filterColor.value = ensureFullHex(settings.filterColor);
             filterOpacity.value = settings.filterOpacity;
             updateOpacityDisplay(settings.filterOpacity);
             iconSize.value = settings.iconSize;
@@ -98,16 +142,26 @@ document.addEventListener('DOMContentLoaded', function () {
             updateIconGapDisplay(iconGap.value);
             categoryGap.value = settings.categoryGap !== undefined ? settings.categoryGap : 20;
             updateCategoryGapDisplay(categoryGap.value);
+
+
             bookmarkMinWidth.value = settings.bookmarkMinWidth;
             updateBookmarkMinWidthDisplay(settings.bookmarkMinWidth);
             iconBorderRadius.value = settings.iconBorderRadius;
             updateBorderRadiusDisplay(settings.iconBorderRadius);
-            iconBorderColor.value = settings.iconBorderColor;
-            iconBgColor.value = settings.iconBgColor;
+            iconBorderColor.value = ensureFullHex(settings.iconBorderColor);
+            iconBgColor.value = ensureFullHex(settings.iconBgColor);
             bookmarkFontFamily.value = settings.bookmarkFontFamily;
             bookmarkFontSize.value = settings.bookmarkFontSize;
             updateBookmarkFontSizeDisplay(settings.bookmarkFontSize);
-            bookmarkFontColor.value = settings.bookmarkFontColor;
+            bookmarkFontColor.value = ensureFullHex(settings.bookmarkFontColor);
+
+            if (quickLinksSize) {
+                quickLinksSize.value = settings.quickLinksSize || 13;
+                if (quickLinksSizeValue) quickLinksSizeValue.textContent = (settings.quickLinksSize || 13) + 'px';
+            }
+
+            // Load Quick Links List (Separate Storage)
+            loadQuickLinksList();
             nameDisplay.value = settings.nameDisplay;
             textBehavior.value = settings.textBehavior || 'truncate';
             iconLayout.value = settings.iconLayout || 'row'; // New
@@ -154,7 +208,8 @@ document.addEventListener('DOMContentLoaded', function () {
             themePreset: themePreset.value,
             layoutMode: layoutMode.value,
             columnCount: parseInt(columnCount.value),
-            sidebarWidth: parseInt(sidebarWidth.value)
+            sidebarWidth: parseInt(sidebarWidth.value),
+            quickLinksSize: parseInt(quickLinksSize.value)
         };
 
         chrome.storage.local.set({ extensionSettings: settings }, function () {
@@ -297,6 +352,85 @@ document.addEventListener('DOMContentLoaded', function () {
         element.addEventListener('input', saveSettings);
         element.addEventListener('change', saveSettings);
     });
+
+    // QUICK LINKS LOGIC
+    function loadQuickLinksList() {
+        chrome.storage.local.get(['quickLinks'], (result) => {
+            const links = result.quickLinks || [];
+            renderQuickLinksUI(links);
+        });
+    }
+
+    function renderQuickLinksUI(links) {
+        if (!quickLinksList) return;
+        quickLinksList.innerHTML = '';
+        if (links.length === 0) {
+            quickLinksList.innerHTML = '<div style="padding:15px; text-align:center; opacity:0.7;">Nenhum link adicionado</div>';
+            return;
+        }
+        links.forEach((link, index) => {
+            const item = document.createElement('div');
+            item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--settings-border); background:var(--input-bg); margin-bottom:5px; border-radius:4px;';
+            item.innerHTML = `
+                <div>
+                    <strong style="color:var(--text);">${link.name}</strong>
+                    <div style="font-size:0.8em; opacity:0.7;">${link.url}</div>
+                </div>
+                <button class="delete-link-btn" data-index="${index}" style="background:transparent; border:none; cursor:pointer; font-size:1.2em;">🗑️</button>
+            `;
+            quickLinksList.appendChild(item);
+        });
+
+        // Add listeners to delete buttons
+        document.querySelectorAll('.delete-link-btn').forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                const index = parseInt(e.target.dataset.index);
+                removeQuickLink(index);
+            });
+        });
+    }
+
+    function addQuickLink() {
+        const name = newLinkName.value.trim();
+        let url = newLinkUrl.value.trim();
+
+        if (!name || !url) return alert('Preencha nome e URL');
+        if (!url.startsWith('http')) url = 'https://' + url;
+
+        chrome.storage.local.get(['quickLinks'], (result) => {
+            const links = result.quickLinks || [];
+            links.push({ name, url });
+            chrome.storage.local.set({ quickLinks: links }, () => {
+                newLinkName.value = '';
+                newLinkUrl.value = '';
+                renderQuickLinksUI(links);
+            });
+        });
+    }
+
+    function removeQuickLink(index) {
+        chrome.storage.local.get(['quickLinks'], (result) => {
+            const links = result.quickLinks || [];
+            if (index >= 0 && index < links.length) {
+                links.splice(index, 1);
+                chrome.storage.local.set({ quickLinks: links }, () => {
+                    renderQuickLinksUI(links);
+                });
+            }
+        });
+    }
+
+    if (addLinkBtn) addLinkBtn.addEventListener('click', addQuickLink);
+
+    if (quickLinksSize) {
+        quickLinksSize.addEventListener('input', (e) => {
+            if (quickLinksSizeValue) quickLinksSizeValue.textContent = e.target.value + 'px';
+            saveSettings(); // Save font size immediately or waiting for button? Just updating preview.
+            // But saveSettings handles saving extensionSettings which includes quickLinksSize.
+            // We can auto-save here too.
+            saveSettings();
+        });
+    }
 
     // Exportar dados
     exportDataBtn.addEventListener('click', function () {

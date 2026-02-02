@@ -214,7 +214,14 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTheme(theme);
         });
         if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
-        if (settingsBtn) settingsBtn.addEventListener('click', () => chrome.tabs.create({ url: chrome.runtime.getURL('settings.html') }));
+        if (settingsBtn) settingsBtn.addEventListener('click', () => {
+            chrome.windows.create({
+                url: chrome.runtime.getURL('settings.html'),
+                type: 'popup',
+                width: 900,
+                height: 700
+            });
+        });
         if (analogClockPlaceholder) {
             updateClock(analogClockPlaceholder);
             setInterval(() => updateClock(analogClockPlaceholder), 1000);
@@ -227,6 +234,63 @@ document.addEventListener('DOMContentLoaded', function () {
             updateCalendar(calendarPlaceholder);
             setInterval(() => updateCalendar(calendarPlaceholder), 3600000);
         }
+
+        // ---- QUICK LINKS LOGIC ----
+        const quickLinksBar = document.getElementById('quick-links-bar');
+        const DEFAULT_QUICK_LINKS = [
+            { name: 'Gmail', url: 'https://mail.google.com' },
+            { name: 'Calendar', url: 'https://calendar.google.com' },
+            { name: 'YouTube', url: 'https://www.youtube.com' },
+            { name: 'WhatsApp', url: 'https://web.whatsapp.com' }
+        ];
+
+        function renderQuickLinks(links) {
+            if (!quickLinksBar) return;
+            quickLinksBar.innerHTML = '';
+            links.forEach(link => {
+                const a = document.createElement('a');
+                a.href = link.url;
+                a.textContent = link.name;
+                a.className = 'quick-link';
+                // Try to open in same tab or new tab? Normally quick links open in same tab or new tab.
+                // User didn't specify. Google's links open in same tab usually.
+                // But this is a new tab page. Opening in same tab navigates away. New tab is better?
+                // Or same tab is fine. Let's stick to simple href.
+                quickLinksBar.appendChild(a);
+            });
+        }
+
+        chrome.storage.local.get(['quickLinks'], result => {
+            if (result.quickLinks && result.quickLinks.length > 0) {
+                renderQuickLinks(result.quickLinks);
+            } else {
+                renderQuickLinks(DEFAULT_QUICK_LINKS);
+                chrome.storage.local.set({ quickLinks: DEFAULT_QUICK_LINKS });
+            }
+        });
+
+        // Load Font Size
+        chrome.storage.local.get(['extensionSettings'], res => {
+            const settings = res.extensionSettings || {};
+            if (settings.quickLinksSize) {
+                document.documentElement.style.setProperty('--quick-links-size', settings.quickLinksSize + 'px');
+            }
+        });
+
+        // Real-time Updates
+        chrome.storage.onChanged.addListener((changes, namespace) => {
+            if (namespace === 'local') {
+                if (changes.quickLinks) {
+                    renderQuickLinks(changes.quickLinks.newValue || []);
+                }
+                if (changes.extensionSettings) {
+                    const newSettings = changes.extensionSettings.newValue;
+                    if (newSettings && newSettings.quickLinksSize) {
+                        document.documentElement.style.setProperty('--quick-links-size', newSettings.quickLinksSize + 'px');
+                    }
+                }
+            }
+        });
     }
 
     // ---- PONTO DE ENTRADA ----
