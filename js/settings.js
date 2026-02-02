@@ -46,7 +46,11 @@ document.addEventListener('DOMContentLoaded', function () {
     const newLinkUrl = document.getElementById('new-link-url');
     const addLinkBtn = document.getElementById('add-link-btn');
 
-
+    // Section Style Elements
+    const sectionPadding = document.getElementById('section-padding');
+    const sectionPaddingValue = document.getElementById('section-padding-value');
+    const sectionBgColor = document.getElementById('section-bg-color');
+    const sectionLineColor = document.getElementById('section-line-color');
 
     const exportDataBtn = document.getElementById('export-data-btn');
     const importDataBtn = document.getElementById('import-data-btn');
@@ -78,6 +82,7 @@ document.addEventListener('DOMContentLoaded', function () {
     });
 
     // Configurações padrão
+    // Configurações padrão
     const defaultSettings = {
         wallpaperFolderPath: "C:\\Users\\estev\\OneDrive\\Imagens\\Wallpapers",
         wallpaperFrequency: 1,
@@ -89,21 +94,22 @@ document.addEventListener('DOMContentLoaded', function () {
         categoryGap: 20,
         bookmarkMinWidth: 100,
         iconBorderRadius: 6,
-        iconBorderColor: "#dddddd",
-        iconBgColor: "#ffffff",
+        iconBorderColor: "#475569", // Dark Theme Default
+        iconBgColor: "#334155", // Dark Theme Default
         bookmarkFontFamily: "sans-serif",
         bookmarkFontSize: 14,
-        bookmarkFontColor: "#333333",
+        bookmarkFontColor: "#e2e8f0", // Dark Theme Default
         nameDisplay: "always",
         textBehavior: "truncate",
         iconLayout: "row", // Default
-        themePreset: "light",
+        themePreset: "dark",
         layoutMode: "list",
         columnCount: 3,
-        layoutMode: "list",
-        columnCount: 3,
-        sidebarWidth: 200,
-        quickLinksSize: 13
+        sidebarWidth: 40,
+        quickLinksSize: 13,
+        sectionPadding: 15,
+        sectionBgColor: "#1e293b", // Dark Theme Default
+        sectionLineColor: "#38bdf8" // Dark Theme Default
     };
 
     function toggleColumnCountDisplay(mode) {
@@ -160,6 +166,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (quickLinksSizeValue) quickLinksSizeValue.textContent = (settings.quickLinksSize || 13) + 'px';
             }
 
+            // Section Styles
+            if (sectionPadding) {
+                sectionPadding.value = settings.sectionPadding !== undefined ? settings.sectionPadding : 15;
+                if (sectionPaddingValue) sectionPaddingValue.textContent = (settings.sectionPadding !== undefined ? settings.sectionPadding : 15) + 'px';
+            }
+            if (sectionBgColor) sectionBgColor.value = ensureFullHex(settings.sectionBgColor) || '#ffffff';
+            if (sectionLineColor) sectionLineColor.value = ensureFullHex(settings.sectionLineColor) || '#007bff';
+
             // Load Quick Links List (Separate Storage)
             loadQuickLinksList();
             nameDisplay.value = settings.nameDisplay;
@@ -209,7 +223,11 @@ document.addEventListener('DOMContentLoaded', function () {
             layoutMode: layoutMode.value,
             columnCount: parseInt(columnCount.value),
             sidebarWidth: parseInt(sidebarWidth.value),
-            quickLinksSize: parseInt(quickLinksSize.value)
+            sidebarWidth: parseInt(sidebarWidth.value),
+            quickLinksSize: parseInt(quickLinksSize.value || 13),
+            sectionPadding: parseInt(sectionPadding.value || 15),
+            sectionBgColor: sectionBgColor.value,
+            sectionLineColor: sectionLineColor.value
         };
 
         chrome.storage.local.set({ extensionSettings: settings }, function () {
@@ -303,6 +321,23 @@ document.addEventListener('DOMContentLoaded', function () {
         saveSettings();
     });
 
+    if (sectionPadding) {
+        sectionPadding.addEventListener('input', function () {
+            if (sectionPaddingValue) sectionPaddingValue.textContent = this.value + 'px';
+            saveSettings();
+        });
+    }
+
+    if (sectionBgColor) {
+        sectionBgColor.addEventListener('input', saveSettings);
+        sectionBgColor.addEventListener('change', saveSettings);
+    }
+
+    if (sectionLineColor) {
+        sectionLineColor.addEventListener('input', saveSettings);
+        sectionLineColor.addEventListener('change', saveSettings);
+    }
+
     iconBorderRadius.addEventListener('input', function () {
         updateBorderRadiusDisplay(this.value);
         saveSettings();
@@ -361,6 +396,9 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 
+    // Drag and Drop Variables
+    let dragSrcEl = null;
+
     function renderQuickLinksUI(links) {
         if (!quickLinksList) return;
         quickLinksList.innerHTML = '';
@@ -370,23 +408,95 @@ document.addEventListener('DOMContentLoaded', function () {
         }
         links.forEach((link, index) => {
             const item = document.createElement('div');
-            item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--settings-border); background:var(--input-bg); margin-bottom:5px; border-radius:4px;';
+            item.draggable = true;
+            item.dataset.index = index;
+            item.className = 'draggable-link';
+            item.style.cssText = 'display:flex; justify-content:space-between; align-items:center; padding:10px; border-bottom:1px solid var(--settings-border); background:var(--input-bg); margin-bottom:5px; border-radius:4px; transition: transform 0.2s, box-shadow 0.2s;';
+
             item.innerHTML = `
-                <div>
-                    <strong style="color:var(--text);">${link.name}</strong>
-                    <div style="font-size:0.8em; opacity:0.7;">${link.url}</div>
+                <div style="display:flex; align-items:center; gap:10px; flex:1; overflow:hidden;">
+                    <span style="cursor:grab; font-size:1.2em; opacity:0.5; user-select:none;">☰</span>
+                    <div style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
+                        <strong style="color:var(--text);">${link.name}</strong>
+                        <div style="font-size:0.8em; opacity:0.7; overflow:hidden; text-overflow:ellipsis;">${link.url}</div>
+                    </div>
                 </div>
-                <button class="delete-link-btn" data-index="${index}" style="background:transparent; border:none; cursor:pointer; font-size:1.2em;">🗑️</button>
+                <button class="delete-link-btn" data-index="${index}" style="background:transparent; border:none; cursor:pointer; font-size:1.2em; padding:5px;">🗑️</button>
             `;
+
+            // DnD Events
+            item.addEventListener('dragstart', handleDragStart);
+            item.addEventListener('dragover', handleDragOver);
+            item.addEventListener('dragleave', handleDragLeave);
+            item.addEventListener('drop', handleDrop);
+            item.addEventListener('dragend', handleDragEnd);
+
             quickLinksList.appendChild(item);
         });
 
         // Add listeners to delete buttons
         document.querySelectorAll('.delete-link-btn').forEach(btn => {
             btn.addEventListener('click', (e) => {
-                const index = parseInt(e.target.dataset.index);
+                e.stopPropagation(); // Prevent drag issue logic if any
+                const index = parseInt(e.currentTarget.dataset.index); // Use currentTarget for button
                 removeQuickLink(index);
             });
+        });
+    }
+
+    // DnD Handlers
+    function handleDragStart(e) {
+        this.style.opacity = '0.4';
+        dragSrcEl = this;
+        e.dataTransfer.effectAllowed = 'move';
+    }
+
+    function handleDragOver(e) {
+        if (e.preventDefault) e.preventDefault();
+        e.dataTransfer.dropEffect = 'move';
+        this.style.border = '2px dashed var(--accent)';
+        return false;
+    }
+
+    function handleDragLeave(e) {
+        this.style.border = 'none';
+        this.style.borderBottom = '1px solid var(--settings-border)';
+    }
+
+    function handleDrop(e) {
+        if (e.stopPropagation) e.stopPropagation();
+
+        // Restore style
+        this.style.border = 'none';
+        this.style.borderBottom = '1px solid var(--settings-border)';
+
+        const srcIndex = parseInt(dragSrcEl.dataset.index);
+        const targetIndex = parseInt(this.dataset.index);
+
+        if (dragSrcEl !== this) {
+            reorderQuickLinks(srcIndex, targetIndex);
+        }
+        return false;
+    }
+
+    function handleDragEnd(e) {
+        this.style.opacity = '1';
+        document.querySelectorAll('.draggable-link').forEach(item => {
+            item.style.border = 'none';
+            item.style.borderBottom = '1px solid var(--settings-border)';
+        });
+    }
+
+    function reorderQuickLinks(fromIndex, toIndex) {
+        chrome.storage.local.get(['quickLinks'], (result) => {
+            const links = result.quickLinks || [];
+            if (fromIndex >= 0 && fromIndex < links.length) {
+                const item = links.splice(fromIndex, 1)[0];
+                links.splice(toIndex, 0, item);
+                chrome.storage.local.set({ quickLinks: links }, () => {
+                    renderQuickLinksUI(links);
+                });
+            }
         });
     }
 

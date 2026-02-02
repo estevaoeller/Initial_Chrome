@@ -239,9 +239,13 @@ document.addEventListener('DOMContentLoaded', function () {
         const quickLinksBar = document.getElementById('quick-links-bar');
         const DEFAULT_QUICK_LINKS = [
             { name: 'Gmail', url: 'https://mail.google.com' },
+            { name: 'Contatos', url: 'https://contacts.google.com/' },
             { name: 'Calendar', url: 'https://calendar.google.com' },
+            { name: 'Drive', url: 'https://drive.google.com/drive/u/0/home' },
             { name: 'YouTube', url: 'https://www.youtube.com' },
-            { name: 'WhatsApp', url: 'https://web.whatsapp.com' }
+            { name: 'YTMusic', url: 'https://music.youtube.com/' },
+            { name: 'GNews', url: 'https://news.google.com/' },
+            { name: 'GFinance', url: 'https://www.google.com/finance/' }
         ];
 
         function renderQuickLinks(links) {
@@ -269,11 +273,20 @@ document.addEventListener('DOMContentLoaded', function () {
             }
         });
 
-        // Load Font Size
+        // Load Font Size & Section Styles
         chrome.storage.local.get(['extensionSettings'], res => {
             const settings = res.extensionSettings || {};
             if (settings.quickLinksSize) {
                 document.documentElement.style.setProperty('--quick-links-size', settings.quickLinksSize + 'px');
+            }
+            if (settings.sectionPadding) {
+                document.documentElement.style.setProperty('--section-padding', settings.sectionPadding + 'px');
+            }
+            if (settings.sectionBgColor) {
+                document.documentElement.style.setProperty('--section-bg-color', settings.sectionBgColor);
+            }
+            if (settings.sectionLineColor) {
+                document.documentElement.style.setProperty('--section-line-color', settings.sectionLineColor);
             }
         });
 
@@ -285,8 +298,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 }
                 if (changes.extensionSettings) {
                     const newSettings = changes.extensionSettings.newValue;
-                    if (newSettings && newSettings.quickLinksSize) {
-                        document.documentElement.style.setProperty('--quick-links-size', newSettings.quickLinksSize + 'px');
+                    if (newSettings) {
+                        if (newSettings.quickLinksSize) {
+                            document.documentElement.style.setProperty('--quick-links-size', newSettings.quickLinksSize + 'px');
+                        }
+                        if (newSettings.sectionPadding) {
+                            document.documentElement.style.setProperty('--section-padding', newSettings.sectionPadding + 'px');
+                        }
+                        if (newSettings.sectionBgColor) {
+                            document.documentElement.style.setProperty('--section-bg-color', newSettings.sectionBgColor);
+                        }
+                        if (newSettings.sectionLineColor) {
+                            document.documentElement.style.setProperty('--section-line-color', newSettings.sectionLineColor);
+                        }
                     }
                 }
             }
@@ -426,3 +450,70 @@ document.addEventListener('DOMContentLoaded', function () {
         }
     });
 });
+
+// Setup Sidebar Actions (Theme Toggle & Chrome Links)
+function setupSidebarActions() {
+    // Theme Toggle
+    const themeToggleBtn = document.getElementById('theme-toggle-btn');
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener('click', () => {
+            const themes = ['light', 'dark', 'solar', 'minimal'];
+            const current = settingsState.themePreset || 'light';
+            const nextIndex = (themes.indexOf(current) + 1) % themes.length;
+            const nextTheme = themes[nextIndex];
+
+            // Update Storage (Listener will handle UI update)
+            chrome.storage.local.get(['extensionSettings'], res => {
+                const s = res.extensionSettings || {};
+                s.themePreset = nextTheme;
+                chrome.storage.local.set({ extensionSettings: s });
+            });
+        });
+    }
+
+    // Settings Button (Custom Size) - Replacer to ensure dimensions
+    const settingsBtn = document.getElementById('settings-btn');
+    if (settingsBtn) {
+        const newSettingsBtn = settingsBtn.cloneNode(true);
+        settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
+
+        newSettingsBtn.addEventListener('click', () => {
+            const width = Math.round(window.screen.availWidth * 0.35);
+            const height = Math.round(window.screen.availHeight * 0.8);
+            const left = Math.round((window.screen.availWidth - width) / 2);
+            const top = Math.round((window.screen.availHeight - height) / 2);
+
+            chrome.windows.create({
+                url: 'settings.html',
+                type: 'popup',
+                width: width,
+                height: height,
+                left: left,
+                top: top
+            });
+        });
+    }
+
+    // Chrome Shortcuts
+    const shortcuts = {
+        'chrome-bookmarks-btn': 'chrome://bookmarks',
+        'chrome-history-btn': 'chrome://history',
+        'chrome-downloads-btn': 'chrome://downloads'
+    };
+
+    Object.keys(shortcuts).forEach(id => {
+        const btn = document.getElementById(id);
+        if (btn) {
+            btn.addEventListener('click', () => {
+                chrome.tabs.create({ url: shortcuts[id] });
+            });
+        }
+    });
+}
+
+// Call setup
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', setupSidebarActions);
+} else {
+    setupSidebarActions();
+}

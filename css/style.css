@@ -238,9 +238,19 @@ body {
     flex-direction: column;
     align-items: center;
     padding-top: 15px;
-    gap: 10px;
+    padding-bottom: 20px;
+    justify-content: space-between;
     z-index: 100;
     flex-shrink: 0;
+}
+
+.action-top,
+.action-bottom {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 15px;
+    width: 100%;
 }
 
 .action-btn {
@@ -399,9 +409,9 @@ body {
 
 
 .bookmark-category {
-    background-color: var(--card);
+    background-color: var(--section-bg-color, var(--card));
     color: var(--text);
-    padding: 15px;
+    padding: var(--section-padding, 15px);
     margin-bottom: var(--category-gap, 20px);
     /* Use variable for category gap */
     border-radius: 8px;
@@ -410,7 +420,7 @@ body {
 
 .bookmark-category h2 {
     margin-top: 0;
-    border-bottom: 1px solid var(--accent);
+    border-bottom: 2px solid var(--section-line-color, var(--accent));
     padding-bottom: 10px;
     font-weight: 500;
     color: var(--text);

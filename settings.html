@@ -349,6 +349,9 @@
                 <button class="nav-btn" data-tab="links">
                     <span>🔗</span> Links Rápidos
                 </button>
+                <button class="nav-btn" data-tab="wallpaper">
+                    <span>🖼️</span> Papel de Parede
+                </button>
                 <button class="nav-btn" data-tab="system">
                     <span>💾</span> Sistema
                 </button>
@@ -382,48 +385,7 @@
                         </div>
                     </div>
 
-                    <div class="settings-group">
-                        <div class="group-title">Fundo Dinâmico</div>
-                        <div class="controls-grid">
-                            <div class="control-item full-width">
-                                <label for="wallpaper-folder-path">Caminho da Pasta de Wallpapers</label>
-                                <div style="display: flex; gap: 10px;">
-                                    <input type="text" id="wallpaper-folder-path"
-                                        value="C:\Users\estev\OneDrive\Imagens\Wallpapers" readonly style="flex: 1;">
-                                    <button id="select-wallpaper-folder-btn"
-                                        class="btn btn-secondary">Selecionar</button>
-                                </div>
-                            </div>
 
-                            <div class="control-item">
-                                <label for="wallpaper-frequency">Trocar a cada (horas)</label>
-                                <div class="range-wrapper">
-                                    <input type="range" id="wallpaper-frequency" min="0" max="24" step="0.5" value="1">
-                                    <span id="wallpaper-frequency-value" class="range-value">1h</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <div class="group-title">Filtro de Fundo (Overlay)</div>
-                        <div class="controls-grid">
-                            <div class="control-item">
-                                <label for="filter-color">Cor da Camada</label>
-                                <div class="color-wrapper">
-                                    <input type="color" id="filter-color" value="#000000">
-                                    <span>Escolher cor</span>
-                                </div>
-                            </div>
-                            <div class="control-item">
-                                <label for="filter-opacity">Opacidade</label>
-                                <div class="range-wrapper">
-                                    <input type="range" id="filter-opacity" min="0" max="1" step="0.05" value="0.3">
-                                    <span id="filter-opacity-value" class="range-value">0.30</span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
 
                 <!-- TAB: LAYOUT -->
@@ -468,6 +430,33 @@
                                 <div class="range-wrapper">
                                     <input type="range" id="category-gap" min="0" max="60" step="2" value="20">
                                     <span id="category-gap-value" class="range-value">20px</span>
+                                </div>
+                                <div class="settings-group">
+                                    <div class="group-title">Estilo das Seções (Categorias)</div>
+                                    <div class="controls-grid">
+                                        <div class="control-item">
+                                            <label for="section-padding">Padding (Tamanho Interno)</label>
+                                            <div class="range-wrapper">
+                                                <input type="range" id="section-padding" min="5" max="40" step="5"
+                                                    value="15">
+                                                <span id="section-padding-value" class="range-value">15px</span>
+                                            </div>
+                                        </div>
+                                        <div class="control-item">
+                                            <label for="section-bg-color">Cor do Fundo (Box)</label>
+                                            <div class="color-wrapper">
+                                                <input type="color" id="section-bg-color" value="#ffffff">
+                                                <span>Cor Fundo</span>
+                                            </div>
+                                        </div>
+                                        <div class="control-item">
+                                            <label for="section-line-color">Cor da Linha (Divisória)</label>
+                                            <div class="color-wrapper">
+                                                <input type="color" id="section-line-color" value="#007bff">
+                                                <span>Cor Linha</span>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -647,6 +636,57 @@
                                 <input type="text" id="new-link-url" placeholder="https://...">
                             </div>
                             <button id="add-link-btn" class="btn btn-primary" style="height: 42px;">Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: WALLPAPER -->
+                <div id="tab-wallpaper" class="tab-pane">
+                    <div class="section-header">
+                        <h2 class="section-title">Papel de Parede e Fundo</h2>
+                        <p class="section-desc">Gerencie o fundo dinâmico e filtros visuais.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Fundo Dinâmico</div>
+                        <div class="controls-grid">
+                            <div class="control-item full-width">
+                                <label for="wallpaper-folder-path">Caminho da Pasta de Wallpapers</label>
+                                <div style="display: flex; gap: 10px;">
+                                    <input type="text" id="wallpaper-folder-path"
+                                        value="C:\Users\estev\OneDrive\Imagens\Wallpapers" readonly style="flex: 1;">
+                                    <button id="select-wallpaper-folder-btn"
+                                        class="btn btn-secondary">Selecionar</button>
+                                </div>
+                            </div>
+
+                            <div class="control-item">
+                                <label for="wallpaper-frequency">Trocar a cada (horas)</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="wallpaper-frequency" min="0" max="24" step="0.5" value="1">
+                                    <span id="wallpaper-frequency-value" class="range-value">1h</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Filtro de Fundo (Overlay)</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="filter-color">Cor da Camada</label>
+                                <div class="color-wrapper">
+                                    <input type="color" id="filter-color" value="#000000">
+                                    <span>Escolher cor</span>
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="filter-opacity">Opacidade</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="filter-opacity" min="0" max="1" step="0.05" value="0.3">
+                                    <span id="filter-opacity-value" class="range-value">0.30</span>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
