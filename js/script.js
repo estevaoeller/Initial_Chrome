@@ -214,14 +214,7 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTheme(theme);
         });
         if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
-        if (settingsBtn) settingsBtn.addEventListener('click', () => {
-            chrome.windows.create({
-                url: chrome.runtime.getURL('settings.html'),
-                type: 'popup',
-                width: 900,
-                height: 700
-            });
-        });
+
         if (analogClockPlaceholder) {
             updateClock(analogClockPlaceholder);
             setInterval(() => updateClock(analogClockPlaceholder), 1000);
