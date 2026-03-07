@@ -23,6 +23,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const iconBorderRadiusValue = document.getElementById('icon-border-radius-value');
     const iconBorderColor = document.getElementById('icon-border-color');
     const iconBgColor = document.getElementById('icon-bg-color');
+    const iconBgOpacity = document.getElementById('icon-bg-opacity');
+    const iconBgOpacityValue = document.getElementById('icon-bg-opacity-value');
     const themePreset = document.getElementById('theme-preset');
     const bookmarkFontFamily = document.getElementById('bookmark-font-family');
     const bookmarkFontSize = document.getElementById('bookmark-font-size');
@@ -50,6 +52,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const sectionPadding = document.getElementById('section-padding');
     const sectionPaddingValue = document.getElementById('section-padding-value');
     const sectionBgColor = document.getElementById('section-bg-color');
+    const sectionBgOpacity = document.getElementById('section-bg-opacity');
+    const sectionBgOpacityValue = document.getElementById('section-bg-opacity-value');
     const sectionLineColor = document.getElementById('section-line-color');
 
     const exportDataBtn = document.getElementById('export-data-btn');
@@ -201,6 +205,10 @@ document.addEventListener('DOMContentLoaded', function () {
             updateBorderRadiusDisplay(settings.iconBorderRadius);
             iconBorderColor.value = ensureFullHex(settings.iconBorderColor);
             iconBgColor.value = ensureFullHex(settings.iconBgColor);
+            if (iconBgOpacity) {
+                iconBgOpacity.value = settings.iconBgOpacity !== undefined ? settings.iconBgOpacity : 1;
+                if (iconBgOpacityValue) iconBgOpacityValue.textContent = Number(iconBgOpacity.value).toFixed(2);
+            }
             bookmarkFontFamily.value = settings.bookmarkFontFamily;
             bookmarkFontSize.value = settings.bookmarkFontSize;
             updateBookmarkFontSizeDisplay(settings.bookmarkFontSize);
@@ -217,6 +225,10 @@ document.addEventListener('DOMContentLoaded', function () {
                 if (sectionPaddingValue) sectionPaddingValue.textContent = (settings.sectionPadding !== undefined ? settings.sectionPadding : 15) + 'px';
             }
             if (sectionBgColor) sectionBgColor.value = ensureFullHex(settings.sectionBgColor) || '#ffffff';
+            if (sectionBgOpacity) {
+                sectionBgOpacity.value = settings.sectionBgOpacity !== undefined ? settings.sectionBgOpacity : 1;
+                if (sectionBgOpacityValue) sectionBgOpacityValue.textContent = Number(sectionBgOpacity.value).toFixed(2);
+            }
             if (sectionLineColor) sectionLineColor.value = ensureFullHex(settings.sectionLineColor) || '#007bff';
 
             // Load Quick Links List (Separate Storage)
@@ -258,6 +270,7 @@ document.addEventListener('DOMContentLoaded', function () {
             iconBorderRadius: parseInt(iconBorderRadius.value),
             iconBorderColor: iconBorderColor.value,
             iconBgColor: iconBgColor.value,
+            iconBgOpacity: iconBgOpacity ? parseFloat(iconBgOpacity.value) : 1,
             bookmarkFontFamily: bookmarkFontFamily.value,
             bookmarkFontSize: parseInt(bookmarkFontSize.value),
             bookmarkFontColor: bookmarkFontColor.value,
@@ -268,10 +281,10 @@ document.addEventListener('DOMContentLoaded', function () {
             layoutMode: layoutMode.value,
             columnCount: parseInt(columnCount.value),
             sidebarWidth: parseInt(sidebarWidth.value),
-            sidebarWidth: parseInt(sidebarWidth.value),
             quickLinksSize: parseInt(quickLinksSize.value || 13),
             sectionPadding: parseInt(sectionPadding.value || 15),
             sectionBgColor: sectionBgColor.value,
+            sectionBgOpacity: sectionBgOpacity ? parseFloat(sectionBgOpacity.value) : 1,
             sectionLineColor: sectionLineColor.value,
             clockStyle: clockStyle ? clockStyle.value : 'analog',
             userName: userName ? userName.value.trim() : '',
@@ -384,9 +397,23 @@ document.addEventListener('DOMContentLoaded', function () {
         sectionBgColor.addEventListener('change', saveSettings);
     }
 
+    if (sectionBgOpacity) {
+        sectionBgOpacity.addEventListener('input', function () {
+            if (sectionBgOpacityValue) sectionBgOpacityValue.textContent = Number(this.value).toFixed(2);
+            saveSettings();
+        });
+    }
+
     if (sectionLineColor) {
         sectionLineColor.addEventListener('input', saveSettings);
         sectionLineColor.addEventListener('change', saveSettings);
+    }
+
+    if (iconBgOpacity) {
+        iconBgOpacity.addEventListener('input', function () {
+            if (iconBgOpacityValue) iconBgOpacityValue.textContent = Number(this.value).toFixed(2);
+            saveSettings();
+        });
     }
 
     iconBorderRadius.addEventListener('input', function () {

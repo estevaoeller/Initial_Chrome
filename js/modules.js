@@ -497,9 +497,15 @@ export async function updateWeather(weatherWidget, weatherIcon, weatherTemp, cit
 export async function manageWallpaper(settingsState) {
     // This will be called from script.js background logic
     const body = document.body;
+    const unsplashInfoDiv = document.getElementById('unsplash-info');
+
+    const hideUnsplashInfo = () => {
+        if (unsplashInfoDiv) unsplashInfoDiv.style.display = 'none';
+    };
 
     if (settingsState.wallpaperSource === 'none') {
         body.style.backgroundImage = 'none';
+        hideUnsplashInfo();
         return;
     }
 
@@ -518,6 +524,7 @@ export async function manageWallpaper(settingsState) {
             console.warn("Unsplash API Key is missing. Crie no site e cole em configurações. Fazendo fallback para loremflickr por enquanto.");
             const seed = new Date().toDateString();
             setBackground(`https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`);
+            hideUnsplashInfo();
             return;
         }
 
@@ -536,6 +543,35 @@ export async function manageWallpaper(settingsState) {
             const data = await response.json();
             if (data && data.urls && data.urls.regular) {
                 setBackground(data.urls.regular);
+
+                // Show Unsplash Info
+                if (unsplashInfoDiv) {
+                    const linkEl = document.getElementById('unsplash-link');
+                    const locEl = document.getElementById('unsplash-location');
+                    const dateEl = document.getElementById('unsplash-date');
+                    const viewsEl = document.getElementById('unsplash-views');
+                    const userEl = document.getElementById('unsplash-user');
+
+                    if (linkEl) linkEl.href = data.links?.html || `https://unsplash.com/photos/${data.id}`;
+
+                    if (locEl) {
+                        locEl.innerHTML = data.location?.name ? `📍 ${data.location.name}` : '';
+                    }
+                    if (dateEl) {
+                        const dateObj = new Date(data.created_at);
+                        dateEl.innerHTML = data.created_at ? `📅 ${dateObj.toLocaleDateString('pt-BR')}` : '';
+                    }
+                    if (viewsEl) {
+                        const stats = data.views || data.downloads || data.likes || 0;
+                        const label = data.views ? 'visualizações' : (data.downloads ? 'downloads' : 'curtidas');
+                        viewsEl.innerHTML = stats ? `👁️ ${stats.toLocaleString('pt-BR')} ${label}` : '';
+                    }
+                    if (userEl) {
+                        userEl.innerHTML = data.user?.name ? `👤 ${data.user.name}` : '';
+                    }
+
+                    unsplashInfoDiv.style.display = 'block';
+                }
             } else {
                 throw new Error("Invalid Unsplash response format");
             }
@@ -543,11 +579,13 @@ export async function manageWallpaper(settingsState) {
             console.error("Falha ao buscar Unsplash Oficial:", error);
             const seed = new Date().toDateString();
             setBackground(`https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`);
+            hideUnsplashInfo();
         }
         return;
     }
 
     // Default to local folder logic which is handled in script.js interval
+    hideUnsplashInfo();
 }
 
 

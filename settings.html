@@ -466,10 +466,18 @@
                                             </div>
                                         </div>
                                         <div class="control-item">
-                                            <label for="section-bg-color">Cor do Fundo (Box)</label>
+                                            <label for="section-bg-color">Cor da Seção</label>
                                             <div class="color-wrapper">
                                                 <input type="color" id="section-bg-color" value="#ffffff">
-                                                <span>Cor Fundo</span>
+                                                <span>Fundo Seção</span>
+                                            </div>
+                                        </div>
+                                        <div class="control-item">
+                                            <label for="section-bg-opacity">Transparência da Seção</label>
+                                            <div class="range-wrapper">
+                                                <input type="range" id="section-bg-opacity" min="0" max="1" step="0.05"
+                                                    value="1">
+                                                <span id="section-bg-opacity-value" class="range-value">1.00</span>
                                             </div>
                                         </div>
                                         <div class="control-item">
@@ -550,6 +558,15 @@
                                     <input type="color" id="icon-border-color" value="#dddddd">
                                     <span>Borda Card</span>
                                 </div>
+                            </div>
+                            <div class="control-item full-width">
+                                <label for="icon-bg-opacity">Transparência do Fundo do Cartão</label>
+                                <div class="range-wrapper">
+                                    <input type="range" id="icon-bg-opacity" min="0" max="1" step="0.05" value="1">
+                                    <span id="icon-bg-opacity-value" class="range-value">1.00</span>
+                                </div>
+                                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0;">0 = Totalmente
+                                    transparente, 1 = Cor Sólida</p>
                             </div>
                         </div>
                     </div>

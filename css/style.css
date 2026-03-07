@@ -562,11 +562,69 @@ body {
     white-space: normal;
     word-break: break-word;
     display: -webkit-box;
-    -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
+    line-clamp: 2;
+    -webkit-box-orient: vertical;
     overflow: hidden;
     text-overflow: ellipsis;
     line-height: 1.2;
+    max-height: 2.4em;
+    /* 2 lines */
+}
+
+/* Expansion mode (hover) */
+/* This requires JS to toggle a class on hover if we want "expand on hover" instead of full expansion */
+/* Modos de comportamento do texto aplicados via classe no body */
+
+/* Modo: Cortar em 1 linha */
+body.text-behavior-single .bookmark-name {
+    display: block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-height: none;
+    -webkit-line-clamp: 1;
+    line-clamp: 1;
+}
+
+/* Modo: Expandir completamente */
+body.text-behavior-expand .bookmark-name {
+    display: block;
+    white-space: normal;
+    overflow: visible;
+    -webkit-line-clamp: unset;
+    line-clamp: unset;
+    max-height: none;
+}
+
+/* Modo: Apenas ao passar o mouse (Name Display Setting) */
+body.name-display-hover .bookmark-name {
+    opacity: 0;
+    position: absolute;
+    /* Remove from flow when hidden */
+    pointer-events: none;
+    /* Prevent interaction when hidden */
+}
+
+body.name-display-hover .bookmark-item:hover .bookmark-name {
+    opacity: 1;
+    position: static;
+    /* Restore to flow on hover */
+    margin-top: var(--icon-gap);
+    /* Reapply margin */
+    display: -webkit-box;
+    /* Ensure line-clamp works if needed */
+    animation: fadeIn 0.2s ease;
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+
+    to {
+        opacity: 1;
+    }
 }
 
 /* Ajuste no .bookmark-item para acomodar favicon e nome lado a lado, e o X */
@@ -669,9 +727,7 @@ body.text-behavior-single .bookmark-name {
     -webkit-line-clamp: 1;
 }
 
-/* Se expandir no layout horizontal, talvez queira que ele não empurre demais? */
-/* Por enquanto deixa fluir */
-
+/* Name alignment logic handled entirely by grid/flex and display: block now */
 /* Estilo para o campo de input durante a edição do nome do bookmark */
 .bookmark-name-edit {
     font-size: inherit;
@@ -813,4 +869,43 @@ body.text-behavior-single .bookmark-name {
 .quick-link:hover {
     opacity: 1;
     transform: translateY(-1px);
+}
+
+/* Unsplash Info Widget */
+#unsplash-info {
+    position: fixed;
+    bottom: 20px;
+    right: 60px;
+    /* To avoid overlapping with the action sidebar */
+    background: rgba(0, 0, 0, 0.5);
+    padding: 8px 12px;
+    border-radius: 8px;
+    font-size: 10px;
+    z-index: 0;
+    transition: background 0.2s ease;
+    backdrop-filter: blur(4px);
+}
+
+#unsplash-info:hover {
+    background: rgba(0, 0, 0, 0.8);
+}
+
+#unsplash-link {
+    color: #ffffff;
+    text-decoration: none;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
+}
+
+#unsplash-link span {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.9;
+}
+
+#unsplash-link span:hover {
+    opacity: 1;
 }

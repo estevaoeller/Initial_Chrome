@@ -15,10 +15,27 @@ export function applySidebarWidthSetting(width) {
     document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
 }
 
-export function applyIconAppearance(borderRadius, borderColor, bgColor) {
+export function applyIconAppearance(borderRadius, borderColor, bgColor, bgOpacity = 1) {
     document.documentElement.style.setProperty('--icon-border-radius', `${borderRadius}px`);
     document.documentElement.style.setProperty('--icon-border-color', borderColor);
-    document.documentElement.style.setProperty('--icon-bg-color', bgColor);
+
+    // Convert hex to rgba for bgColor
+    let rgbaStr = bgColor;
+    if (bgColor && bgColor.startsWith('#')) {
+        let r = 0, g = 0, b = 0;
+        if (bgColor.length === 4) {
+            r = parseInt(bgColor[1] + bgColor[1], 16);
+            g = parseInt(bgColor[2] + bgColor[2], 16);
+            b = parseInt(bgColor[3] + bgColor[3], 16);
+        } else if (bgColor.length === 7) {
+            r = parseInt(bgColor.substring(1, 3), 16);
+            g = parseInt(bgColor.substring(3, 5), 16);
+            b = parseInt(bgColor.substring(5, 7), 16);
+        }
+        rgbaStr = `rgba(${r}, ${g}, ${b}, ${bgOpacity})`;
+    }
+
+    document.documentElement.style.setProperty('--icon-bg-color', rgbaStr);
 }
 
 export function applyIconSpacingSetting(spacing) {
@@ -41,6 +58,29 @@ export function applyBookmarkFontSettings(fontFamily, fontSize, fontColor) {
     document.documentElement.style.setProperty('--bookmark-font-family', fontFamily);
     document.documentElement.style.setProperty('--bookmark-font-size', `${fontSize}px`);
     document.documentElement.style.setProperty('--bookmark-font-color', fontColor);
+}
+
+export function applySectionAppearance(padding, bgColor, bgOpacity, lineColor) {
+    if (padding !== undefined) document.documentElement.style.setProperty('--section-padding', `${padding}px`);
+    if (lineColor) document.documentElement.style.setProperty('--section-line-color', lineColor);
+
+    if (bgColor) {
+        let rgbaStr = bgColor;
+        if (bgColor.startsWith('#')) {
+            let r = 0, g = 0, b = 0;
+            if (bgColor.length === 4) {
+                r = parseInt(bgColor[1] + bgColor[1], 16);
+                g = parseInt(bgColor[2] + bgColor[2], 16);
+                b = parseInt(bgColor[3] + bgColor[3], 16);
+            } else if (bgColor.length === 7) {
+                r = parseInt(bgColor.substring(1, 3), 16);
+                g = parseInt(bgColor.substring(3, 5), 16);
+                b = parseInt(bgColor.substring(5, 7), 16);
+            }
+            rgbaStr = `rgba(${r}, ${g}, ${b}, ${bgOpacity !== undefined ? bgOpacity : 1})`;
+        }
+        document.documentElement.style.setProperty('--section-bg-color', rgbaStr);
+    }
 }
 
 export function applyBackgroundFilter(color, opacity) {
@@ -108,6 +148,11 @@ export function loadSettings(state, callback) {
         if (settings.iconBgColor) {
             state.iconBgColor = settings.iconBgColor;
         }
+        if (settings.iconBgOpacity !== undefined) {
+            state.iconBgOpacity = settings.iconBgOpacity;
+        } else {
+            state.iconBgOpacity = 1;
+        }
         if (settings.iconSpacing !== undefined) {
             state.iconSpacing = settings.iconSpacing;
         }
@@ -154,7 +199,7 @@ export function loadSettings(state, callback) {
         }
 
         applyIconSizeSetting(state.iconSize);
-        applyIconAppearance(state.iconBorderRadius, state.iconBorderColor, state.iconBgColor);
+        applyIconAppearance(state.iconBorderRadius, state.iconBorderColor, state.iconBgColor, state.iconBgOpacity);
         applyIconSpacingSetting(state.iconSpacing);
         applyIconGapSetting(state.iconGap);
         applyCategoryGapSetting(state.categoryGap);
@@ -181,6 +226,13 @@ export function loadSettings(state, callback) {
         state.wallpaperSource = settings.wallpaperSource || 'local';
         state.wallpaperTheme = settings.wallpaperTheme || 'nature';
         state.wallpaperApiKey = settings.wallpaperApiKey || '';
+
+        applySectionAppearance(
+            settings.sectionPadding !== undefined ? settings.sectionPadding : 15,
+            settings.sectionBgColor || '#ffffff',
+            settings.sectionBgOpacity !== undefined ? settings.sectionBgOpacity : 1,
+            settings.sectionLineColor || '#007bff'
+        );
 
         // Sidebar settings
         if (settings.lastActiveSpace) {
