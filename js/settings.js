@@ -59,6 +59,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const saveSettingsBtn = document.getElementById('save-settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
 
+    // New Widget Settings
+    const clockStyle = document.getElementById('clock-style');
+    const userName = document.getElementById('user-name');
+    const weatherCity = document.getElementById('weather-city');
+    const wallpaperSource = document.getElementById('wallpaper-source');
+    const wallpaperTheme = document.getElementById('wallpaper-theme');
+    const wallpaperApiKey = document.getElementById('wallpaper-api-key');
+    const wallpaperLocalConfig = document.getElementById('wallpaper-local-config');
+    const wallpaperUnsplashConfig = document.getElementById('wallpaper-unsplash-config');
+
+    // Toggle Wallpaper Configs based on Source
+    if (wallpaperSource) {
+        wallpaperSource.addEventListener('change', () => {
+            if (wallpaperSource.value === 'local') {
+                wallpaperLocalConfig.style.display = 'block';
+                wallpaperUnsplashConfig.style.display = 'none';
+            } else if (wallpaperSource.value === 'unsplash') {
+                wallpaperLocalConfig.style.display = 'none';
+                wallpaperUnsplashConfig.style.display = 'block';
+            } else {
+                wallpaperLocalConfig.style.display = 'none';
+                wallpaperUnsplashConfig.style.display = 'none';
+            }
+        });
+    }
+
     // TAB NAVIGATION LOGIC
     const tabs = document.querySelectorAll('.nav-btn');
     const pages = document.querySelectorAll('.tab-pane');
@@ -109,7 +135,13 @@ document.addEventListener('DOMContentLoaded', function () {
         quickLinksSize: 13,
         sectionPadding: 15,
         sectionBgColor: "#1e293b", // Dark Theme Default
-        sectionLineColor: "#38bdf8" // Dark Theme Default
+        sectionLineColor: "#38bdf8", // Dark Theme Default
+        clockStyle: "analog",
+        userName: "",
+        weatherCity: "",
+        wallpaperSource: "local",
+        wallpaperTheme: "nature",
+        wallpaperApiKey: ""
     };
 
     function toggleColumnCountDisplay(mode) {
@@ -136,6 +168,19 @@ document.addEventListener('DOMContentLoaded', function () {
 
             wallpaperFolderPath.value = settings.wallpaperFolderPath;
             wallpaperFrequency.value = settings.wallpaperFrequency;
+            if (wallpaperSource) {
+                wallpaperSource.value = settings.wallpaperSource || 'local';
+                // Trigger change event to update display
+                const event = new Event('change');
+                wallpaperSource.dispatchEvent(event);
+            }
+            if (wallpaperApiKey) wallpaperApiKey.value = settings.wallpaperApiKey || '';
+            if (wallpaperTheme) wallpaperTheme.value = settings.wallpaperTheme || 'nature';
+
+            if (clockStyle) clockStyle.value = settings.clockStyle || 'analog';
+            if (userName) userName.value = settings.userName || '';
+            if (weatherCity) weatherCity.value = settings.weatherCity || '';
+
             updateFrequencyDisplay(settings.wallpaperFrequency);
             filterColor.value = ensureFullHex(settings.filterColor);
             filterOpacity.value = settings.filterOpacity;
@@ -227,7 +272,13 @@ document.addEventListener('DOMContentLoaded', function () {
             quickLinksSize: parseInt(quickLinksSize.value || 13),
             sectionPadding: parseInt(sectionPadding.value || 15),
             sectionBgColor: sectionBgColor.value,
-            sectionLineColor: sectionLineColor.value
+            sectionLineColor: sectionLineColor.value,
+            clockStyle: clockStyle ? clockStyle.value : 'analog',
+            userName: userName ? userName.value.trim() : '',
+            weatherCity: weatherCity ? weatherCity.value.trim() : '',
+            wallpaperSource: wallpaperSource ? wallpaperSource.value : 'local',
+            wallpaperTheme: wallpaperTheme ? wallpaperTheme.value.trim() : 'nature',
+            wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : ''
         };
 
         chrome.storage.sync.set({ extensionSettings: settings }, function () {

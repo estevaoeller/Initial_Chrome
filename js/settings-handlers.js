@@ -174,6 +174,14 @@ export function loadSettings(state, callback) {
             state.columnCount = 3; // Default
         }
 
+        // New Widget Variables
+        state.clockStyle = settings.clockStyle || 'analog';
+        state.userName = settings.userName || '';
+        state.weatherCity = settings.weatherCity || '';
+        state.wallpaperSource = settings.wallpaperSource || 'local';
+        state.wallpaperTheme = settings.wallpaperTheme || 'nature';
+        state.wallpaperApiKey = settings.wallpaperApiKey || '';
+
         // Sidebar settings
         if (settings.lastActiveSpace) {
             state.lastActiveSpace = settings.lastActiveSpace;

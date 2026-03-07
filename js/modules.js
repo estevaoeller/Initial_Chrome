@@ -442,4 +442,112 @@ export function updateCalendar(calendarPlaceholder) {
     calendarPlaceholder.innerHTML = calendarHtml;
 }
 
+export function updateDigitalClock(digitalClockPlaceholder) {
+    const now = new Date();
+    const hours = now.getHours();
+    const minutes = now.getMinutes();
+    digitalClockPlaceholder.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+}
+
+export function updateGreeting(greetingPlaceholder, userName) {
+    if (!greetingPlaceholder) return;
+    const hour = new Date().getHours();
+    let greeting = 'Boa noite';
+    if (hour >= 5 && hour < 12) greeting = 'Bom dia';
+    else if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
+
+    greetingPlaceholder.textContent = userName ? `${greeting}, ${userName}` : greeting;
+}
+
+export async function updateWeather(weatherWidget, weatherIcon, weatherTemp, city) {
+    if (!weatherWidget || !city) return;
+    try {
+        // Simple geocoding using Open-Meteo
+        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`);
+        const geoData = await geoRes.json();
+
+        if (geoData.results && geoData.results.length > 0) {
+            const { latitude, longitude } = geoData.results[0];
+            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
+            const weatherData = await weatherRes.json();
+
+            if (weatherData.current_weather) {
+                const temp = weatherData.current_weather.temperature;
+                const weathercode = weatherData.current_weather.weathercode;
+
+                // Keep it simple for weather codes
+                let icon = '☁️';
+                if (weathercode === 0) icon = '☀️';
+                else if (weathercode >= 1 && weathercode <= 3) icon = '⛅';
+                else if (weathercode >= 61 && weathercode <= 69) icon = '🌧️';
+                else if (weathercode >= 71 && weathercode <= 79) icon = '❄️';
+                else if (weathercode >= 95) icon = '⛈️';
+
+                if (weatherIcon) weatherIcon.textContent = icon;
+                if (weatherTemp) weatherTemp.textContent = `${temp}°C`;
+                weatherWidget.style.display = 'flex';
+                weatherWidget.title = `${geoData.results[0].name}: ${temp}°C`;
+            }
+        }
+    } catch (error) {
+        console.error("Falha ao buscar clima:", error);
+    }
+}
+
+export async function manageWallpaper(settingsState) {
+    // This will be called from script.js background logic
+    const body = document.body;
+
+    if (settingsState.wallpaperSource === 'none') {
+        body.style.backgroundImage = 'none';
+        return;
+    }
+
+    if (settingsState.wallpaperSource === 'unsplash') {
+        const theme = settingsState.wallpaperTheme || 'nature';
+        const apiKey = settingsState.wallpaperApiKey || '';
+
+        const setBackground = (url) => {
+            body.style.backgroundImage = `url('${url}')`;
+            body.style.backgroundSize = 'cover';
+            body.style.backgroundPosition = 'center';
+            body.style.backgroundRepeat = 'no-repeat';
+        };
+
+        if (!apiKey) {
+            console.warn("Unsplash API Key is missing. Crie no site e cole em configurações. Fazendo fallback para loremflickr por enquanto.");
+            const seed = new Date().toDateString();
+            setBackground(`https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`);
+            return;
+        }
+
+        try {
+            const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(theme)}&orientation=landscape`;
+            const response = await fetch(apiUrl, {
+                headers: {
+                    'Authorization': `Client-ID ${apiKey}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`Unsplash API Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            if (data && data.urls && data.urls.regular) {
+                setBackground(data.urls.regular);
+            } else {
+                throw new Error("Invalid Unsplash response format");
+            }
+        } catch (error) {
+            console.error("Falha ao buscar Unsplash Oficial:", error);
+            const seed = new Date().toDateString();
+            setBackground(`https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`);
+        }
+        return;
+    }
+
+    // Default to local folder logic which is handled in script.js interval
+}
+
 

@@ -374,14 +374,37 @@
 
                     <div class="settings-group">
                         <div class="group-title">Tema Principal</div>
-                        <div class="control-item">
-                            <label for="theme-preset">Selecione o Tema</label>
-                            <select id="theme-preset" style="width: 100%; max-width: 300px;">
-                                <option value="light">☀️ Claro (Padrão)</option>
-                                <option value="dark">🌙 Escuro</option>
-                                <option value="solar">🌅 Solar</option>
-                                <option value="minimal">⚪ Minimal</option>
-                            </select>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="theme-preset">Selecione o Tema</label>
+                                <select id="theme-preset" style="width: 100%;">
+                                    <option value="light">☀️ Claro (Padrão)</option>
+                                    <option value="dark">🌙 Escuro</option>
+                                    <option value="solar">🌅 Solar</option>
+                                    <option value="minimal">⚪ Minimal</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Widgets da Tela Inicial</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="clock-style">Estilo do Relógio</label>
+                                <select id="clock-style" style="width: 100%;">
+                                    <option value="analog">⏱️ Analógico</option>
+                                    <option value="digital">💻 Digital Moderno</option>
+                                </select>
+                            </div>
+                            <div class="control-item">
+                                <label for="user-name">Seu Nome (Para Saudações)</label>
+                                <input type="text" id="user-name" placeholder="Ex: Estêvão" style="width: 100%;">
+                            </div>
+                            <div class="control-item">
+                                <label for="weather-city">Cidade para Previsão do Tempo</label>
+                                <input type="text" id="weather-city" placeholder="Ex: São Paulo" style="width: 100%;">
+                            </div>
                         </div>
                     </div>
 
@@ -651,6 +674,15 @@
                         <div class="group-title">Fundo Dinâmico</div>
                         <div class="controls-grid">
                             <div class="control-item full-width">
+                                <label for="wallpaper-source">Origem do Wallpaper</label>
+                                <select id="wallpaper-source" style="width: 100%; max-width: 300px;">
+                                    <option value="local">Pasta Local do PC</option>
+                                    <option value="unsplash">Internet (Unsplash Diário)</option>
+                                    <option value="none">Nenhum (Usar cor do tema)</option>
+                                </select>
+                            </div>
+
+                            <div class="control-item full-width" id="wallpaper-local-config">
                                 <label for="wallpaper-folder-path">Caminho da Pasta de Wallpapers</label>
                                 <div style="display: flex; gap: 10px;">
                                     <input type="text" id="wallpaper-folder-path"
@@ -658,6 +690,24 @@
                                     <button id="select-wallpaper-folder-btn"
                                         class="btn btn-secondary">Selecionar</button>
                                 </div>
+                            </div>
+
+                            <div class="control-item full-width" id="wallpaper-unsplash-config" style="display: none;">
+                                <div style="display: flex; gap: 15px;">
+                                    <div style="flex: 1;">
+                                        <label for="wallpaper-api-key">Chave da API (Access Key)</label>
+                                        <input type="password" id="wallpaper-api-key"
+                                            placeholder="Sua Access Key do Unsplash" style="width: 100%;">
+                                    </div>
+                                    <div style="flex: 1;">
+                                        <label for="wallpaper-theme">Tema de Imagens (Inglês)</label>
+                                        <input type="text" id="wallpaper-theme"
+                                            placeholder="Ex: nature, architecture, minimal" style="width: 100%;"
+                                            value="nature">
+                                    </div>
+                                </div>
+                                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0;">Crie um App gratuito no
+                                    Unsplash e insira sua Access Key para carregar fundos com alta qualidade.</p>
                             </div>
 
                             <div class="control-item">

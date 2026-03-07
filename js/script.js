@@ -12,7 +12,11 @@ import {
     createSpace,
     deleteSpace,
     checkAndMigrateToSpaces,
-    getRandomSpaceIcon
+    getRandomSpaceIcon,
+    updateDigitalClock,
+    updateGreeting,
+    updateWeather,
+    manageWallpaper
 } from './modules.js';
 import {
     loadSettings,
@@ -36,6 +40,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // ---- CONSTANTES E VARIÁVEIS ----
     const contentArea = document.getElementById('content-area');
     const analogClockPlaceholder = document.getElementById('analog-clock-placeholder');
+    const digitalClockPlaceholder = document.getElementById('digital-clock-placeholder');
+    const greetingPlaceholder = document.getElementById('greeting-placeholder');
+    const weatherWidget = document.getElementById('weather-widget');
+    const weatherIcon = document.getElementById('weather-icon');
+    const weatherTemp = document.getElementById('weather-temp');
     const datePlaceholder = document.getElementById('date-placeholder');
     const calendarPlaceholder = document.getElementById('calendar-placeholder');
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
@@ -215,10 +224,30 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTheme(theme);
         });
 
-        if (analogClockPlaceholder) {
+        // Initialize Widgets
+        if (settingsState.clockStyle === 'digital') {
+            analogClockPlaceholder.style.display = 'none';
+            digitalClockPlaceholder.style.display = 'block';
+            updateDigitalClock(digitalClockPlaceholder);
+            setInterval(() => updateDigitalClock(digitalClockPlaceholder), 1000);
+        } else {
+            analogClockPlaceholder.style.display = 'block';
+            digitalClockPlaceholder.style.display = 'none';
             updateClock(analogClockPlaceholder);
             setInterval(() => updateClock(analogClockPlaceholder), 1000);
         }
+
+        updateGreeting(greetingPlaceholder, settingsState.userName);
+        // Refresh greeting smoothly every 10 min
+        setInterval(() => updateGreeting(greetingPlaceholder, settingsState.userName), 600000);
+
+        if (settingsState.weatherCity) {
+            updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity);
+            // Refresh weather every 30 mins
+            setInterval(() => updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity), 1800000);
+        }
+
+        manageWallpaper(settingsState);
         if (datePlaceholder) {
             updateDate(datePlaceholder);
             setInterval(() => updateDate(datePlaceholder), 60000);
