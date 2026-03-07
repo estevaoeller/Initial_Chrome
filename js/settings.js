@@ -126,6 +126,7 @@ document.addEventListener('DOMContentLoaded', function () {
         iconBorderRadius: 6,
         iconBorderColor: "#475569", // Dark Theme Default
         iconBgColor: "#334155", // Dark Theme Default
+        iconBgOpacity: 1,
         bookmarkFontFamily: "sans-serif",
         bookmarkFontSize: 14,
         bookmarkFontColor: "#e2e8f0", // Dark Theme Default
@@ -139,6 +140,7 @@ document.addEventListener('DOMContentLoaded', function () {
         quickLinksSize: 13,
         sectionPadding: 15,
         sectionBgColor: "#1e293b", // Dark Theme Default
+        sectionBgOpacity: 1,
         sectionLineColor: "#38bdf8", // Dark Theme Default
         clockStyle: "analog",
         userName: "",
@@ -397,9 +399,22 @@ document.addEventListener('DOMContentLoaded', function () {
         sectionBgColor.addEventListener('change', saveSettings);
     }
 
+    // Helper para Converter Hex + Opacidade para RGBA
+    function hexToRgbaStr(hex, opacity) {
+        if (!hex) hex = '#ffffff';
+        if (hex.length === 4) {
+            hex = "#" + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        }
+        let r = parseInt(hex.substring(1, 3), 16) || 0;
+        let g = parseInt(hex.substring(3, 5), 16) || 0;
+        let b = parseInt(hex.substring(5, 7), 16) || 0;
+        return `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+
     if (sectionBgOpacity) {
         sectionBgOpacity.addEventListener('input', function () {
             if (sectionBgOpacityValue) sectionBgOpacityValue.textContent = Number(this.value).toFixed(2);
+            document.documentElement.style.setProperty('--section-bg-color', hexToRgbaStr(sectionBgColor ? sectionBgColor.value : '#ffffff', this.value));
             saveSettings();
         });
     }
@@ -412,6 +427,7 @@ document.addEventListener('DOMContentLoaded', function () {
     if (iconBgOpacity) {
         iconBgOpacity.addEventListener('input', function () {
             if (iconBgOpacityValue) iconBgOpacityValue.textContent = Number(this.value).toFixed(2);
+            document.documentElement.style.setProperty('--icon-bg-color', hexToRgbaStr(iconBgColor ? iconBgColor.value : '#ffffff', this.value));
             saveSettings();
         });
     }
@@ -456,14 +472,18 @@ document.addEventListener('DOMContentLoaded', function () {
         filterColor,
         iconBorderColor,
         iconBgColor,
+        iconBgOpacity,
         bookmarkFontFamily,
         bookmarkFontColor,
         nameDisplay,
         textBehavior,
+        sectionBgOpacity,
         layoutMode // New
     ].forEach(element => {
-        element.addEventListener('input', saveSettings);
-        element.addEventListener('change', saveSettings);
+        if (element) {
+            element.addEventListener('input', saveSettings);
+            element.addEventListener('change', saveSettings);
+        }
     });
 
     // QUICK LINKS LOGIC
@@ -623,10 +643,11 @@ document.addEventListener('DOMContentLoaded', function () {
     // Exportar dados
     exportDataBtn.addEventListener('click', function () {
         chrome.storage.local.get(['userBookmarks'], function (resultLocal) {
-            chrome.storage.sync.get(['extensionSettings'], function (resultSync) {
+            chrome.storage.sync.get(['extensionSettings', 'quickLinks'], function (resultSync) {
                 const exportData = {
                     bookmarks: resultLocal.userBookmarks || [],
                     settings: resultSync.extensionSettings || defaultSettings,
+                    quickLinks: resultSync.quickLinks || [],
                     exportDate: new Date().toISOString()
                 };
 
@@ -657,13 +678,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 try {
                     const importData = JSON.parse(e.target.result);
 
-                    if (confirm("Tem certeza que deseja importar os dados? Isso substituirá todas as configurações e bookmarks atuais.")) {
+                    if (confirm("Tem certeza que deseja importar os dados? Isso substituirá todas as configurações e atalhos atuais.")) {
                         const dataToSave = {};
 
                         if (importData.bookmarks) {
                             dataToSave.userBookmarks = importData.bookmarks;
                             // Bookmarks must remain local due to eventual length limits on sync APIs or Chrome API preference.
                             chrome.storage.local.set({ userBookmarks: importData.bookmarks });
+                        }
+
+                        if (importData.quickLinks) {
+                            chrome.storage.sync.set({ quickLinks: importData.quickLinks }, function () {
+                                renderQuickLinksUI(importData.quickLinks);
+                            });
                         }
 
                         if (importData.settings) {

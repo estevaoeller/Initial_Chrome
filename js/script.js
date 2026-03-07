@@ -32,7 +32,8 @@ import {
     applySidebarWidthSetting,
     applyBookmarkFontSettings,
     applyBackgroundFilter,
-    applyLayoutMode
+    applyLayoutMode,
+    applySectionAppearance
 } from './settings-handlers.js';
 import { renderBookmarks } from './bookmark-renderer.js';
 
@@ -349,15 +350,61 @@ document.addEventListener('DOMContentLoaded', function () {
                 settingsState.iconSize = newSettings.iconSize;
                 applyIconSizeSetting(settingsState.iconSize);
             }
+            let updateIconAppearance = false;
+            let updateSectionAppearance = false;
+
             if (newSettings.iconBorderRadius !== undefined && newSettings.iconBorderRadius !== settingsState.iconBorderRadius) {
                 settingsState.iconBorderRadius = newSettings.iconBorderRadius;
+                updateIconAppearance = true;
             }
             if (newSettings.iconBorderColor && newSettings.iconBorderColor !== settingsState.iconBorderColor) {
                 settingsState.iconBorderColor = newSettings.iconBorderColor;
+                updateIconAppearance = true;
             }
             if (newSettings.iconBgColor && newSettings.iconBgColor !== settingsState.iconBgColor) {
                 settingsState.iconBgColor = newSettings.iconBgColor;
+                updateIconAppearance = true;
             }
+            if (newSettings.iconBgOpacity !== undefined && newSettings.iconBgOpacity !== settingsState.iconBgOpacity) {
+                settingsState.iconBgOpacity = newSettings.iconBgOpacity;
+                updateIconAppearance = true;
+            }
+
+            if (updateIconAppearance) {
+                applyIconAppearance(
+                    settingsState.iconBorderRadius,
+                    settingsState.iconBorderColor,
+                    settingsState.iconBgColor,
+                    settingsState.iconBgOpacity
+                );
+            }
+
+            if (newSettings.sectionPadding !== undefined && newSettings.sectionPadding !== settingsState.sectionPadding) {
+                settingsState.sectionPadding = newSettings.sectionPadding;
+                updateSectionAppearance = true;
+            }
+            if (newSettings.sectionBgColor && newSettings.sectionBgColor !== settingsState.sectionBgColor) {
+                settingsState.sectionBgColor = newSettings.sectionBgColor;
+                updateSectionAppearance = true;
+            }
+            if (newSettings.sectionBgOpacity !== undefined && newSettings.sectionBgOpacity !== settingsState.sectionBgOpacity) {
+                settingsState.sectionBgOpacity = newSettings.sectionBgOpacity;
+                updateSectionAppearance = true;
+            }
+            if (newSettings.sectionLineColor && newSettings.sectionLineColor !== settingsState.sectionLineColor) {
+                settingsState.sectionLineColor = newSettings.sectionLineColor;
+                updateSectionAppearance = true;
+            }
+
+            if (updateSectionAppearance) {
+                applySectionAppearance(
+                    settingsState.sectionPadding,
+                    settingsState.sectionBgColor,
+                    settingsState.sectionBgOpacity,
+                    settingsState.sectionLineColor
+                );
+            }
+
             if (newSettings.iconSpacing !== undefined && newSettings.iconSpacing !== settingsState.iconSpacing) {
                 settingsState.iconSpacing = newSettings.iconSpacing;
                 applyIconSpacingSetting(settingsState.iconSpacing);

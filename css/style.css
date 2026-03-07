@@ -375,6 +375,8 @@ body {
     margin-top: 20px;
     /* Reduced from 100px */
     padding: 20px;
+    position: relative;
+    z-index: 10;
 
     /* Default Layout: List (Block/Flex Column) */
     display: block;
@@ -673,6 +675,7 @@ body.name-display-hover .bookmark-item:hover .bookmark-name {
 .icon-layout-column .bookmark-name {
     text-align: center;
     -webkit-line-clamp: 3;
+    line-clamp: 3;
     /* Permite mais linhas no vertical */
 }
 
@@ -717,6 +720,7 @@ body.text-behavior-expand .bookmark-name {
     display: block;
     /* Remove o -webkit-box */
     -webkit-line-clamp: unset;
+    line-clamp: unset;
     -webkit-box-orient: unset;
     white-space: normal;
     overflow: visible;
@@ -725,6 +729,7 @@ body.text-behavior-expand .bookmark-name {
 
 body.text-behavior-single .bookmark-name {
     -webkit-line-clamp: 1;
+    line-clamp: 1;
 }
 
 /* Name alignment logic handled entirely by grid/flex and display: block now */
@@ -745,16 +750,6 @@ body.text-behavior-single .bookmark-name {
     /* Se houver outros elementos ao lado, como o X */
     background: var(--card);
 }
-
-/* Opcional: Ajuste no .bookmark-item para garantir que o input caiba bem */
-.bookmark-item {
-    /* ... (seus estilos existentes) ... */
-    /* Se você tiver display: flex e align-items: center, o input deve se alinhar bem.
-       Pode ser necessário ajustar o padding do .bookmark-item ou o tamanho do input
-       para que tudo fique visualmente agradável durante a edição. */
-}
-
-
 
 /* Adicione mais estilos conforme necessário */
 /* Estilos para Relógio, Data e Calendário */
@@ -894,8 +889,10 @@ body.text-behavior-single .bookmark-name {
     color: #ffffff;
     text-decoration: none;
     display: flex;
-    flex-direction: column;
-    gap: 4px;
+    flex-direction: row;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 12px;
     text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
 }
 
