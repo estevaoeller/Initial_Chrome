@@ -509,7 +509,50 @@ document.addEventListener('DOMContentLoaded', function () {
                 applySidebarWidthSetting(settingsState.sidebarWidth);
             }
 
-            applyIconAppearance(settingsState.iconBorderRadius, settingsState.iconBorderColor, settingsState.iconBgColor);
+            // Widget Reactivity
+            if (newSettings.clockStyle && newSettings.clockStyle !== settingsState.clockStyle) {
+                settingsState.clockStyle = newSettings.clockStyle;
+                const analogClockPlaceholder = document.getElementById('analog-clock-placeholder');
+                const digitalClockPlaceholder = document.getElementById('digital-clock-placeholder');
+                if (settingsState.clockStyle === 'digital') {
+                    analogClockPlaceholder.style.display = 'none';
+                    digitalClockPlaceholder.style.display = 'block';
+                    updateDigitalClock(digitalClockPlaceholder);
+                } else {
+                    analogClockPlaceholder.style.display = 'block';
+                    digitalClockPlaceholder.style.display = 'none';
+                    updateClock(analogClockPlaceholder);
+                }
+            }
+
+            if (newSettings.userName !== undefined && newSettings.userName !== settingsState.userName) {
+                settingsState.userName = newSettings.userName;
+                const greetingPlaceholder = document.getElementById('greeting-placeholder');
+                if (greetingPlaceholder) updateGreeting(greetingPlaceholder, settingsState.userName);
+            }
+
+            if (newSettings.weatherCity !== undefined && newSettings.weatherCity !== settingsState.weatherCity) {
+                settingsState.weatherCity = newSettings.weatherCity;
+                const weatherWidget = document.getElementById('weather-widget');
+                const weatherIcon = document.getElementById('weather-icon');
+                const weatherTemp = document.getElementById('weather-temp');
+                if (weatherWidget && weatherIcon && weatherTemp) {
+                    updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity);
+                }
+            }
+
+            if (newSettings.wallpaperSource !== undefined && newSettings.wallpaperSource !== settingsState.wallpaperSource ||
+                newSettings.wallpaperTheme !== undefined && newSettings.wallpaperTheme !== settingsState.wallpaperTheme ||
+                newSettings.wallpaperFrequency !== undefined && newSettings.wallpaperFrequency !== settingsState.wallpaperFrequency) {
+
+                settingsState.wallpaperSource = newSettings.wallpaperSource !== undefined ? newSettings.wallpaperSource : settingsState.wallpaperSource;
+                settingsState.wallpaperTheme = newSettings.wallpaperTheme !== undefined ? newSettings.wallpaperTheme : settingsState.wallpaperTheme;
+                settingsState.wallpaperFrequency = newSettings.wallpaperFrequency !== undefined ? newSettings.wallpaperFrequency : settingsState.wallpaperFrequency;
+
+                manageWallpaper(settingsState);
+            }
+
+            applyIconAppearance(settingsState.iconBorderRadius, settingsState.iconBorderColor, settingsState.iconBgColor, settingsState.iconBgOpacity);
             applyBookmarkFontSettings(
                 settingsState.bookmarkFontFamily,
                 settingsState.bookmarkFontSize,

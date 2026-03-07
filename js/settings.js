@@ -466,6 +466,13 @@ document.addEventListener('DOMContentLoaded', function () {
         saveSettings();
     });
 
+    if (quickLinksSize) {
+        quickLinksSize.addEventListener('input', function () {
+            if (quickLinksSizeValue) quickLinksSizeValue.textContent = this.value + 'px';
+            saveSettings();
+        });
+    }
+
     // Auto-save para campos sem display
     [
         wallpaperFolderPath,
@@ -478,7 +485,13 @@ document.addEventListener('DOMContentLoaded', function () {
         nameDisplay,
         textBehavior,
         sectionBgOpacity,
-        layoutMode // New
+        layoutMode, // New
+        clockStyle,
+        userName,
+        weatherCity,
+        wallpaperSource,
+        wallpaperTheme,
+        wallpaperApiKey
     ].forEach(element => {
         if (element) {
             element.addEventListener('input', saveSettings);
