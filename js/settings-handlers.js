@@ -94,7 +94,7 @@ export function applyTextBehaviorSetting(behavior) {
 }
 
 export function loadSettings(state, callback) {
-    chrome.storage.local.get(['extensionSettings'], result => {
+    chrome.storage.sync.get(['extensionSettings'], result => {
         const settings = result.extensionSettings || {};
         if (settings.iconSize !== undefined) {
             state.iconSize = settings.iconSize;

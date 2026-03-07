@@ -195,6 +195,28 @@ export function renameSpace(spaceId, newName, newIcon, callback) {
 }
 
 /**
+ * Rename a group (category)
+ */
+export function renameGroup(groupId, newName, callback) {
+    chrome.bookmarks.update(groupId, { title: newName }, () => {
+        if (callback) callback();
+    });
+}
+
+/**
+ * Create a new group (category) inside a space
+ */
+export function createGroup(spaceId, groupName, callback) {
+    chrome.bookmarks.create({ parentId: spaceId, title: groupName }, newGroup => {
+        if (callback) callback({
+            id: newGroup.id,
+            name: newGroup.title,
+            links: []
+        });
+    });
+}
+
+/**
  * Check if migration is needed (old structure -> new spaces structure)
  * Old structure: Root > Categories > Bookmarks
  * New structure: Root > Spaces > Groups > Bookmarks
@@ -278,37 +300,33 @@ export function moveBookmark(bookmarkId, destinationFolderId, index, callback) {
     });
 }
 
-export function addBookmarkToChrome(categoryName, bookmark, callback) {
-    getRootFolder(root => {
-        if (!root) { if (callback) callback(); return; }
-        chrome.bookmarks.getChildren(root.id, children => {
-            let category = children.find(c => c.title === categoryName && !c.url);
-            const createBookmark = folderId => chrome.bookmarks.create({ parentId: folderId, title: bookmark.name, url: bookmark.url }, (newNode) => callback && callback(newNode));
-            if (category) {
-                createBookmark(category.id);
-            } else {
-                chrome.bookmarks.create({ parentId: root.id, title: categoryName }, newFolder => {
-                    createBookmark(newFolder.id);
-                });
-            }
-        });
+export function addBookmarkToChrome(spaceId, categoryName, bookmark, callback) {
+    if (!spaceId) { if (callback) callback(); return; }
+    chrome.bookmarks.getChildren(spaceId, children => {
+        let category = children.find(c => c.title === categoryName && !c.url);
+        const createBookmark = folderId => chrome.bookmarks.create({ parentId: folderId, title: bookmark.name, url: bookmark.url }, (newNode) => callback && callback(newNode));
+        if (category) {
+            createBookmark(category.id);
+        } else {
+            chrome.bookmarks.create({ parentId: spaceId, title: categoryName }, newFolder => {
+                createBookmark(newFolder.id);
+            });
+        }
     });
 }
 
-export function removeBookmarkFromChrome(categoryName, bookmarkUrl, callback) {
-    getRootFolder(root => {
-        if (!root) { if (callback) callback(); return; }
-        chrome.bookmarks.getChildren(root.id, children => {
-            const category = children.find(c => c.title === categoryName && !c.url);
-            if (!category) { if (callback) callback(); return; }
-            chrome.bookmarks.getChildren(category.id, bookmarks => {
-                const bm = bookmarks.find(b => b.url === bookmarkUrl);
-                if (bm) {
-                    chrome.bookmarks.remove(bm.id, () => callback && callback());
-                } else {
-                    if (callback) callback();
-                }
-            });
+export function removeBookmarkFromChrome(spaceId, categoryName, bookmarkUrl, callback) {
+    if (!spaceId) { if (callback) callback(); return; }
+    chrome.bookmarks.getChildren(spaceId, children => {
+        const category = children.find(c => c.title === categoryName && !c.url);
+        if (!category) { if (callback) callback(); return; }
+        chrome.bookmarks.getChildren(category.id, bookmarks => {
+            const bm = bookmarks.find(b => b.url === bookmarkUrl);
+            if (bm) {
+                chrome.bookmarks.remove(bm.id, () => callback && callback());
+            } else {
+                if (callback) callback();
+            }
         });
     });
 }
@@ -338,14 +356,14 @@ export function getDragAfterElement(container, y) {
     }, { offset: Number.NEGATIVE_INFINITY }).element;
 }
 
-export function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom, currentBookmarks, renderBookmarks) {
+export function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom, currentBookmarks, renderBookmarks, spaceId) {
     const categoryIndex = currentBookmarks.findIndex(cat => cat.name === categoryNameToDeleteFrom);
     if (categoryIndex > -1) {
         const category = currentBookmarks[categoryIndex];
         const linkIndex = category.links.findIndex(link => link.url === urlToDelete);
         if (linkIndex > -1) {
             if (confirm(`Tem certeza que deseja excluir o bookmark "${category.links[linkIndex].name}"?`)) {
-                removeBookmarkFromChrome(category.name, urlToDelete, () => {
+                removeBookmarkFromChrome(spaceId, category.name, urlToDelete, () => {
                     category.links.splice(linkIndex, 1);
                     renderBookmarks(currentBookmarks);
                 });
@@ -371,10 +389,10 @@ export function toggleTheme() {
     const current = THEME_LIST.find(t => document.body.classList.contains(`${t}-theme`)) || "light";
     const next = THEME_LIST[(THEME_LIST.indexOf(current) + 1) % THEME_LIST.length];
     applyTheme(next);
-    chrome.storage.local.get(["extensionSettings"], data => {
+    chrome.storage.sync.get(["extensionSettings"], data => {
         const settings = data.extensionSettings || {};
         settings.themePreset = next;
-        chrome.storage.local.set({ extensionSettings: settings });
+        chrome.storage.sync.set({ extensionSettings: settings });
     });
 }
 

@@ -3,27 +3,29 @@ import { addBookmarkToChrome, removeBookmarkFromChrome, moveBookmark, getRootFol
 
 let draggedItem = null;
 let sourceCategoryName = null;
+let sourceSpaceId = null;
 let placeholder = document.createElement('div');
 placeholder.className = 'drop-placeholder';
 
-export function setupDragParams(item, categoryName) {
+export function setupDragParams(item, categoryName, spaceId) {
     item.draggable = true;
-    item.addEventListener('dragstart', (e) => handleDragStart(e, item, categoryName));
+    item.addEventListener('dragstart', (e) => handleDragStart(e, item, categoryName, spaceId));
     item.addEventListener('dragend', handleDragEnd);
 }
 
-export function setupCategoryDropZone(categoryDiv, categoryName, getBookmarksState, setBookmarksState, renderCallback) {
+export function setupCategoryDropZone(categoryDiv, categoryName, getBookmarksState, setBookmarksState, renderCallback, spaceId) {
     const grid = categoryDiv.querySelector('.bookmarks-grid');
 
     categoryDiv.addEventListener('dragover', (e) => handleDragOver(e, grid));
     categoryDiv.addEventListener('dragenter', (e) => handleDragEnter(e, categoryDiv));
     categoryDiv.addEventListener('dragleave', (e) => handleDragLeave(e, categoryDiv));
-    categoryDiv.addEventListener('drop', (e) => handleDrop(e, grid, categoryName, getBookmarksState, setBookmarksState, renderCallback));
+    categoryDiv.addEventListener('drop', (e) => handleDrop(e, grid, categoryName, getBookmarksState, setBookmarksState, renderCallback, spaceId));
 }
 
-function handleDragStart(e, item, categoryName) {
+function handleDragStart(e, item, categoryName, spaceId) {
     draggedItem = item;
     sourceCategoryName = categoryName;
+    sourceSpaceId = spaceId;
     e.dataTransfer.effectAllowed = 'move';
     // Guardamos dados básicos para o caso de drop externo, embora usemos as variáveis globais para interno
     e.dataTransfer.setData('text/plain', JSON.stringify({
@@ -41,6 +43,7 @@ function handleDragEnd(e) {
         draggedItem.style.display = '';
         draggedItem = null;
         sourceCategoryName = null;
+        sourceSpaceId = null;
     }
     if (placeholder.parentNode) {
         placeholder.parentNode.removeChild(placeholder);
@@ -70,7 +73,7 @@ function handleDragLeave(e, categoryDiv) {
     }
 }
 
-async function handleDrop(e, grid, targetCategoryName, getBookmarksState, setBookmarksState, renderCallback) {
+async function handleDrop(e, grid, targetCategoryName, getBookmarksState, setBookmarksState, renderCallback, targetSpaceId) {
     e.preventDefault();
     document.querySelectorAll('.bookmark-category.drag-over').forEach(el => el.classList.remove('drag-over'));
 
@@ -98,7 +101,7 @@ async function handleDrop(e, grid, targetCategoryName, getBookmarksState, setBoo
                 targetCategory.links.splice(dropIndex, 0, movedItem);
 
                 // Atualizar Chrome
-                await moveBookmarkInChrome(movedItem, sourceCategoryName, targetCategoryName, dropIndex);
+                await moveBookmarkInChrome(movedItem, sourceCategoryName, targetCategoryName, dropIndex, sourceSpaceId, targetSpaceId);
 
                 setBookmarksState(currentBookmarks);
                 renderCallback(currentBookmarks);
@@ -120,7 +123,7 @@ async function handleDrop(e, grid, targetCategoryName, getBookmarksState, setBoo
 
             if (targetCategory) {
                 // Adiciona no Chrome e depois no estado local
-                addBookmarkToChrome(targetCategoryName, newItem, (createdNode) => {
+                addBookmarkToChrome(targetSpaceId, targetCategoryName, newItem, (createdNode) => {
                     // Atualiza com dado real do chrome se possível
                     if (createdNode) {
                         newItem.id = createdNode.id;
@@ -165,23 +168,20 @@ function getDragAfterElement(container, x, y) {
     }, { element: null, dist: Number.POSITIVE_INFINITY }).element;
 }
 
-async function moveBookmarkInChrome(item, sourceCat, targetCat, newIndex) {
+async function moveBookmarkInChrome(item, sourceCat, targetCat, newIndex, sourceSpaceId, targetSpaceId) {
     return new Promise(resolve => {
-        // Obter os IDs das pastas
-        getRootFolder(root => {
-            if (!root) { resolve(); return; }
-            chrome.bookmarks.getChildren(root.id, children => {
-                const targetFolder = children.find(c => c.title === targetCat);
-                if (targetFolder && item.id) {
-                    // Chrome API move
-                    moveBookmark(item.id, targetFolder.id, newIndex, resolve);
-                } else {
-                    // Fallback
-                    removeBookmarkFromChrome(sourceCat, item.url, () => {
-                        addBookmarkToChrome(targetCat, item, resolve);
-                    });
-                }
-            });
+        // Obter os IDs das pastas da Space atual
+        chrome.bookmarks.getChildren(targetSpaceId, children => {
+            const targetFolder = children.find(c => c.title === targetCat && !c.url);
+            if (targetFolder && item.id && sourceSpaceId === targetSpaceId) {
+                // Chrome API move within current space
+                moveBookmark(item.id, targetFolder.id, newIndex, resolve);
+            } else {
+                // Fallback / Cross-space move (via delete + add)
+                removeBookmarkFromChrome(sourceSpaceId, sourceCat, item.url, () => {
+                    addBookmarkToChrome(targetSpaceId, targetCat, item, resolve);
+                });
+            }
         });
     });
 }

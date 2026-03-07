@@ -122,8 +122,8 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Carregar configurações salvas
     function loadSettings() {
-        chrome.storage.local.get(['extensionSettings'], function (result) {
-            const settings = result.extensionSettings || defaultSettings;
+        chrome.storage.sync.get(['extensionSettings'], function (result) {
+            const settings = Object.assign({}, defaultSettings, result.extensionSettings || {});
 
             // Helper to ensure full hex for color inputs
             const ensureFullHex = (hex) => {
@@ -230,7 +230,7 @@ document.addEventListener('DOMContentLoaded', function () {
             sectionLineColor: sectionLineColor.value
         };
 
-        chrome.storage.local.set({ extensionSettings: settings }, function () {
+        chrome.storage.sync.set({ extensionSettings: settings }, function () {
             if (chrome.runtime.lastError) {
                 console.error("Erro ao salvar configurações:", chrome.runtime.lastError.message);
             } else {
@@ -390,7 +390,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // QUICK LINKS LOGIC
     function loadQuickLinksList() {
-        chrome.storage.local.get(['quickLinks'], (result) => {
+        chrome.storage.sync.get(['quickLinks'], (result) => {
             const links = result.quickLinks || [];
             renderQuickLinksUI(links);
         });
@@ -488,12 +488,12 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function reorderQuickLinks(fromIndex, toIndex) {
-        chrome.storage.local.get(['quickLinks'], (result) => {
+        chrome.storage.sync.get(['quickLinks'], (result) => {
             const links = result.quickLinks || [];
             if (fromIndex >= 0 && fromIndex < links.length) {
                 const item = links.splice(fromIndex, 1)[0];
                 links.splice(toIndex, 0, item);
-                chrome.storage.local.set({ quickLinks: links }, () => {
+                chrome.storage.sync.set({ quickLinks: links }, () => {
                     renderQuickLinksUI(links);
                 });
             }
@@ -507,10 +507,10 @@ document.addEventListener('DOMContentLoaded', function () {
         if (!name || !url) return alert('Preencha nome e URL');
         if (!url.startsWith('http')) url = 'https://' + url;
 
-        chrome.storage.local.get(['quickLinks'], (result) => {
+        chrome.storage.sync.get(['quickLinks'], (result) => {
             const links = result.quickLinks || [];
             links.push({ name, url });
-            chrome.storage.local.set({ quickLinks: links }, () => {
+            chrome.storage.sync.set({ quickLinks: links }, () => {
                 newLinkName.value = '';
                 newLinkUrl.value = '';
                 renderQuickLinksUI(links);
@@ -519,11 +519,11 @@ document.addEventListener('DOMContentLoaded', function () {
     }
 
     function removeQuickLink(index) {
-        chrome.storage.local.get(['quickLinks'], (result) => {
+        chrome.storage.sync.get(['quickLinks'], (result) => {
             const links = result.quickLinks || [];
             if (index >= 0 && index < links.length) {
                 links.splice(index, 1);
-                chrome.storage.local.set({ quickLinks: links }, () => {
+                chrome.storage.sync.set({ quickLinks: links }, () => {
                     renderQuickLinksUI(links);
                 });
             }
@@ -544,23 +544,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Exportar dados
     exportDataBtn.addEventListener('click', function () {
-        chrome.storage.local.get(['userBookmarks', 'extensionSettings'], function (result) {
-            const exportData = {
-                bookmarks: result.userBookmarks || [],
-                settings: result.extensionSettings || defaultSettings,
-                exportDate: new Date().toISOString()
-            };
+        chrome.storage.local.get(['userBookmarks'], function (resultLocal) {
+            chrome.storage.sync.get(['extensionSettings'], function (resultSync) {
+                const exportData = {
+                    bookmarks: resultLocal.userBookmarks || [],
+                    settings: resultSync.extensionSettings || defaultSettings,
+                    exportDate: new Date().toISOString()
+                };
 
-            const dataStr = JSON.stringify(exportData, null, 2);
-            const dataBlob = new Blob([dataStr], { type: 'application/json' });
-            const url = URL.createObjectURL(dataBlob);
+                const dataStr = JSON.stringify(exportData, null, 2);
+                const dataBlob = new Blob([dataStr], { type: 'application/json' });
+                const url = URL.createObjectURL(dataBlob);
 
-            const link = document.createElement('a');
-            link.href = url;
-            link.download = `extensao-bookmarks-${new Date().toISOString().split('T')[0]}.json`;
-            link.click();
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `extensao-bookmarks-${new Date().toISOString().split('T')[0]}.json`;
+                link.click();
 
-            URL.revokeObjectURL(url);
+                URL.revokeObjectURL(url);
+            });
         });
     });
 
@@ -582,20 +584,22 @@ document.addEventListener('DOMContentLoaded', function () {
 
                         if (importData.bookmarks) {
                             dataToSave.userBookmarks = importData.bookmarks;
+                            // Bookmarks must remain local due to eventual length limits on sync APIs or Chrome API preference.
+                            chrome.storage.local.set({ userBookmarks: importData.bookmarks });
                         }
 
                         if (importData.settings) {
-                            dataToSave.extensionSettings = importData.settings;
+                            chrome.storage.sync.set({ extensionSettings: importData.settings }, function () {
+                                if (chrome.runtime.lastError) {
+                                    console.error("Erro ao importar dados de config:", chrome.runtime.lastError.message);
+                                } else {
+                                    console.log("Dados importados com sucesso!");
+                                    loadSettings(); // Recarregar configurações na interface
+                                }
+                            });
+                        } else {
+                            loadSettings();
                         }
-
-                        chrome.storage.local.set(dataToSave, function () {
-                            if (chrome.runtime.lastError) {
-                                console.error("Erro ao importar dados:", chrome.runtime.lastError.message);
-                            } else {
-                                console.log("Dados importados com sucesso!");
-                                loadSettings(); // Recarregar configurações na interface
-                            }
-                        });
                     }
                 } catch (error) {
                     console.error("Erro ao processar arquivo:", error);
@@ -608,7 +612,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Reiniciar configurações
     resetSettingsBtn.addEventListener('click', function () {
         if (confirm("Tem certeza que deseja reiniciar todas as configurações para os valores padrão?")) {
-            chrome.storage.local.set({ extensionSettings: defaultSettings }, function () {
+            chrome.storage.sync.set({ extensionSettings: defaultSettings }, function () {
                 if (chrome.runtime.lastError) {
                     console.error("Erro ao reiniciar configurações:", chrome.runtime.lastError.message);
                 } else {

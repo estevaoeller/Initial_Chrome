@@ -109,16 +109,17 @@ document.addEventListener('DOMContentLoaded', function () {
         loadGroupsFromSpace(spaceId, groups => {
             currentBookmarks = groups;
             const stateHelpers = {
+                spaceId: spaceId,
                 getBookmarks: () => currentBookmarks,
                 setBookmarks: (newVal) => { currentBookmarks = newVal; }
             };
             renderBookmarks(currentBookmarks, contentArea, settingsState.iconSize, stateHelpers);
         });
         // Save to settings
-        chrome.storage.local.get(['extensionSettings'], result => {
+        chrome.storage.sync.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
             settings.lastActiveSpace = spaceId;
-            chrome.storage.local.set({ extensionSettings: settings });
+            chrome.storage.sync.set({ extensionSettings: settings });
         });
     }
 
@@ -130,10 +131,10 @@ document.addEventListener('DOMContentLoaded', function () {
             sidebarToggle.textContent = isCollapsed ? '▶' : '◀';
         }
         // Save state
-        chrome.storage.local.get(['extensionSettings'], result => {
+        chrome.storage.sync.get(['extensionSettings'], result => {
             const settings = result.extensionSettings || {};
             settings.sidebarCollapsed = isCollapsed;
-            chrome.storage.local.set({ extensionSettings: settings });
+            chrome.storage.sync.set({ extensionSettings: settings });
         });
     }
 
@@ -199,21 +200,20 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         // Inicialização de outros componentes
-        chrome.storage.local.get(['extensionSettings', 'theme'], result => {
+        chrome.storage.sync.get(['extensionSettings', 'theme'], result => {
             const settings = result.extensionSettings || {};
             let theme = settings.themePreset;
             if (!theme && result.theme && ['light', 'dark'].includes(result.theme)) {
                 theme = result.theme;
                 settings.themePreset = theme;
-                chrome.storage.local.set({ extensionSettings: settings }, () => {
-                    chrome.storage.local.remove('theme');
+                chrome.storage.sync.set({ extensionSettings: settings }, () => {
+                    chrome.storage.sync.remove('theme');
                 });
             }
             theme = theme || 'light';
             settingsState.themePreset = theme;
             applyTheme(theme);
         });
-        if (themeToggleBtn) themeToggleBtn.addEventListener('click', toggleTheme);
 
         if (analogClockPlaceholder) {
             updateClock(analogClockPlaceholder);
@@ -257,17 +257,17 @@ document.addEventListener('DOMContentLoaded', function () {
             });
         }
 
-        chrome.storage.local.get(['quickLinks'], result => {
+        chrome.storage.sync.get(['quickLinks'], result => {
             if (result.quickLinks && result.quickLinks.length > 0) {
                 renderQuickLinks(result.quickLinks);
             } else {
                 renderQuickLinks(DEFAULT_QUICK_LINKS);
-                chrome.storage.local.set({ quickLinks: DEFAULT_QUICK_LINKS });
+                chrome.storage.sync.set({ quickLinks: DEFAULT_QUICK_LINKS });
             }
         });
 
         // Load Font Size & Section Styles
-        chrome.storage.local.get(['extensionSettings'], res => {
+        chrome.storage.sync.get(['extensionSettings'], res => {
             const settings = res.extensionSettings || {};
             if (settings.quickLinksSize) {
                 document.documentElement.style.setProperty('--quick-links-size', settings.quickLinksSize + 'px');
@@ -314,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
     loadSettings(settingsState, initialize);
 
     chrome.storage.onChanged.addListener((changes, area) => {
-        if (area === 'local' && changes.extensionSettings) {
+        if (area === 'sync' && changes.extensionSettings) {
             const newSettings = changes.extensionSettings.newValue || {};
             if (newSettings.iconSize !== undefined && newSettings.iconSize !== settingsState.iconSize) {
                 settingsState.iconSize = newSettings.iconSize;
@@ -397,10 +397,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             settingsState.bookmarkFontColor
                         );
                         // Persist change
-                        chrome.storage.local.get(['extensionSettings'], (res) => {
+                        chrome.storage.sync.get(['extensionSettings'], (res) => {
                             const s = res.extensionSettings || {};
                             s.bookmarkFontColor = LIGHT_TEXT;
-                            chrome.storage.local.set({ extensionSettings: s });
+                            chrome.storage.sync.set({ extensionSettings: s });
                         });
                     }
                 } else if (settingsState.themePreset === 'light' || settingsState.themePreset === 'minimal') {
@@ -412,10 +412,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             settingsState.bookmarkFontColor
                         );
                         // Persist change
-                        chrome.storage.local.get(['extensionSettings'], (res) => {
+                        chrome.storage.sync.get(['extensionSettings'], (res) => {
                             const s = res.extensionSettings || {};
                             s.bookmarkFontColor = DARK_TEXT;
-                            chrome.storage.local.set({ extensionSettings: s });
+                            chrome.storage.sync.set({ extensionSettings: s });
                         });
                     }
                 }
@@ -451,15 +451,19 @@ function setupSidebarActions() {
     if (themeToggleBtn) {
         themeToggleBtn.addEventListener('click', () => {
             const themes = ['light', 'dark', 'solar', 'minimal'];
-            const current = settingsState.themePreset || 'light';
+
+            // Determine current theme from body class
+            const currentClass = Array.from(document.body.classList).find(c => c.endsWith('-theme'));
+            const current = currentClass ? currentClass.replace('-theme', '') : 'light';
+
             const nextIndex = (themes.indexOf(current) + 1) % themes.length;
             const nextTheme = themes[nextIndex];
 
             // Update Storage (Listener will handle UI update)
-            chrome.storage.local.get(['extensionSettings'], res => {
+            chrome.storage.sync.get(['extensionSettings'], res => {
                 const s = res.extensionSettings || {};
                 s.themePreset = nextTheme;
-                chrome.storage.local.set({ extensionSettings: s });
+                chrome.storage.sync.set({ extensionSettings: s });
             });
         });
     }
