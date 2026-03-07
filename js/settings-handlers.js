@@ -1,3 +1,5 @@
+import { defaultSettings } from './config.js';
+
 export function applyIconSizeSetting(size) {
     document.documentElement.style.setProperty('--icon-size', `${size}px`);
     document.querySelectorAll('.bookmark-favicon').forEach(img => {
@@ -135,69 +137,19 @@ export function applyTextBehaviorSetting(behavior) {
 
 export function loadSettings(state, callback) {
     chrome.storage.sync.get(['extensionSettings'], result => {
-        const settings = result.extensionSettings || {};
-        if (settings.iconSize !== undefined) {
-            state.iconSize = settings.iconSize;
-        }
-        if (settings.iconBorderRadius !== undefined) {
-            state.iconBorderRadius = settings.iconBorderRadius;
-        }
-        if (settings.iconBorderColor) {
-            state.iconBorderColor = settings.iconBorderColor;
-        }
-        if (settings.iconBgColor) {
-            state.iconBgColor = settings.iconBgColor;
-        }
-        if (settings.iconBgOpacity !== undefined) {
-            state.iconBgOpacity = settings.iconBgOpacity;
-        } else {
-            state.iconBgOpacity = 1;
-        }
-        if (settings.iconSpacing !== undefined) {
-            state.iconSpacing = settings.iconSpacing;
-        }
-        if (settings.iconGap !== undefined) {
-            state.iconGap = settings.iconGap;
-        } else {
+        const settings = Object.assign({}, defaultSettings, result.extensionSettings || {});
+
+        // Map settings to state
+        Object.keys(settings).forEach(key => {
+            state[key] = settings[key];
+        });
+
+        // Specific fallbacks
+        if (state.iconGap === undefined) {
             state.iconGap = state.iconSpacing;
         }
 
-        if (settings.bookmarkFontFamily) {
-            state.bookmarkFontFamily = settings.bookmarkFontFamily;
-        }
-        if (settings.bookmarkFontSize !== undefined) {
-            state.bookmarkFontSize = settings.bookmarkFontSize;
-        }
-        if (settings.bookmarkFontColor) {
-            state.bookmarkFontColor = settings.bookmarkFontColor;
-        }
-
-        if (settings.bookmarkMinWidth !== undefined) {
-            state.bookmarkMinWidth = settings.bookmarkMinWidth;
-        }
-
-        if (settings.filterColor) {
-            state.filterColor = settings.filterColor;
-        }
-        if (settings.filterOpacity !== undefined) {
-            state.filterOpacity = settings.filterOpacity;
-        }
-
-        if (settings.categoryGap !== undefined) {
-            state.categoryGap = settings.categoryGap;
-        } else {
-            state.categoryGap = 20; // Default
-        }
-        if (settings.iconLayout) {
-            state.iconLayout = settings.iconLayout;
-        }
-        if (settings.nameDisplay) {
-            state.nameDisplay = settings.nameDisplay;
-        }
-        if (settings.textBehavior) {
-            state.textBehavior = settings.textBehavior;
-        }
-
+        // Apply settings
         applyIconSizeSetting(state.iconSize);
         applyIconAppearance(state.iconBorderRadius, state.iconBorderColor, state.iconBgColor, state.iconBgOpacity);
         applyIconSpacingSetting(state.iconSpacing);
@@ -205,50 +157,16 @@ export function loadSettings(state, callback) {
         applyCategoryGapSetting(state.categoryGap);
         applyIconLayoutSetting(state.iconLayout);
         applyNameDisplaySetting(state.nameDisplay);
-        applyTextBehaviorSetting(state.textBehavior); // New
+        applyTextBehaviorSetting(state.textBehavior);
         applyBookmarkFontSettings(state.bookmarkFontFamily, state.bookmarkFontSize, state.bookmarkFontColor);
         applyBookmarkMinWidthSetting(state.bookmarkMinWidth);
-        if (settings.layoutMode) {
-            state.layoutMode = settings.layoutMode;
-        } else {
-            state.layoutMode = 'list';
-        }
-        if (settings.columnCount) {
-            state.columnCount = settings.columnCount;
-        } else {
-            state.columnCount = 3; // Default
-        }
-
-        // New Widget Variables
-        state.clockStyle = settings.clockStyle || 'analog';
-        state.userName = settings.userName || '';
-        state.weatherCity = settings.weatherCity || '';
-        state.wallpaperSource = settings.wallpaperSource || 'local';
-        state.wallpaperTheme = settings.wallpaperTheme || 'nature';
-        state.wallpaperApiKey = settings.wallpaperApiKey || '';
-
-        applySectionAppearance(
-            settings.sectionPadding !== undefined ? settings.sectionPadding : 15,
-            settings.sectionBgColor || '#ffffff',
-            settings.sectionBgOpacity !== undefined ? settings.sectionBgOpacity : 1,
-            settings.sectionLineColor || '#007bff'
-        );
-
-        // Sidebar settings
-        if (settings.lastActiveSpace) {
-            state.lastActiveSpace = settings.lastActiveSpace;
-        }
-        if (settings.sidebarCollapsed !== undefined) {
-            state.sidebarCollapsed = settings.sidebarCollapsed;
-        }
-        if (settings.sidebarWidth !== undefined) {
-            state.sidebarWidth = settings.sidebarWidth;
-        } else {
-            state.sidebarWidth = 200;
-        }
-
+        applySectionAppearance(state.sectionPadding, state.sectionBgColor, state.sectionBgOpacity, state.sectionLineColor);
         applySidebarWidthSetting(state.sidebarWidth);
         applyLayoutMode(state.layoutMode, state.columnCount);
+
+        if (state.filterColor !== undefined) {
+            applyBackgroundFilter(state.filterColor, state.filterOpacity);
+        }
 
         if (callback) callback();
     });

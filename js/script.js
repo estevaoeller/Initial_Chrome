@@ -459,40 +459,19 @@ document.addEventListener('DOMContentLoaded', function () {
                 settingsState.themePreset = newSettings.themePreset;
                 applyTheme(settingsState.themePreset);
 
-                // Auto-adjust font color for Dark/Light modes if using defaults
+                // Auto-adjust font color for Dark/Light modes naturally (No auto-saving to avoid race conditions)
                 const DARK_TEXT = '#333333';
                 const LIGHT_TEXT = '#e2e8f0';
 
-                if (settingsState.themePreset === 'dark' || settingsState.themePreset === 'solar') { // Solar is also dark-ish usually, or check specifically
+                if (settingsState.themePreset === 'dark' || settingsState.themePreset === 'solar') {
                     if (settingsState.bookmarkFontColor === DARK_TEXT) {
                         settingsState.bookmarkFontColor = LIGHT_TEXT;
-                        // Update state and UI
-                        applyBookmarkFontSettings(
-                            settingsState.bookmarkFontFamily,
-                            settingsState.bookmarkFontSize,
-                            settingsState.bookmarkFontColor
-                        );
-                        // Persist change
-                        chrome.storage.sync.get(['extensionSettings'], (res) => {
-                            const s = res.extensionSettings || {};
-                            s.bookmarkFontColor = LIGHT_TEXT;
-                            chrome.storage.sync.set({ extensionSettings: s });
-                        });
+                        applyBookmarkFontSettings(settingsState.bookmarkFontFamily, settingsState.bookmarkFontSize, settingsState.bookmarkFontColor);
                     }
                 } else if (settingsState.themePreset === 'light' || settingsState.themePreset === 'minimal') {
                     if (settingsState.bookmarkFontColor === LIGHT_TEXT) {
                         settingsState.bookmarkFontColor = DARK_TEXT;
-                        applyBookmarkFontSettings(
-                            settingsState.bookmarkFontFamily,
-                            settingsState.bookmarkFontSize,
-                            settingsState.bookmarkFontColor
-                        );
-                        // Persist change
-                        chrome.storage.sync.get(['extensionSettings'], (res) => {
-                            const s = res.extensionSettings || {};
-                            s.bookmarkFontColor = DARK_TEXT;
-                            chrome.storage.sync.set({ extensionSettings: s });
-                        });
+                        applyBookmarkFontSettings(settingsState.bookmarkFontFamily, settingsState.bookmarkFontSize, settingsState.bookmarkFontColor);
                     }
                 }
             }

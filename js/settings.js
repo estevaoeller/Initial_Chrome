@@ -1,4 +1,5 @@
 // js/settings.js
+import { defaultSettings } from './config.js';
 document.addEventListener('DOMContentLoaded', function () {
     console.log("Página de configurações carregada.");
 
@@ -72,6 +73,8 @@ document.addEventListener('DOMContentLoaded', function () {
     const wallpaperApiKey = document.getElementById('wallpaper-api-key');
     const wallpaperLocalConfig = document.getElementById('wallpaper-local-config');
     const wallpaperUnsplashConfig = document.getElementById('wallpaper-unsplash-config');
+    const toggleApiKeyBtn = document.getElementById('toggle-api-key-btn');
+    const clearApiKeyBtn = document.getElementById('clear-api-key-btn');
 
     // Toggle Wallpaper Configs based on Source
     if (wallpaperSource) {
@@ -86,6 +89,27 @@ document.addEventListener('DOMContentLoaded', function () {
                 wallpaperLocalConfig.style.display = 'none';
                 wallpaperUnsplashConfig.style.display = 'none';
             }
+        });
+    }
+
+    if (toggleApiKeyBtn) {
+        toggleApiKeyBtn.addEventListener('click', () => {
+            if (wallpaperApiKey.type === 'password') {
+                wallpaperApiKey.type = 'text';
+                toggleApiKeyBtn.textContent = '🙈'; // Monkey hide icon
+            } else {
+                wallpaperApiKey.type = 'password';
+                toggleApiKeyBtn.textContent = '👁️'; // Eye icon
+            }
+        });
+    }
+
+    if (clearApiKeyBtn) {
+        clearApiKeyBtn.addEventListener('click', () => {
+            wallpaperApiKey.value = '';
+            // Dispara um evento change manual para acionar o auto-save
+            const event = new Event('change');
+            wallpaperApiKey.dispatchEvent(event);
         });
     }
 
@@ -111,43 +135,15 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
-    // Configurações padrão
-    // Configurações padrão
-    const defaultSettings = {
-        wallpaperFolderPath: "C:\\Users\\estev\\OneDrive\\Imagens\\Wallpapers",
-        wallpaperFrequency: 1,
-        filterColor: "#000000",
-        filterOpacity: 0.3,
-        iconSize: 32,
-        iconSpacing: 8,
-        iconGap: 8,
-        categoryGap: 20,
-        bookmarkMinWidth: 100,
-        iconBorderRadius: 6,
-        iconBorderColor: "#475569", // Dark Theme Default
-        iconBgColor: "#334155", // Dark Theme Default
-        iconBgOpacity: 1,
-        bookmarkFontFamily: "sans-serif",
-        bookmarkFontSize: 14,
-        bookmarkFontColor: "#e2e8f0", // Dark Theme Default
-        nameDisplay: "always",
-        textBehavior: "truncate",
-        iconLayout: "row", // Default
-        themePreset: "dark",
-        layoutMode: "list",
-        columnCount: 3,
-        sidebarWidth: 40,
-        quickLinksSize: 13,
-        sectionPadding: 15,
-        sectionBgColor: "#1e293b", // Dark Theme Default
-        sectionBgOpacity: 1,
-        sectionLineColor: "#38bdf8", // Dark Theme Default
-        clockStyle: "analog",
-        userName: "",
-        weatherCity: "",
-        wallpaperSource: "local",
-        wallpaperTheme: "nature",
-        wallpaperApiKey: ""
+    let isInitializing = true;
+
+    // Helper to ensure full hex for color inputs
+    const ensureFullHex = (hex) => {
+        if (!hex) return "#000000";
+        if (hex.length === 4) {
+            return "#" + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
+        }
+        return hex;
     };
 
     function toggleColumnCountDisplay(mode) {
@@ -160,17 +156,9 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Carregar configurações salvas
     function loadSettings() {
+        isInitializing = true;
         chrome.storage.sync.get(['extensionSettings'], function (result) {
             const settings = Object.assign({}, defaultSettings, result.extensionSettings || {});
-
-            // Helper to ensure full hex for color inputs
-            const ensureFullHex = (hex) => {
-                if (!hex) return "#000000";
-                if (hex.length === 4) {
-                    return "#" + hex[1] + hex[1] + hex[2] + hex[2] + hex[3] + hex[3];
-                }
-                return hex;
-            };
 
             wallpaperFolderPath.value = settings.wallpaperFolderPath;
             wallpaperFrequency.value = settings.wallpaperFrequency;
@@ -254,55 +242,77 @@ document.addEventListener('DOMContentLoaded', function () {
             themePreset.value = settings.themePreset || 'light';
             document.body.classList.remove('light-theme', 'dark-theme', 'solar-theme', 'minimal-theme');
             document.body.classList.add(`${themePreset.value}-theme`);
+
+            // Allow saving after all elements are loaded and events dispatched
+            setTimeout(() => {
+                isInitializing = false;
+            }, 100);
         });
     }
 
-    // Salvar configurações
-    function saveSettings() {
-        const settings = {
-            wallpaperFolderPath: wallpaperFolderPath.value,
-            wallpaperFrequency: parseFloat(wallpaperFrequency.value),
-            filterColor: filterColor.value,
-            filterOpacity: parseFloat(filterOpacity.value),
-            iconSize: parseInt(iconSize.value),
-            iconSpacing: parseInt(iconSpacing.value),
-            iconGap: parseInt(iconGap.value),
-            categoryGap: parseInt(categoryGap.value),
-            bookmarkMinWidth: parseInt(bookmarkMinWidth.value),
-            iconBorderRadius: parseInt(iconBorderRadius.value),
-            iconBorderColor: iconBorderColor.value,
-            iconBgColor: iconBgColor.value,
-            iconBgOpacity: iconBgOpacity ? parseFloat(iconBgOpacity.value) : 1,
-            bookmarkFontFamily: bookmarkFontFamily.value,
-            bookmarkFontSize: parseInt(bookmarkFontSize.value),
-            bookmarkFontColor: bookmarkFontColor.value,
-            nameDisplay: nameDisplay.value,
-            textBehavior: textBehavior.value,
-            iconLayout: iconLayout.value, // New
-            themePreset: themePreset.value,
-            layoutMode: layoutMode.value,
-            columnCount: parseInt(columnCount.value),
-            sidebarWidth: parseInt(sidebarWidth.value),
-            quickLinksSize: parseInt(quickLinksSize.value || 13),
-            sectionPadding: parseInt(sectionPadding.value || 15),
-            sectionBgColor: sectionBgColor.value,
-            sectionBgOpacity: sectionBgOpacity ? parseFloat(sectionBgOpacity.value) : 1,
-            sectionLineColor: sectionLineColor.value,
-            clockStyle: clockStyle ? clockStyle.value : 'analog',
-            userName: userName ? userName.value.trim() : '',
-            weatherCity: weatherCity ? weatherCity.value.trim() : '',
-            wallpaperSource: wallpaperSource ? wallpaperSource.value : 'local',
-            wallpaperTheme: wallpaperTheme ? wallpaperTheme.value.trim() : 'nature',
-            wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : ''
-        };
+    let saveTimeout = null;
 
-        chrome.storage.sync.set({ extensionSettings: settings }, function () {
-            if (chrome.runtime.lastError) {
-                console.error("Erro ao salvar configurações:", chrome.runtime.lastError.message);
-            } else {
-                console.log("Configurações salvas com sucesso!");
-            }
-        });
+    // Salvar configurações com Debounce
+    function saveSettings() {
+        if (isInitializing) return;
+
+        if (saveTimeout) clearTimeout(saveTimeout);
+
+        saveTimeout = setTimeout(() => {
+            const settings = {
+                wallpaperFolderPath: wallpaperFolderPath.value,
+                wallpaperFrequency: parseFloat(wallpaperFrequency.value),
+                filterColor: filterColor.value,
+                filterOpacity: parseFloat(filterOpacity.value),
+                iconSize: parseInt(iconSize.value),
+                iconSpacing: parseInt(iconSpacing.value),
+                iconGap: parseInt(iconGap.value),
+                categoryGap: parseInt(categoryGap.value),
+                bookmarkMinWidth: parseInt(bookmarkMinWidth.value),
+                iconBorderRadius: parseInt(iconBorderRadius.value),
+                iconBorderColor: iconBorderColor.value,
+                iconBgColor: iconBgColor.value,
+                iconBgOpacity: iconBgOpacity ? parseFloat(iconBgOpacity.value) : 1,
+                bookmarkFontFamily: bookmarkFontFamily.value,
+                bookmarkFontSize: parseInt(bookmarkFontSize.value),
+                bookmarkFontColor: bookmarkFontColor.value,
+                nameDisplay: nameDisplay.value,
+                textBehavior: textBehavior.value,
+                iconLayout: iconLayout.value, // New
+                themePreset: themePreset.value,
+                layoutMode: layoutMode.value,
+                columnCount: parseInt(columnCount.value),
+                sidebarWidth: parseInt(sidebarWidth.value),
+                quickLinksSize: parseInt(quickLinksSize.value || 13),
+                sectionPadding: parseInt(sectionPadding.value || 15),
+                sectionBgColor: sectionBgColor.value,
+                sectionBgOpacity: sectionBgOpacity ? parseFloat(sectionBgOpacity.value) : 1,
+                sectionLineColor: sectionLineColor.value,
+                clockStyle: clockStyle ? clockStyle.value : 'analog',
+                userName: userName ? userName.value.trim() : '',
+                weatherCity: weatherCity ? weatherCity.value.trim() : '',
+                wallpaperSource: wallpaperSource ? wallpaperSource.value : 'local',
+                wallpaperTheme: wallpaperTheme ? wallpaperTheme.value.trim() : 'nature',
+                wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : ''
+            };
+
+            chrome.storage.sync.set({ extensionSettings: settings }, function () {
+                if (saveStatus) {
+                    saveStatus.style.opacity = '1';
+                    saveStatus.style.transform = 'translateY(0)';
+                    setTimeout(() => {
+                        saveStatus.style.opacity = '0';
+                        saveStatus.style.transform = 'translateY(-10px)';
+                    }, 2000);
+                }
+
+                if (chrome.runtime.lastError) {
+                    console.error("Erro ao salvar configurações:", chrome.runtime.lastError.message);
+                } else {
+                    console.log("Configurações salvas com sucesso!");
+                }
+            });
+        }, 300); // 300ms de Debounce
     }
 
     // Atualizar displays dos valores
@@ -446,6 +456,24 @@ document.addEventListener('DOMContentLoaded', function () {
         const newTheme = this.value;
         document.body.classList.remove('light-theme', 'dark-theme', 'solar-theme', 'minimal-theme');
         document.body.classList.add(`${newTheme}-theme`);
+
+        const themeColors = {
+            light: { bg: '#ffffff', border: '#e2e8f0', text: '#333333', sectionBg: '#f8fafc', sectionLine: '#3b82f6', filter: '#ffffff' },
+            dark: { bg: '#334155', border: '#475569', text: '#e2e8f0', sectionBg: '#1e293b', sectionLine: '#38bdf8', filter: '#000000' },
+            solar: { bg: '#002b36', border: '#073642', text: '#839496', sectionBg: '#073642', sectionLine: '#b58900', filter: '#002b36' },
+            minimal: { bg: '#ffffff', border: '#eeeeee', text: '#111111', sectionBg: '#fafafa', sectionLine: '#dddddd', filter: '#ffffff' }
+        };
+
+        const colors = themeColors[newTheme];
+        if (colors) {
+            if (iconBgColor) iconBgColor.value = colors.bg;
+            if (iconBorderColor) iconBorderColor.value = colors.border;
+            if (bookmarkFontColor) bookmarkFontColor.value = colors.text;
+            if (sectionBgColor) sectionBgColor.value = colors.sectionBg;
+            if (sectionLineColor) sectionLineColor.value = colors.sectionLine;
+            if (filterColor) filterColor.value = colors.filter;
+        }
+
         saveSettings();
     });
 
@@ -655,6 +683,10 @@ document.addEventListener('DOMContentLoaded', function () {
 
     // Exportar dados
     exportDataBtn.addEventListener('click', function () {
+        const originalText = exportDataBtn.innerHTML;
+        exportDataBtn.innerHTML = "✔️ Exportado!";
+        setTimeout(() => { exportDataBtn.innerHTML = originalText; }, 2000);
+
         chrome.storage.local.get(['userBookmarks'], function (resultLocal) {
             chrome.storage.sync.get(['extensionSettings', 'quickLinks'], function (resultSync) {
                 const exportData = {
@@ -712,11 +744,11 @@ document.addEventListener('DOMContentLoaded', function () {
                                     console.error("Erro ao importar dados de config:", chrome.runtime.lastError.message);
                                 } else {
                                     console.log("Dados importados com sucesso!");
-                                    loadSettings(); // Recarregar configurações na interface
+                                    window.location.reload(); // Recarregar página para aplicar tudo
                                 }
                             });
                         } else {
-                            loadSettings();
+                            window.location.reload();
                         }
                     }
                 } catch (error) {
@@ -735,7 +767,7 @@ document.addEventListener('DOMContentLoaded', function () {
                     console.error("Erro ao reiniciar configurações:", chrome.runtime.lastError.message);
                 } else {
                     console.log("Configurações reiniciadas com sucesso!");
-                    loadSettings(); // Recarregar configurações na interface
+                    window.location.reload(); // Recarregar a página para limpar os estados visuais
                 }
             });
         }

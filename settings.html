@@ -253,6 +253,7 @@
 
         input[type="color"] {
             -webkit-appearance: none;
+            appearance: none;
             width: 40px;
             height: 40px;
             border: none;
@@ -337,11 +338,11 @@
                 <span>⚙️</span> Configurações
             </div>
             <nav class="nav-items">
-                <button class="nav-btn active" data-tab="general">
-                    <span>🎨</span> Aparência
+                <button class="nav-btn active" data-tab="widgets">
+                    <span>✨</span> Widgets
                 </button>
                 <button class="nav-btn" data-tab="layout">
-                    <span>📐</span> Layout & Sidebar
+                    <span>📐</span> Layout e Tema
                 </button>
                 <button class="nav-btn" data-tab="bookmarks">
                     <span>🔖</span> Cartões e Ícones
@@ -365,30 +366,15 @@
         <div class="settings-content-wrapper">
             <main class="settings-content">
 
-                <!-- TAB: GENERAL -->
-                <div id="tab-general" class="tab-pane active">
+                <!-- TAB: WIDGETS -->
+                <div id="tab-widgets" class="tab-pane active">
                     <div class="section-header">
-                        <h2 class="section-title">Aparência Geral</h2>
-                        <p class="section-desc">Personalize as cores e o fundo da sua nova aba.</p>
+                        <h2 class="section-title">Widgets e Funcionalidades</h2>
+                        <p class="section-desc">Personalize o relógio, saudação e previsão do tempo.</p>
                     </div>
 
                     <div class="settings-group">
-                        <div class="group-title">Tema Principal</div>
-                        <div class="controls-grid">
-                            <div class="control-item">
-                                <label for="theme-preset">Selecione o Tema</label>
-                                <select id="theme-preset" style="width: 100%;">
-                                    <option value="light">☀️ Claro (Padrão)</option>
-                                    <option value="dark">🌙 Escuro</option>
-                                    <option value="solar">🌅 Solar</option>
-                                    <option value="minimal">⚪ Minimal</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="settings-group">
-                        <div class="group-title">Widgets da Tela Inicial</div>
+                        <div class="group-title">Configurações de Widgets</div>
                         <div class="controls-grid">
                             <div class="control-item">
                                 <label for="clock-style">Estilo do Relógio</label>
@@ -414,8 +400,23 @@
                 <!-- TAB: LAYOUT -->
                 <div id="tab-layout" class="tab-pane">
                     <div class="section-header">
-                        <h2 class="section-title">Layout & Estrutura</h2>
-                        <p class="section-desc">Defina como os elementos são organizados na tela.</p>
+                        <h2 class="section-title">Layout & Tema</h2>
+                        <p class="section-desc">Defina as cores globais e a organização da tela.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Tema Principal</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="theme-preset">Selecione o Tema Base</label>
+                                <select id="theme-preset" style="width: 100%;">
+                                    <option value="light">☀️ Claro (Padrão)</option>
+                                    <option value="dark">🌙 Escuro</option>
+                                    <option value="solar">🌅 Solar</option>
+                                    <option value="minimal">⚪ Minimal</option>
+                                </select>
+                            </div>
+                        </div>
                     </div>
 
                     <div class="settings-group">
@@ -713,8 +714,16 @@
                                 <div style="display: flex; gap: 15px;">
                                     <div style="flex: 1;">
                                         <label for="wallpaper-api-key">Chave da API (Access Key)</label>
-                                        <input type="password" id="wallpaper-api-key"
-                                            placeholder="Sua Access Key do Unsplash" style="width: 100%;">
+                                        <div style="display: flex; gap: 5px;">
+                                            <input type="password" id="wallpaper-api-key"
+                                                placeholder="Sua Access Key do Unsplash" style="flex: 1;">
+                                            <button id="toggle-api-key-btn" class="btn btn-secondary"
+                                                title="Mostrar/Ocultar"
+                                                style="padding: 0 10px; flex-shrink: 0;">👁️</button>
+                                            <button id="clear-api-key-btn" class="btn btn-secondary"
+                                                title="Limpar Chave"
+                                                style="padding: 0 10px; flex-shrink: 0;">🗑️</button>
+                                        </div>
                                     </div>
                                     <div style="flex: 1;">
                                         <label for="wallpaper-theme">Tema de Imagens (Inglês)</label>
@@ -809,7 +818,7 @@
 
     <!-- Simple script for Tab Switching inside settings page -->
 
-    <script src="js/settings.js"></script>
+    <script type="module" src="js/settings.js"></script>
 </body>
 
 </html>
