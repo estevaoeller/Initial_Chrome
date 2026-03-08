@@ -197,9 +197,12 @@
         }
 
         /* INPUT STYLES */
-        input[type="text"],
-        input[type="number"],
-        select {
+        .control-item input[type="text"],
+        .control-item input[type="number"],
+        .control-item input[type="password"],
+        .control-item select {
+            width: 100%;
+            box-sizing: border-box;
             padding: 10px 14px;
             border-radius: 8px;
             border: 1px solid var(--settings-border);
@@ -210,9 +213,10 @@
             outline: none;
         }
 
-        input[type="text"]:focus,
-        input[type="number"]:focus,
-        select:focus {
+        .control-item input[type="text"]:focus,
+        .control-item input[type="number"]:focus,
+        .control-item input[type="password"]:focus,
+        .control-item select:focus {
             border-color: var(--accent);
             box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
         }
@@ -239,7 +243,7 @@
             padding: 4px 8px;
             background-color: var(--input-bg);
             border-radius: 4px;
-            min-width: 45px;
+            min-width: 60px;
             text-align: center;
             border: 1px solid var(--settings-border);
         }
@@ -271,6 +275,13 @@
         input[type="color"]::-webkit-color-swatch {
             border: 2px solid var(--settings-border);
             border-radius: 50%;
+        }
+
+        input[type="color"]:hover,
+        input[type="color"]:focus {
+            transform: scale(1.1);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+            outline: none;
         }
 
         /* BUTTONS */
@@ -378,18 +389,18 @@
                         <div class="controls-grid">
                             <div class="control-item">
                                 <label for="clock-style">Estilo do Relógio</label>
-                                <select id="clock-style" style="width: 100%;">
+                                <select id="clock-style">
                                     <option value="analog">⏱️ Analógico</option>
                                     <option value="digital">💻 Digital Moderno</option>
                                 </select>
                             </div>
                             <div class="control-item">
                                 <label for="user-name">Seu Nome (Para Saudações)</label>
-                                <input type="text" id="user-name" placeholder="Ex: Estêvão" style="width: 100%;">
+                                <input type="text" id="user-name" placeholder="Ex: Estêvão">
                             </div>
                             <div class="control-item">
                                 <label for="weather-city">Cidade para Previsão do Tempo</label>
-                                <input type="text" id="weather-city" placeholder="Ex: São Paulo" style="width: 100%;">
+                                <input type="text" id="weather-city" placeholder="Ex: São Paulo">
                             </div>
                         </div>
                     </div>
@@ -409,7 +420,7 @@
                         <div class="controls-grid">
                             <div class="control-item">
                                 <label for="theme-preset">Selecione o Tema Base</label>
-                                <select id="theme-preset" style="width: 100%;">
+                                <select id="theme-preset">
                                     <option value="light">☀️ Claro (Padrão)</option>
                                     <option value="dark">🌙 Escuro</option>
                                     <option value="solar">🌅 Solar</option>
@@ -615,8 +626,7 @@
                             <div class="control-item">
                                 <label for="bookmark-font-size">Tamanho (px)</label>
                                 <div class="range-wrapper">
-                                    <input type="number" id="bookmark-font-size" min="8" max="30" value="14"
-                                        style="width: 70px">
+                                    <input type="number" id="bookmark-font-size" min="8" max="30" value="14">
                                     <span id="bookmark-font-size-value" class="range-value"
                                         style="display:none">14px</span> <!-- Mantendo ID para compatibilidade -->
                                 </div>
@@ -693,7 +703,7 @@
                         <div class="controls-grid">
                             <div class="control-item full-width">
                                 <label for="wallpaper-source">Origem do Wallpaper</label>
-                                <select id="wallpaper-source" style="width: 100%; max-width: 300px;">
+                                <select id="wallpaper-source">
                                     <option value="local">Pasta Local do PC</option>
                                     <option value="unsplash">Internet (Unsplash Diário)</option>
                                     <option value="none">Nenhum (Usar cor do tema)</option>
@@ -728,8 +738,7 @@
                                     <div style="flex: 1;">
                                         <label for="wallpaper-theme">Tema de Imagens (Inglês)</label>
                                         <input type="text" id="wallpaper-theme"
-                                            placeholder="Ex: nature, architecture, minimal" style="width: 100%;"
-                                            value="nature">
+                                            placeholder="Ex: nature, architecture, minimal" value="nature">
                                     </div>
                                 </div>
                                 <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0;">Crie um App gratuito no
