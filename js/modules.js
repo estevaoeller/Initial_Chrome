@@ -589,3 +589,26 @@ export async function manageWallpaper(settingsState) {
 }
 
 
+
+// ========== CUSTOM ICONS LOGIC ==========
+export function saveCustomIconProps(bookmarkId, iconData, callback) {
+    chrome.storage.local.get("customIcons", data => {
+        const customIcons = data.customIcons || {};
+        customIcons[bookmarkId] = iconData;
+        chrome.storage.local.set({ customIcons }, callback);
+    });
+}
+
+export function loadCustomIcons(callback) {
+    chrome.storage.local.get("customIcons", data => {
+        callback(data.customIcons || {});
+    });
+}
+
+
+export function updateBookmarkFull(bookmarkId, newTitle, newUrl, callback) {
+    chrome.bookmarks.update(bookmarkId, { title: newTitle, url: newUrl }, () => {
+        if (callback) callback();
+    });
+}
+

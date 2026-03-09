@@ -16,7 +16,10 @@ import {
     updateDigitalClock,
     updateGreeting,
     updateWeather,
-    manageWallpaper
+    manageWallpaper,
+    loadCustomIcons,
+    saveCustomIconProps,
+    updateBookmarkFull
 } from './modules.js';
 import {
     loadSettings,
@@ -116,14 +119,17 @@ document.addEventListener('DOMContentLoaded', function () {
             item.classList.toggle('active', item.dataset.spaceId === spaceId);
         });
         // Load groups from this space
-        loadGroupsFromSpace(spaceId, groups => {
-            currentBookmarks = groups;
-            const stateHelpers = {
-                spaceId: spaceId,
-                getBookmarks: () => currentBookmarks,
-                setBookmarks: (newVal) => { currentBookmarks = newVal; }
-            };
-            renderBookmarks(currentBookmarks, contentArea, settingsState.iconSize, stateHelpers);
+        loadCustomIcons(customIcons => {
+            loadGroupsFromSpace(spaceId, groups => {
+                currentBookmarks = groups;
+                const stateHelpers = {
+                    spaceId: spaceId,
+                    getBookmarks: () => currentBookmarks,
+                    setBookmarks: (newVal) => { currentBookmarks = newVal; },
+                    customIcons: customIcons
+                };
+                renderBookmarks(currentBookmarks, contentArea, settingsState.iconSize, stateHelpers);
+            });
         });
         // Save to settings
         chrome.storage.sync.get(['extensionSettings'], result => {
@@ -336,6 +342,277 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
                     }
                 }
+            }
+        });
+
+        // Setup Edit Modal Events
+        setupEditModal();
+    }
+
+    // ---- EDIT MODAL LOGIC ----
+    function setupEditModal() {
+        const modal = document.getElementById('edit-link-modal');
+        if (!modal) return;
+
+        const closeBtn = document.getElementById('close-modal-btn');
+        const cancelBtn = document.getElementById('cancel-link-btn');
+        const saveBtn = document.getElementById('save-link-btn');
+
+        const inputName = document.getElementById('edit-link-name');
+        const inputUrl = document.getElementById('edit-link-url');
+        const tabBtns = document.querySelectorAll('.icon-tab-btn');
+        const tabContents = document.querySelectorAll('.icon-tab-content');
+
+        const previewFavicon = document.getElementById('preview-favicon');
+        const previewName = document.getElementById('preview-name');
+
+        const gallerySource = document.getElementById('gallery-source');
+        const gallerySearch = document.getElementById('gallery-search');
+
+        const gallerySimpleiconsSettings = document.getElementById('gallery-simpleicons-settings');
+        const simpleColor = document.getElementById('edit-icon-color');
+        const simpleColorHex = document.getElementById('edit-icon-color-hex');
+
+        const galleryTechiconsSettings = document.getElementById('gallery-techicons-settings');
+        const techColored = document.getElementById('techicon-colored');
+
+        const galleryDashboardiconsSettings = document.getElementById('gallery-dashboardicons-settings');
+
+        const customUrl = document.getElementById('custom-icon-url');
+
+        let currentActiveTab = 'auto'; // auto, gallery, custom
+        let currentEditingLink = null;
+        let currentStateHelpers = null; // Para poder chamar renderBookmarks() e ter customIcons
+
+        // --- Tab Switching ---
+        tabBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                tabBtns.forEach(b => b.classList.remove('active'));
+                tabContents.forEach(c => c.style.display = 'none');
+                btn.classList.add('active');
+                currentActiveTab = btn.dataset.tab;
+                document.getElementById(`tab-${currentActiveTab}`).style.display = 'block';
+                updatePreview();
+            });
+        });
+
+        // --- Live Preview Updates ---
+        const updatePreview = () => {
+            if (!currentEditingLink) return;
+            const size = currentStateHelpers ? currentStateHelpers.iconSize || settingsState.iconSize : 32;
+            previewName.textContent = inputName.value || 'Nome do Link';
+
+            if (currentActiveTab === 'auto') {
+                const url = inputUrl.value || currentEditingLink.url;
+                try {
+                    const parsed = new URL(url);
+                    previewFavicon.src = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=${size}`;
+                } catch (e) {
+                    previewFavicon.src = '';
+                }
+            } else if (currentActiveTab === 'gallery') {
+                const val = gallerySearch.value.trim().toLowerCase().replace(/\s+/g, '');
+                const source = gallerySource.value;
+                if (val) {
+                    if (source === 'simpleicons') {
+                        const color = simpleColor.value.replace('#', '');
+                        previewFavicon.src = `https://cdn.simpleicons.org/${val}/${color}`;
+                    } else if (source === 'techicons') {
+                        const suffix = techColored.checked ? 'original' : 'plain';
+                        previewFavicon.src = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${val}/${val}-${suffix}.svg`;
+                    } else if (source === 'dashboardicons') {
+                        previewFavicon.src = `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/${val}.svg`;
+                    }
+                } else {
+                    previewFavicon.src = '';
+                }
+            } else if (currentActiveTab === 'custom') {
+                previewFavicon.src = customUrl.value || '';
+            }
+        };
+
+        // --- Gallery Dynamic Settings Toggling ---
+        const updateGallerySettingsVisibility = () => {
+            const source = gallerySource.value;
+            gallerySimpleiconsSettings.style.display = source === 'simpleicons' ? 'block' : 'none';
+            galleryTechiconsSettings.style.display = source === 'techicons' ? 'flex' : 'none';
+            galleryDashboardiconsSettings.style.display = source === 'dashboardicons' ? 'block' : 'none';
+            updatePreview();
+        };
+
+        gallerySource.addEventListener('change', updateGallerySettingsVisibility);
+
+        inputName.addEventListener('input', updatePreview);
+        inputUrl.addEventListener('input', updatePreview);
+        gallerySearch.addEventListener('input', updatePreview);
+        customUrl.addEventListener('input', updatePreview);
+        techColored.addEventListener('change', updatePreview);
+
+        simpleColor.addEventListener('input', (e) => {
+            simpleColorHex.textContent = e.target.value;
+            updatePreview();
+        });
+
+        // --- Listen to global event ---
+        window.addEventListener('openEditModal', (e) => {
+            const { link, stateHelpers } = e.detail;
+            currentEditingLink = link;
+            currentStateHelpers = stateHelpers;
+
+            // Load values
+            inputName.value = link.name;
+            inputUrl.value = link.url;
+
+            // Load custom icon if exists
+            const customIcons = stateHelpers.customIcons || {};
+            const iconData = customIcons[link.id || link.url];
+
+            if (iconData) {
+                if (iconData.type === 'simpleicons' || iconData.type === 'techicons' || iconData.type === 'dashboardicons') {
+                    currentActiveTab = 'gallery';
+                    gallerySource.value = iconData.type;
+                    gallerySearch.value = iconData.value;
+                    if (iconData.type === 'simpleicons') {
+                        simpleColor.value = iconData.color || '#ffffff';
+                        simpleColorHex.textContent = simpleColor.value;
+                    } else if (iconData.type === 'techicons') {
+                        techColored.checked = iconData.color !== 'plain';
+                    }
+                } else if (iconData.type === 'custom') {
+                    currentActiveTab = 'custom';
+                    customUrl.value = iconData.value;
+                }
+            } else {
+                currentActiveTab = 'auto';
+                gallerySource.value = 'simpleicons';
+                gallerySearch.value = '';
+                simpleColor.value = '#ffffff';
+                simpleColorHex.textContent = '#ffffff';
+                techColored.checked = true;
+                customUrl.value = '';
+            }
+
+            updateGallerySettingsVisibility();
+
+            // Sync Tabs UI
+            tabBtns.forEach(b => {
+                b.classList.toggle('active', b.dataset.tab === currentActiveTab);
+            });
+            tabContents.forEach(c => {
+                c.style.display = c.id === `tab-${currentActiveTab}` ? 'block' : 'none';
+            });
+
+            updatePreview();
+
+            // Show modal
+            modal.style.display = 'flex';
+            // slight delay to allow display flow before adding class for animation
+            setTimeout(() => modal.classList.add('show'), 10);
+        });
+
+        // --- Close Logic ---
+        const closeModal = () => {
+            modal.classList.remove('show');
+            setTimeout(() => { modal.style.display = 'none'; }, 300);
+            currentEditingLink = null;
+        };
+
+        closeBtn.addEventListener('click', closeModal);
+        cancelBtn.addEventListener('click', closeModal);
+        modal.addEventListener('click', (e) => {
+            if (e.target === modal) closeModal(); // Click outside
+        });
+
+        // --- Save Logic ---
+        saveBtn.addEventListener('click', () => {
+            if (!currentEditingLink) return;
+
+            const newName = inputName.value.trim() || currentEditingLink.name;
+            const newUrl = inputUrl.value.trim() || currentEditingLink.url;
+
+            // Prepare Icon Data
+            let iconData = null;
+            if (currentActiveTab === 'gallery' && gallerySearch.value.trim()) {
+                const source = gallerySource.value;
+                if (source === 'simpleicons') {
+                    iconData = {
+                        type: 'simpleicons',
+                        value: gallerySearch.value.trim().toLowerCase().replace(/\s+/g, ''),
+                        color: simpleColor.value
+                    };
+                } else if (source === 'techicons') {
+                    iconData = {
+                        type: 'techicons',
+                        value: gallerySearch.value.trim().toLowerCase().replace(/\s+/g, ''),
+                        color: techColored.checked ? 'original' : 'plain'
+                    };
+                } else if (source === 'dashboardicons') {
+                    iconData = {
+                        type: 'dashboardicons',
+                        value: gallerySearch.value.trim().toLowerCase().replace(/\s+/g, '')
+                    };
+                }
+            } else if (currentActiveTab === 'custom' && customUrl.value.trim()) {
+                iconData = {
+                    type: 'custom',
+                    value: customUrl.value.trim()
+                };
+            }
+
+            const idKey = currentEditingLink.id || currentEditingLink.url; // fallback id
+
+            // Function to finish and re-render
+            const finishSave = () => {
+                // Modificar o link no objeto local para re-render imediato
+                currentEditingLink.name = newName;
+                currentEditingLink.url = newUrl;
+
+                // Re-render
+                if (currentStateHelpers) {
+                    if (iconData) {
+                        currentStateHelpers.customIcons[idKey] = iconData;
+                    } else {
+                        delete currentStateHelpers.customIcons[idKey];
+                    }
+                    if (currentStateHelpers.setBookmarks) currentStateHelpers.setBookmarks(currentStateHelpers.getBookmarks());
+
+                    // Import renderBookmarks from module scope or assume it is available
+                    renderBookmarks(currentStateHelpers.getBookmarks(), document.getElementById('content-area'), settingsState.iconSize, currentStateHelpers);
+                }
+                closeModal();
+            };
+
+            // 1. Save Icon to storage
+            if (iconData) {
+                saveCustomIconProps(idKey, iconData, () => {
+                    // 2. Save Link changes to Chrome
+                    if (currentEditingLink.id) {
+                        updateBookmarkFull(currentEditingLink.id, newName, newUrl, finishSave);
+                    } else {
+                        finishSave();
+                    }
+                });
+            } else {
+                // Clear old icon if switched to auto
+                chrome.storage.local.get("customIcons", data => {
+                    const icons = data.customIcons || {};
+                    if (icons[idKey]) {
+                        delete icons[idKey];
+                        chrome.storage.local.set({ customIcons: icons }, () => {
+                            if (currentEditingLink.id) {
+                                updateBookmarkFull(currentEditingLink.id, newName, newUrl, finishSave);
+                            } else {
+                                finishSave();
+                            }
+                        });
+                    } else {
+                        if (currentEditingLink.id) {
+                            updateBookmarkFull(currentEditingLink.id, newName, newUrl, finishSave);
+                        } else {
+                            finishSave();
+                        }
+                    }
+                });
             }
         });
     }

@@ -906,3 +906,213 @@ body.text-behavior-single .bookmark-name {
 #unsplash-link span:hover {
     opacity: 1;
 }
+/* ========== EDIT LINK MODAL ========== */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 2000;
+    opacity: 0;
+    visibility: hidden;
+    transition: opacity 0.3s ease, visibility 0.3s ease;
+}
+
+.modal-overlay.show {
+    opacity: 1;
+    visibility: visible;
+}
+
+.modal-content.glass-effect {
+    background: color-mix(in srgb, var(--card) 85%, transparent);
+    backdrop-filter: blur(10px);
+    border: 1px solid var(--icon-border-color);
+    border-radius: 12px;
+    width: 90%;
+    max-width: 400px;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+    overflow: hidden;
+    transform: translateY(20px);
+    transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+}
+
+.modal-overlay.show .modal-content {
+    transform: translateY(0);
+}
+
+.modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 15px 20px;
+    border-bottom: 1px solid var(--icon-border-color);
+}
+
+.modal-header h2 {
+    margin: 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.close-btn {
+    background: none;
+    border: none;
+    font-size: 24px;
+    cursor: pointer;
+    color: var(--text);
+    opacity: 0.6;
+    transition: opacity 0.2s;
+}
+
+.close-btn:hover {
+    opacity: 1;
+}
+
+.modal-body {
+    padding: 20px;
+    max-height: 70vh;
+    overflow-y: auto;
+}
+
+.form-group {
+    margin-bottom: 15px;
+}
+
+.form-group label {
+    display: block;
+    font-size: 13px;
+    margin-bottom: 6px;
+    font-weight: 500;
+    color: var(--text);
+    opacity: 0.8;
+}
+
+.modern-input {
+    width: 100%;
+    padding: 10px 12px;
+    border-radius: 6px;
+    border: 1px solid var(--icon-border-color);
+    background-color: var(--bg);
+    color: var(--text);
+    font-family: inherit;
+    font-size: 14px;
+    box-sizing: border-box;
+    transition: border-color 0.2s, box-shadow 0.2s;
+}
+
+.modern-input:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+/* Icon Tabs */
+.icon-tabs {
+    display: flex;
+    background-color: var(--bg);
+    border-radius: 6px;
+    overflow: hidden;
+    margin-bottom: 10px;
+}
+
+.icon-tab-btn {
+    flex: 1;
+    background: none;
+    border: none;
+    padding: 8px 0;
+    font-size: 12px;
+    cursor: pointer;
+    color: var(--text);
+    opacity: 0.6;
+    transition: background 0.2s, opacity 0.2s;
+}
+
+.icon-tab-btn:hover {
+    background-color: color-mix(in srgb, var(--card) 50%, transparent);
+    opacity: 0.9;
+}
+
+.icon-tab-btn.active {
+    background-color: var(--card);
+    opacity: 1;
+    font-weight: 600;
+    border-bottom: 2px solid var(--accent);
+}
+
+.tab-desc {
+    font-size: 12px;
+    opacity: 0.7;
+    margin-top: 0;
+    margin-bottom: 10px;
+}
+
+.icon-tab-content {
+    background-color: var(--card);
+    border-radius: 6px;
+    border: 1px solid var(--icon-border-color);
+    padding: 12px;
+}
+
+/* Modal Footer */
+.modal-footer {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    padding: 15px 20px;
+    border-top: 1px solid var(--icon-border-color);
+    background-color: color-mix(in srgb, var(--bg) 50%, transparent);
+}
+
+.modal-btn {
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: transform 0.1s, box-shadow 0.2s, background 0.2s;
+    border: none;
+}
+
+.modal-btn:active {
+    transform: scale(0.97);
+}
+
+.secondary-btn {
+    background-color: transparent;
+    color: var(--text);
+    border: 1px solid var(--icon-border-color);
+}
+
+.secondary-btn:hover {
+    background-color: var(--bg);
+}
+
+.primary-btn {
+    background-color: var(--accent);
+    color: #fff;
+    box-shadow: 0 2px 4px color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+.primary-btn:hover {
+    background-color: color-mix(in srgb, var(--accent) 80%, #000);
+}
+
+/* Preview Section */
+.preview-section {
+    margin-bottom: 20px;
+    padding-bottom: 15px;
+    border-bottom: 1px dashed var(--icon-border-color);
+}
+
+.preview-card-container {
+    display: flex;
+    justify-content: center;
+    padding: 10px 0;
+}
+

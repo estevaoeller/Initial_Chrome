@@ -687,10 +687,11 @@ document.addEventListener('DOMContentLoaded', function () {
         exportDataBtn.innerHTML = "✔️ Exportado!";
         setTimeout(() => { exportDataBtn.innerHTML = originalText; }, 2000);
 
-        chrome.storage.local.get(['userBookmarks'], function (resultLocal) {
+        chrome.storage.local.get(['userBookmarks', 'customIcons'], function (resultLocal) {
             chrome.storage.sync.get(['extensionSettings', 'quickLinks'], function (resultSync) {
                 const exportData = {
                     bookmarks: resultLocal.userBookmarks || [],
+                    customIcons: resultLocal.customIcons || {},
                     settings: resultSync.extensionSettings || defaultSettings,
                     quickLinks: resultSync.quickLinks || [],
                     exportDate: new Date().toISOString()
@@ -730,6 +731,10 @@ document.addEventListener('DOMContentLoaded', function () {
                             dataToSave.userBookmarks = importData.bookmarks;
                             // Bookmarks must remain local due to eventual length limits on sync APIs or Chrome API preference.
                             chrome.storage.local.set({ userBookmarks: importData.bookmarks });
+                        }
+
+                        if (importData.customIcons) {
+                            chrome.storage.local.set({ customIcons: importData.customIcons });
                         }
 
                         if (importData.quickLinks) {

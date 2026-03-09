@@ -123,86 +123,44 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             const editBtn = document.createElement('span');
             editBtn.className = 'edit-bookmark-btn';
             editBtn.innerHTML = '✎';
-            editBtn.title = "Editar Nome";
+            editBtn.title = "Editar Link";
             editBtn.addEventListener('click', event => {
                 event.preventDefault();
                 event.stopPropagation();
 
-                // Toggle Edit Mode
-                const nameSpan = bookmarkItem.querySelector('.bookmark-name');
-                const existingInput = bookmarkItem.querySelector('.bookmark-name-edit');
-
-                if (existingInput) return; // Já está editando
-
-                const currentName = nameSpan.textContent;
-                const input = document.createElement('input');
-                input.type = 'text';
-                input.className = 'bookmark-name-edit';
-                input.value = currentName;
-
-                nameSpan.style.display = 'none';
-
-                // Substituir o span pelo input temporariamente, inserir antes do edit button
-                // Como layout é flex, inserir na posição correta é importante.
-                bookmarkItem.insertBefore(input, editBtn); // Insere antes dos botões
-                input.focus();
-
-                // Block drag while editing
-                bookmarkItem.draggable = false;
-
-                function saveEdit() {
-                    const newName = input.value.trim();
-                    if (newName && newName !== currentName) {
-                        // Salvar
-                        if (link.id) {
-                            renameBookmark(link.id, newName, () => {
-                                link.name = newName;
-                                // Atualizar estado local
-                                if (setBookmarks) setBookmarks(bookmarks);
-                                renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
-                            });
-                        } else {
-                            // Se não tiver ID (legado), atualiza só local?
-                            // Melhor atualizar o array e re-renderizar, esperando que o próximo sync resolva.
-                            link.name = newName;
-                            if (setBookmarks) setBookmarks(bookmarks);
-                            renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
-                        }
-                    } else {
-                        // Cancelar / Sem mudança
-                        cancelEdit();
-                    }
-                }
-
-                function cancelEdit() {
-                    if (input.parentNode) input.parentNode.removeChild(input);
-                    nameSpan.style.display = '';
-                    bookmarkItem.draggable = true;
-                }
-
-                input.addEventListener('keydown', (e) => {
-                    if (e.key === 'Enter') {
-                        saveEdit();
-                    } else if (e.key === 'Escape') {
-                        cancelEdit();
+                // Dispara o evento para abrir o modal
+                const editEvent = new CustomEvent('openEditModal', {
+                    detail: {
+                        link: link,
+                        category: category,
+                        bookmarks: bookmarks,
+                        contentArea: contentArea,
+                        iconSize: iconSize,
+                        stateHelpers: stateHelpers
                     }
                 });
-
-                input.addEventListener('blur', () => {
-                    saveEdit();
-                });
-
-                input.addEventListener('click', (e) => {
-                    e.preventDefault();
-                    e.stopPropagation(); // Previne click no link
-                });
+                window.dispatchEvent(editEvent);
             });
-
 
             const favicon = document.createElement('img');
             favicon.className = 'bookmark-favicon';
             favicon.dataset.url = link.url;
-            favicon.src = `https://www.google.com/s2/favicons?domain=${link.url}&sz=${iconSize}`;
+
+            const customIcon = stateHelpers && stateHelpers.customIcons ? stateHelpers.customIcons[link.id || link.url] : null;
+
+            if (customIcon && customIcon.type === 'simpleicons') {
+                let colorHex = customIcon.color ? customIcon.color.replace('#', '') : 'default';
+                favicon.src = `https://cdn.simpleicons.org/${customIcon.value}/${colorHex}`;
+            } else if (customIcon && customIcon.type === 'techicons') {
+                const suffix = customIcon.color === 'original' ? 'original' : 'plain';
+                favicon.src = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${customIcon.value}/${customIcon.value}-${suffix}.svg`;
+            } else if (customIcon && customIcon.type === 'dashboardicons') {
+                favicon.src = `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/${customIcon.value}.svg`;
+            } else if (customIcon && customIcon.type === 'custom') {
+                favicon.src = customIcon.value;
+            } else {
+                favicon.src = `https://www.google.com/s2/favicons?domain=${link.url}&sz=${iconSize}`;
+            }
             favicon.alt = '';
 
             const bookmarkName = document.createElement('span');

@@ -117,6 +117,108 @@
 
 
 
+    <!-- Edit Link Modal -->
+    <div id="edit-link-modal" class="modal-overlay" style="display: none;">
+        <div class="modal-content glass-effect">
+            <div class="modal-header">
+                <h2>Editar Link</h2>
+                <button id="close-modal-btn" class="close-btn">&times;</button>
+            </div>
+            <div class="modal-body">
+                <!-- Live Preview Card -->
+                <div class="preview-section">
+                    <label>Pré-visualização</label>
+                    <div class="preview-card-container">
+                        <div id="preview-bookmark-item" class="bookmark-item" style="pointer-events: none;">
+                            <img id="preview-favicon" class="bookmark-favicon" src="" alt="">
+                            <span id="preview-name" class="bookmark-name">Nome do Link</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-link-name">Nome de Exibição</label>
+                    <input type="text" id="edit-link-name" class="modern-input" placeholder="Ex: Uptime Kuma">
+                </div>
+
+                <div class="form-group">
+                    <label for="edit-link-url">URL de Destino</label>
+                    <input type="url" id="edit-link-url" class="modern-input" placeholder="http://192.168.1.10:3001">
+                </div>
+
+                <div class="form-group">
+                    <label>Ícone Inteligente</label>
+                    <div class="icon-tabs">
+                        <button class="icon-tab-btn active" data-tab="auto">Automático</button>
+                        <button class="icon-tab-btn" data-tab="gallery">Galeria Oficial</button>
+                        <button class="icon-tab-btn" data-tab="custom">Link/Upload</button>
+                    </div>
+
+                    <!-- Tab: Auto (Favicon) -->
+                    <div id="tab-auto" class="icon-tab-content active">
+                        <p class="tab-desc">Busca o favicon oficial usando o serviço do Google.</p>
+                    </div>
+
+                    <!-- Tab: Unified Gallery -->
+                    <div id="tab-gallery" class="icon-tab-content" style="display: none;">
+                        <div class="form-group" style="margin-bottom: 12px;">
+                            <label for="gallery-source">Fonte do Ícone</label>
+                            <select id="gallery-source" class="modern-input" style="padding: 8px;">
+                                <option value="simpleicons">SimpleIcons (Logos Coloridos / Flat)</option>
+                                <option value="techicons">TechIcons (Linguagens e Ferramentas)</option>
+                                <option value="dashboardicons">DashboardIcons (Self-Hosted Apps)</option>
+                            </select>
+                        </div>
+
+                        <input type="text" id="gallery-search" class="modern-input"
+                            placeholder="Buscar... (Ex: github, docker, plex)">
+
+                        <!-- Dynamic settings inside Gallery -->
+                        <div id="gallery-settings" style="margin-top: 15px;">
+                            <!-- SimpleIcons: Color Picker -->
+                            <div id="gallery-simpleicons-settings" class="gallery-dynamic-settings">
+                                <label for="edit-icon-color">Cor da Silhueta (SVG)</label>
+                                <div class="color-picker-row"
+                                    style="display:flex; align-items:center; gap:10px; margin-top:5px;">
+                                    <input type="color" id="edit-icon-color" value="#ffffff"
+                                        style="cursor:pointer; padding:0; border:none; border-radius:4px; width:30px; height:30px;">
+                                    <span id="edit-icon-color-hex" style="font-family:monospace;">#ffffff</span>
+                                </div>
+                            </div>
+
+                            <!-- TechIcons: Colorized View -->
+                            <div id="gallery-techicons-settings" class="gallery-dynamic-settings"
+                                style="display: none;">
+                                <div style="display: flex; gap: 10px; align-items: center;">
+                                    <input type="checkbox" id="techicon-colored" checked>
+                                    <label for="techicon-colored" style="margin-bottom:0;">Colorido (Original)</label>
+                                </div>
+                            </div>
+
+                            <!-- DashboardIcons: Only message/info -->
+                            <div id="gallery-dashboardicons-settings" class="gallery-dynamic-settings"
+                                style="display: none;">
+                                <p style="font-size: 0.8rem; opacity: 0.7; margin: 0;">Ícones desenhados especialmente
+                                    para dashboards e home servers.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Tab: Custom -->
+                    <div id="tab-custom" class="icon-tab-content" style="display: none;">
+                        <p class="tab-desc">Cole o link direto da imagem (.png, .jpg, .svg).</p>
+                        <input type="url" id="custom-icon-url" class="modern-input"
+                            placeholder="https://exemplo.com/logo.png">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="cancel-link-btn" class="modal-btn secondary-btn">Cancelar</button>
+                <button id="save-link-btn" class="modal-btn primary-btn">Salvar Alterações</button>
+            </div>
+        </div>
+    </div>
+
     <script type="module" src="js/script.js"></script>
 </body>
 
