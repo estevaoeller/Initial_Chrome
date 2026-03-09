@@ -495,7 +495,6 @@ export async function updateWeather(weatherWidget, weatherIcon, weatherTemp, cit
 }
 
 export async function manageWallpaper(settingsState) {
-    // This will be called from script.js background logic
     const body = document.body;
     const unsplashInfoDiv = document.getElementById('unsplash-info');
 
@@ -509,83 +508,125 @@ export async function manageWallpaper(settingsState) {
         return;
     }
 
+    const setBackground = (url) => {
+        body.style.backgroundImage = `url('${url}')`;
+        body.style.backgroundSize = 'cover';
+        body.style.backgroundPosition = 'center';
+        body.style.backgroundRepeat = 'no-repeat';
+    };
+
+    const displayUnsplashInfo = (data) => {
+        if (!unsplashInfoDiv || !data) return;
+        const linkEl = document.getElementById('unsplash-link');
+        const locEl = document.getElementById('unsplash-location');
+        const dateEl = document.getElementById('unsplash-date');
+        const viewsEl = document.getElementById('unsplash-views');
+        const userEl = document.getElementById('unsplash-user');
+
+        if (linkEl) linkEl.href = data.link || '#';
+        if (locEl) locEl.innerHTML = data.location ? `📍 ${data.location}` : '';
+        if (dateEl) {
+            const dateObj = new Date(data.date);
+            dateEl.innerHTML = data.date ? `📅 ${dateObj.toLocaleDateString('pt-BR')}` : '';
+        }
+        if (viewsEl) viewsEl.innerHTML = data.stats ? `👁️ ${data.stats.toLocaleString('pt-BR')} ${data.statsLabel || 'visualizações'}` : '';
+        if (userEl) userEl.innerHTML = data.user ? `👤 ${data.user}` : '';
+
+        unsplashInfoDiv.style.display = 'block';
+    };
+
     if (settingsState.wallpaperSource === 'unsplash') {
         const theme = settingsState.wallpaperTheme || 'nature';
         const apiKey = settingsState.wallpaperApiKey || '';
+        const freqHours = settingsState.wallpaperFrequency || 1;
+        const freqMs = freqHours * 60 * 60 * 1000;
 
-        const setBackground = (url) => {
-            body.style.backgroundImage = `url('${url}')`;
-            body.style.backgroundSize = 'cover';
-            body.style.backgroundPosition = 'center';
-            body.style.backgroundRepeat = 'no-repeat';
-        };
+        chrome.storage.local.get(['cachedWallpaper'], async (result) => {
+            const cache = result.cachedWallpaper;
+            const now = Date.now();
 
-        if (!apiKey) {
-            console.warn("Unsplash API Key is missing. Crie no site e cole em configurações. Fazendo fallback para loremflickr por enquanto.");
-            const seed = new Date().toDateString();
-            setBackground(`https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`);
-            hideUnsplashInfo();
-            return;
-        }
+            // Check if we have a valid cache
+            if (cache && cache.source === 'unsplash' && cache.theme === theme && cache.apiKey === apiKey) {
+                const age = now - cache.timestamp;
+                if (age < freqMs && cache.url) {
+                    // Use cache
+                    setBackground(cache.url);
+                    if (cache.unsplashData) {
+                        displayUnsplashInfo(cache.unsplashData);
+                    } else {
+                        hideUnsplashInfo();
+                    }
+                    return;
+                }
+            }
 
-        try {
-            const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(theme)}&orientation=landscape`;
-            const response = await fetch(apiUrl, {
-                headers: {
-                    'Authorization': `Client-ID ${apiKey}`
+            // Cache missed or expired. Fetch new.
+            let newUrl = '';
+            let unsplashData = null;
+
+            if (!apiKey) {
+                console.warn("Unsplash API Key missing. Fallback for loremflickr.");
+                const seed = now.toString();
+                newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`;
+            } else {
+                try {
+                    const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(theme)}&orientation=landscape`;
+                    const response = await fetch(apiUrl, {
+                        headers: { 'Authorization': `Client-ID ${apiKey}` }
+                    });
+
+                    if (!response.ok) throw new Error(`Unsplash API Error: ${response.status}`);
+
+                    const data = await response.json();
+                    if (data && data.urls && data.urls.regular) {
+                        newUrl = data.urls.regular;
+
+                        // Parse Unsplash Data
+                        unsplashData = {
+                            link: data.links?.html || `https://unsplash.com/photos/${data.id}`,
+                            location: data.location?.name,
+                            date: data.created_at,
+                            stats: data.views || data.downloads || data.likes || 0,
+                            statsLabel: data.views ? 'visualizações' : (data.downloads ? 'downloads' : 'curtidas'),
+                            user: data.user?.name
+                        };
+                    } else {
+                        throw new Error("Invalid Unsplash response format");
+                    }
+                } catch (error) {
+                    console.error("Falha ao buscar Unsplash Oficial:", error);
+                    const seed = now.toString();
+                    newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`;
+                }
+            }
+
+            // Apply to UI
+            setBackground(newUrl);
+            if (unsplashData) {
+                displayUnsplashInfo(unsplashData);
+            } else {
+                hideUnsplashInfo();
+            }
+
+            // Save new cache
+            chrome.storage.local.set({
+                cachedWallpaper: {
+                    source: 'unsplash',
+                    theme: theme,
+                    apiKey: apiKey,
+                    url: newUrl,
+                    timestamp: now,
+                    unsplashData: unsplashData
                 }
             });
-
-            if (!response.ok) {
-                throw new Error(`Unsplash API Error: ${response.status}`);
-            }
-
-            const data = await response.json();
-            if (data && data.urls && data.urls.regular) {
-                setBackground(data.urls.regular);
-
-                // Show Unsplash Info
-                if (unsplashInfoDiv) {
-                    const linkEl = document.getElementById('unsplash-link');
-                    const locEl = document.getElementById('unsplash-location');
-                    const dateEl = document.getElementById('unsplash-date');
-                    const viewsEl = document.getElementById('unsplash-views');
-                    const userEl = document.getElementById('unsplash-user');
-
-                    if (linkEl) linkEl.href = data.links?.html || `https://unsplash.com/photos/${data.id}`;
-
-                    if (locEl) {
-                        locEl.innerHTML = data.location?.name ? `📍 ${data.location.name}` : '';
-                    }
-                    if (dateEl) {
-                        const dateObj = new Date(data.created_at);
-                        dateEl.innerHTML = data.created_at ? `📅 ${dateObj.toLocaleDateString('pt-BR')}` : '';
-                    }
-                    if (viewsEl) {
-                        const stats = data.views || data.downloads || data.likes || 0;
-                        const label = data.views ? 'visualizações' : (data.downloads ? 'downloads' : 'curtidas');
-                        viewsEl.innerHTML = stats ? `👁️ ${stats.toLocaleString('pt-BR')} ${label}` : '';
-                    }
-                    if (userEl) {
-                        userEl.innerHTML = data.user?.name ? `👤 ${data.user.name}` : '';
-                    }
-
-                    unsplashInfoDiv.style.display = 'block';
-                }
-            } else {
-                throw new Error("Invalid Unsplash response format");
-            }
-        } catch (error) {
-            console.error("Falha ao buscar Unsplash Oficial:", error);
-            const seed = new Date().toDateString();
-            setBackground(`https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`);
-            hideUnsplashInfo();
-        }
+        });
         return;
     }
 
     // Default to local folder logic which is handled in script.js interval
     hideUnsplashInfo();
+    // Clear cache if changing source to local to avoid stale data if switched back
+    chrome.storage.local.remove(['cachedWallpaper']);
 }
 
 
@@ -611,4 +652,3 @@ export function updateBookmarkFull(bookmarkId, newTitle, newUrl, callback) {
         if (callback) callback();
     });
 }
-
