@@ -255,6 +255,13 @@ document.addEventListener('DOMContentLoaded', function () {
         }
 
         manageWallpaper(settingsState);
+        const nextWallpaperBtn = document.getElementById('next-wallpaper-btn');
+        if (nextWallpaperBtn) {
+            nextWallpaperBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                manageWallpaper(settingsState, true);
+            });
+        }
         if (datePlaceholder) {
             updateDate(datePlaceholder);
             setInterval(() => updateDate(datePlaceholder), 60000);
@@ -465,7 +472,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
             // Load custom icon if exists
             const customIcons = stateHelpers.customIcons || {};
-            const iconData = customIcons[link.id || link.url];
+            const iconData = customIcons[link.url];
 
             if (iconData) {
                 if (iconData.type === 'simpleicons' || iconData.type === 'techicons' || iconData.type === 'dashboardicons') {
@@ -485,7 +492,7 @@ document.addEventListener('DOMContentLoaded', function () {
             } else {
                 currentActiveTab = 'auto';
                 gallerySource.value = 'simpleicons';
-                gallerySearch.value = '';
+                gallerySearch.value = link.name ? link.name.toLowerCase().replace(/\s+/g, '') : '';
                 simpleColor.value = '#ffffff';
                 simpleColorHex.textContent = '#ffffff';
                 techColored.checked = true;
@@ -559,7 +566,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 };
             }
 
-            const idKey = currentEditingLink.id || currentEditingLink.url; // fallback id
+            const idKey = currentEditingLink.url; // Use URL as universal key for icons
 
             // Function to finish and re-render
             const finishSave = () => {

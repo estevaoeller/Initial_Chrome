@@ -3,19 +3,96 @@ import { setupDragParams, setupCategoryDropZone } from './drag-drop.js';
 
 export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) {
     contentArea.innerHTML = '';
-    if (!bookmarks || bookmarks.length === 0) return;
-
     const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
 
-    bookmarks.forEach((category => {
-        const categoryDiv = document.createElement('div');
-        categoryDiv.className = 'bookmark-category';
+    if (bookmarks && bookmarks.length > 0) {
+        bookmarks.forEach((category => {
+            const categoryDiv = document.createElement('div');
+            categoryDiv.className = 'bookmark-category';
 
-        const categoryTitle = document.createElement('h2');
-        categoryTitle.textContent = category.name;
-        categoryTitle.title = "Duplo clique para renomear este grupo";
-        categoryTitle.style.cursor = "text";
-        categoryDiv.appendChild(categoryTitle);
+            const headerDiv = document.createElement('div');
+            headerDiv.style.display = 'flex';
+            headerDiv.style.justifyContent = 'space-between';
+            headerDiv.style.alignItems = 'center';
+            headerDiv.style.borderBottom = '2px solid var(--section-line-color, var(--accent))';
+            headerDiv.style.paddingBottom = '10px';
+            headerDiv.style.marginBottom = '15px';
+
+            const categoryTitle = document.createElement('h2');
+            categoryTitle.textContent = category.name;
+            categoryTitle.title = "Duplo clique para renomear este grupo";
+            categoryTitle.style.cursor = "text";
+            categoryTitle.style.borderBottom = 'none'; // Overrides CSS default
+            categoryTitle.style.paddingBottom = '0';
+            categoryTitle.style.marginBottom = '0';
+            categoryTitle.style.marginTop = '0';
+
+            const arrowsDiv = document.createElement('div');
+            arrowsDiv.style.display = 'flex';
+            arrowsDiv.style.gap = '12px';
+            
+            const upArrow = document.createElement('span');
+            upArrow.textContent = '⬆️';
+            upArrow.style.cursor = 'pointer';
+            upArrow.title = "Mover Grupo para Cima";
+            upArrow.style.opacity = '0.5';
+            upArrow.style.transition = 'opacity 0.2s';
+            upArrow.onmouseenter = () => upArrow.style.opacity = '1';
+            upArrow.onmouseleave = () => upArrow.style.opacity = '0.5';
+            upArrow.onclick = () => {
+                if (category.id) {
+                    chrome.bookmarks.getChildren(spaceId, siblings => {
+                        const currentIndex = siblings.findIndex(s => s.id === category.id);
+                        if (currentIndex > 0) {
+                            chrome.bookmarks.move(category.id, { parentId: spaceId, index: currentIndex - 1 }, () => {
+                                const cIndex = bookmarks.findIndex(c => c.id === category.id);
+                                if (cIndex > 0) {
+                                    const temp = bookmarks[cIndex];
+                                    bookmarks[cIndex] = bookmarks[cIndex - 1];
+                                    bookmarks[cIndex - 1] = temp;
+                                    if (setBookmarks) setBookmarks(bookmarks);
+                                    renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
+                                }
+                            });
+                        }
+                    });
+                }
+            };
+
+            const downArrow = document.createElement('span');
+            downArrow.textContent = '⬇️';
+            downArrow.style.cursor = 'pointer';
+            downArrow.title = "Mover Grupo para Baixo";
+            downArrow.style.opacity = '0.5';
+            downArrow.style.transition = 'opacity 0.2s';
+            downArrow.onmouseenter = () => downArrow.style.opacity = '1';
+            downArrow.onmouseleave = () => downArrow.style.opacity = '0.5';
+            downArrow.onclick = () => {
+                if (category.id) {
+                    chrome.bookmarks.getChildren(spaceId, siblings => {
+                        const currentIndex = siblings.findIndex(s => s.id === category.id);
+                        if (currentIndex > -1 && currentIndex < siblings.length - 1) {
+                            chrome.bookmarks.move(category.id, { parentId: spaceId, index: currentIndex + 1 }, () => {
+                                const cIndex = bookmarks.findIndex(c => c.id === category.id);
+                                if (cIndex < bookmarks.length - 1) {
+                                    const temp = bookmarks[cIndex];
+                                    bookmarks[cIndex] = bookmarks[cIndex + 1];
+                                    bookmarks[cIndex + 1] = temp;
+                                    if (setBookmarks) setBookmarks(bookmarks);
+                                    renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
+                                }
+                            });
+                        }
+                    });
+                }
+            };
+
+            arrowsDiv.appendChild(upArrow);
+            arrowsDiv.appendChild(downArrow);
+            
+            headerDiv.appendChild(categoryTitle);
+            if (spaceId) headerDiv.appendChild(arrowsDiv);
+            categoryDiv.appendChild(headerDiv);
 
         // --- Edit Group Title (Double Click) ---
         categoryTitle.addEventListener('dblclick', () => {
@@ -36,7 +113,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             input.style.outline = 'none';
             input.style.width = '100%';
 
-            categoryDiv.insertBefore(input, categoryTitle);
+            headerDiv.insertBefore(input, categoryTitle);
             categoryTitle.style.display = 'none';
             input.focus();
             input.select();
@@ -146,7 +223,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             favicon.className = 'bookmark-favicon';
             favicon.dataset.url = link.url;
 
-            const customIcon = stateHelpers && stateHelpers.customIcons ? stateHelpers.customIcons[link.id || link.url] : null;
+            const customIcon = stateHelpers && stateHelpers.customIcons ? stateHelpers.customIcons[link.url] : null;
 
             if (customIcon && customIcon.type === 'simpleicons') {
                 let colorHex = customIcon.color ? customIcon.color.replace('#', '') : 'default';
@@ -174,7 +251,8 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             gridDiv.appendChild(bookmarkItem);
         });
         contentArea.appendChild(categoryDiv);
-    }));
+        }));
+    }
 
     // --- Create "New Group" Button ---
     if (getBookmarks && setBookmarks && spaceId) {

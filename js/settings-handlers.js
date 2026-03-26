@@ -18,8 +18,9 @@ export function applySidebarWidthSetting(width) {
 }
 
 export function applyIconAppearance(borderRadius, borderColor, bgColor, bgOpacity = 1) {
-    document.documentElement.style.setProperty('--icon-border-radius', `${borderRadius}px`);
-    document.documentElement.style.setProperty('--icon-border-color', borderColor);
+    const target = document.body || document.documentElement;
+    target.style.setProperty('--icon-border-radius', `${borderRadius}px`);
+    target.style.setProperty('--icon-border-color', borderColor);
 
     // Convert hex to rgba for bgColor
     let rgbaStr = bgColor;
@@ -36,8 +37,7 @@ export function applyIconAppearance(borderRadius, borderColor, bgColor, bgOpacit
         }
         rgbaStr = `rgba(${r}, ${g}, ${b}, ${bgOpacity})`;
     }
-
-    document.documentElement.style.setProperty('--icon-bg-color', rgbaStr);
+    target.style.setProperty('--icon-bg-color', rgbaStr);
 }
 
 export function applyIconSpacingSetting(spacing) {

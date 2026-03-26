@@ -736,9 +736,20 @@
                                         </div>
                                     </div>
                                     <div style="flex: 1;">
-                                        <label for="wallpaper-theme">Tema de Imagens (Inglês)</label>
-                                        <input type="text" id="wallpaper-theme"
-                                            placeholder="Ex: nature, architecture, minimal" value="nature">
+                                        <label for="wallpaper-theme">Tema de Imagens</label>
+                                        <select id="wallpaper-theme" class="modern-input" style="margin-bottom: 5px;">
+                                            <option value="random">Aleatório (Rotacionar)</option>
+                                            <option value="nature" selected>Natureza (Nature)</option>
+                                            <option value="city">Cidades (City)</option>
+                                            <option value="space">Espaço (Space)</option>
+                                            <option value="minimalist">Minimalista</option>
+                                            <option value="abstract">Abstrato</option>
+                                            <option value="architecture">Arquitetura</option>
+                                            <option value="technology">Tecnologia</option>
+                                            <option value="landscape">Paisagem</option>
+                                            <option value="custom">Personalizado...</option>
+                                        </select>
+                                        <input type="text" id="wallpaper-theme-custom" class="modern-input" placeholder="Ex: cars, animals..." style="display: none;">
                                     </div>
                                 </div>
                                 <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0;">Crie um App gratuito no

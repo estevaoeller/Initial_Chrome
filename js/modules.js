@@ -494,7 +494,7 @@ export async function updateWeather(weatherWidget, weatherIcon, weatherTemp, cit
     }
 }
 
-export async function manageWallpaper(settingsState) {
+export async function manageWallpaper(settingsState, forceNext = false) {
     const body = document.body;
     const unsplashInfoDiv = document.getElementById('unsplash-info');
 
@@ -546,7 +546,7 @@ export async function manageWallpaper(settingsState) {
             const now = Date.now();
 
             // Check if we have a valid cache
-            if (cache && cache.source === 'unsplash' && cache.theme === theme && cache.apiKey === apiKey) {
+            if (!forceNext && cache && cache.source === 'unsplash' && cache.theme === theme && cache.apiKey === apiKey) {
                 const age = now - cache.timestamp;
                 if (age < freqMs && cache.url) {
                     // Use cache
@@ -564,13 +564,19 @@ export async function manageWallpaper(settingsState) {
             let newUrl = '';
             let unsplashData = null;
 
+            let actualTheme = theme;
+            if (theme === 'random') {
+                const presetThemes = ['nature', 'city', 'space', 'minimalist', 'abstract', 'architecture', 'technology', 'landscape'];
+                actualTheme = presetThemes[Math.floor(Math.random() * presetThemes.length)];
+            }
+
             if (!apiKey) {
                 console.warn("Unsplash API Key missing. Fallback for loremflickr.");
                 const seed = now.toString();
-                newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`;
+                newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
             } else {
                 try {
-                    const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(theme)}&orientation=landscape`;
+                    const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(actualTheme)}&orientation=landscape`;
                     const response = await fetch(apiUrl, {
                         headers: { 'Authorization': `Client-ID ${apiKey}` }
                     });
@@ -596,7 +602,7 @@ export async function manageWallpaper(settingsState) {
                 } catch (error) {
                     console.error("Falha ao buscar Unsplash Oficial:", error);
                     const seed = now.toString();
-                    newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(theme)}?random=${encodeURIComponent(seed)}`;
+                    newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
                 }
             }
 

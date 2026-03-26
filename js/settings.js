@@ -70,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const weatherCity = document.getElementById('weather-city');
     const wallpaperSource = document.getElementById('wallpaper-source');
     const wallpaperTheme = document.getElementById('wallpaper-theme');
+    const wallpaperThemeCustom = document.getElementById('wallpaper-theme-custom');
     const wallpaperApiKey = document.getElementById('wallpaper-api-key');
     const wallpaperLocalConfig = document.getElementById('wallpaper-local-config');
     const wallpaperUnsplashConfig = document.getElementById('wallpaper-unsplash-config');
@@ -169,7 +170,28 @@ document.addEventListener('DOMContentLoaded', function () {
                 wallpaperSource.dispatchEvent(event);
             }
             if (wallpaperApiKey) wallpaperApiKey.value = settings.wallpaperApiKey || '';
-            if (wallpaperTheme) wallpaperTheme.value = settings.wallpaperTheme || 'nature';
+            if (wallpaperTheme) {
+                const savedTheme = settings.wallpaperTheme || 'nature';
+                const options = Array.from(wallpaperTheme.options).map(opt => opt.value);
+                if (options.includes(savedTheme) && savedTheme !== 'custom') {
+                    wallpaperTheme.value = savedTheme;
+                    if (wallpaperThemeCustom) wallpaperThemeCustom.style.display = 'none';
+                } else {
+                    wallpaperTheme.value = 'custom';
+                    if (wallpaperThemeCustom) {
+                        wallpaperThemeCustom.value = savedTheme !== 'custom' ? savedTheme : '';
+                        wallpaperThemeCustom.style.display = 'block';
+                    }
+                }
+                
+                wallpaperTheme.addEventListener('change', () => {
+                    if (wallpaperTheme.value === 'custom') {
+                        if (wallpaperThemeCustom) wallpaperThemeCustom.style.display = 'block';
+                    } else {
+                        if (wallpaperThemeCustom) wallpaperThemeCustom.style.display = 'none';
+                    }
+                });
+            }
 
             if (clockStyle) clockStyle.value = settings.clockStyle || 'analog';
             if (userName) userName.value = settings.userName || '';
@@ -292,7 +314,7 @@ document.addEventListener('DOMContentLoaded', function () {
                 userName: userName ? userName.value.trim() : '',
                 weatherCity: weatherCity ? weatherCity.value.trim() : '',
                 wallpaperSource: wallpaperSource ? wallpaperSource.value : 'local',
-                wallpaperTheme: wallpaperTheme ? wallpaperTheme.value.trim() : 'nature',
+                wallpaperTheme: wallpaperTheme ? (wallpaperTheme.value === 'custom' && wallpaperThemeCustom && wallpaperThemeCustom.value.trim() ? wallpaperThemeCustom.value.trim() : wallpaperTheme.value) : 'nature',
                 wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : ''
             };
 
@@ -519,6 +541,7 @@ document.addEventListener('DOMContentLoaded', function () {
         weatherCity,
         wallpaperSource,
         wallpaperTheme,
+        wallpaperThemeCustom,
         wallpaperApiKey
     ].forEach(element => {
         if (element) {
