@@ -1116,3 +1116,39 @@ body.text-behavior-single .bookmark-name {
     padding: 10px 0;
 }
 
+/* Unsplash Info Bottom Text */
+.unsplash-info {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    display: flex;
+    align-items: center;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 8px 15px;
+    border-radius: 20px;
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+}
+
+#unsplash-link {
+    color: #fff;
+    text-decoration: none;
+    font-size: 12px;
+    display: flex;
+    gap: 10px;
+    opacity: 0.8;
+    transition: opacity 0.2s;
+}
+
+#unsplash-link:hover {
+    opacity: 1;
+}
+
+#next-wallpaper-btn {
+    opacity: 0.8;
+}
+
+#next-wallpaper-btn:hover {
+    opacity: 1 !important;
+}
+

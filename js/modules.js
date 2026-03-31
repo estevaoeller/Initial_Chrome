@@ -532,7 +532,7 @@ export async function manageWallpaper(settingsState, forceNext = false) {
         if (viewsEl) viewsEl.innerHTML = data.stats ? `👁️ ${data.stats.toLocaleString('pt-BR')} ${data.statsLabel || 'visualizações'}` : '';
         if (userEl) userEl.innerHTML = data.user ? `👤 ${data.user}` : '';
 
-        unsplashInfoDiv.style.display = 'block';
+        unsplashInfoDiv.style.display = 'flex';
     };
 
     if (settingsState.wallpaperSource === 'unsplash') {

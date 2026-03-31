@@ -315,15 +315,6 @@ document.addEventListener('DOMContentLoaded', function () {
             if (settings.quickLinksSize) {
                 document.documentElement.style.setProperty('--quick-links-size', settings.quickLinksSize + 'px');
             }
-            if (settings.sectionPadding) {
-                document.documentElement.style.setProperty('--section-padding', settings.sectionPadding + 'px');
-            }
-            if (settings.sectionBgColor) {
-                document.documentElement.style.setProperty('--section-bg-color', settings.sectionBgColor);
-            }
-            if (settings.sectionLineColor) {
-                document.documentElement.style.setProperty('--section-line-color', settings.sectionLineColor);
-            }
         });
 
         // Real-time Updates
@@ -337,15 +328,6 @@ document.addEventListener('DOMContentLoaded', function () {
                     if (newSettings) {
                         if (newSettings.quickLinksSize) {
                             document.documentElement.style.setProperty('--quick-links-size', newSettings.quickLinksSize + 'px');
-                        }
-                        if (newSettings.sectionPadding) {
-                            document.documentElement.style.setProperty('--section-padding', newSettings.sectionPadding + 'px');
-                        }
-                        if (newSettings.sectionBgColor) {
-                            document.documentElement.style.setProperty('--section-bg-color', newSettings.sectionBgColor);
-                        }
-                        if (newSettings.sectionLineColor) {
-                            document.documentElement.style.setProperty('--section-line-color', newSettings.sectionLineColor);
                         }
                     }
                 }

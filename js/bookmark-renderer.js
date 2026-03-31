@@ -28,8 +28,11 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             categoryTitle.style.marginTop = '0';
 
             const arrowsDiv = document.createElement('div');
-            arrowsDiv.style.display = 'flex';
+            arrowsDiv.style.display = 'none'; // oculto por padrão
             arrowsDiv.style.gap = '12px';
+
+            headerDiv.addEventListener('mouseenter', () => arrowsDiv.style.display = 'flex');
+            headerDiv.addEventListener('mouseleave', () => arrowsDiv.style.display = 'none');
             
             const upArrow = document.createElement('span');
             upArrow.textContent = '⬆️';
@@ -44,7 +47,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
                     chrome.bookmarks.getChildren(spaceId, siblings => {
                         const currentIndex = siblings.findIndex(s => s.id === category.id);
                         if (currentIndex > 0) {
-                            chrome.bookmarks.move(category.id, { parentId: spaceId, index: currentIndex - 1 }, () => {
+                            chrome.bookmarks.move(category.id, { index: currentIndex - 1 }, () => {
                                 const cIndex = bookmarks.findIndex(c => c.id === category.id);
                                 if (cIndex > 0) {
                                     const temp = bookmarks[cIndex];
@@ -72,7 +75,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
                     chrome.bookmarks.getChildren(spaceId, siblings => {
                         const currentIndex = siblings.findIndex(s => s.id === category.id);
                         if (currentIndex > -1 && currentIndex < siblings.length - 1) {
-                            chrome.bookmarks.move(category.id, { parentId: spaceId, index: currentIndex + 1 }, () => {
+                            chrome.bookmarks.move(category.id, { index: currentIndex + 1 }, () => {
                                 const cIndex = bookmarks.findIndex(c => c.id === category.id);
                                 if (cIndex < bookmarks.length - 1) {
                                     const temp = bookmarks[cIndex];
