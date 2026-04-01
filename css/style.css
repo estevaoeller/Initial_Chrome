@@ -1275,3 +1275,20 @@ body.text-behavior-single .bookmark-name {
     filter: brightness(1.2);
 }
 
+/* Cascading Entrance Animation */
+@keyframes slideUpFadeIn {
+    0% {
+        opacity: 0;
+        transform: translateY(15px);
+    }
+    100% {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.animate-cascade {
+    opacity: 0;
+    animation: slideUpFadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+}
+

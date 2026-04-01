@@ -6,6 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Aba Personalizada</title>
     <link rel="stylesheet" href="css/style.css">
+    <script src="js/Sortable.min.js"></script>
 </head>
 
 <body>
@@ -28,10 +29,10 @@
 
         <!-- MAIN CONTENT -->
         <div id="main-wrapper">
-            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; font-size: var(--quick-links-size, 13px);">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; font-size: var(--quick-links-size, 13px);">
                 <nav id="quick-links-bar" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 0;"></nav>
-                <div id="top-right-bar">
-                    <a href="#" id="toggl-toggle-btn" style="text-decoration: none; color: var(--text); opacity: 0.8; font-family: inherit; transition: opacity 0.2s; display: none;">Toggl</a>
+                <div id="top-right-bar" style="display: flex; gap: 15px;">
+                    <a href="#" id="toggl-toggle-btn" class="quick-link" style="text-decoration: none; display: none;">Toggl</a>
                 </div>
             </div>
             <header id="top-header">

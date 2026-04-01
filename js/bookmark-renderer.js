@@ -1,14 +1,15 @@
 import { handleDeleteBookmark, renameBookmark, renameGroup, createGroup } from './modules.js';
-import { setupDragParams, setupCategoryDropZone } from './drag-drop.js';
+// Removed drag-drop.js in favor of CDN SortableJS
 
 export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) {
     contentArea.innerHTML = '';
     const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
 
     if (bookmarks && bookmarks.length > 0) {
-        bookmarks.forEach((category => {
+        bookmarks.forEach((category, index) => {
             const categoryDiv = document.createElement('div');
-            categoryDiv.className = 'bookmark-category';
+            categoryDiv.className = 'bookmark-category animate-cascade';
+            categoryDiv.style.animationDelay = `${index * 0.05}s`;
 
             const headerDiv = document.createElement('div');
             headerDiv.style.display = 'flex';
@@ -27,74 +28,24 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             categoryTitle.style.marginBottom = '0';
             categoryTitle.style.marginTop = '0';
 
-            const arrowsDiv = document.createElement('div');
-            arrowsDiv.style.display = 'none'; // oculto por padrão
-            arrowsDiv.style.gap = '12px';
-
-            headerDiv.addEventListener('mouseenter', () => arrowsDiv.style.display = 'flex');
-            headerDiv.addEventListener('mouseleave', () => arrowsDiv.style.display = 'none');
+            // Set data-id on categoryDiv
+            categoryDiv.dataset.categoryId = category.id || '';
             
-            const upArrow = document.createElement('span');
-            upArrow.textContent = '⬆️';
-            upArrow.style.cursor = 'pointer';
-            upArrow.title = "Mover Grupo para Cima";
-            upArrow.style.opacity = '0.5';
-            upArrow.style.transition = 'opacity 0.2s';
-            upArrow.onmouseenter = () => upArrow.style.opacity = '1';
-            upArrow.onmouseleave = () => upArrow.style.opacity = '0.5';
-            upArrow.onclick = () => {
-                if (category.id) {
-                    chrome.bookmarks.getChildren(spaceId, siblings => {
-                        const currentIndex = siblings.findIndex(s => s.id === category.id);
-                        if (currentIndex > 0) {
-                            chrome.bookmarks.move(category.id, { index: currentIndex - 1 }, () => {
-                                const cIndex = bookmarks.findIndex(c => c.id === category.id);
-                                if (cIndex > 0) {
-                                    const temp = bookmarks[cIndex];
-                                    bookmarks[cIndex] = bookmarks[cIndex - 1];
-                                    bookmarks[cIndex - 1] = temp;
-                                    if (setBookmarks) setBookmarks(bookmarks);
-                                    renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
-                                }
-                            });
-                        }
-                    });
-                }
-            };
-
-            const downArrow = document.createElement('span');
-            downArrow.textContent = '⬇️';
-            downArrow.style.cursor = 'pointer';
-            downArrow.title = "Mover Grupo para Baixo";
-            downArrow.style.opacity = '0.5';
-            downArrow.style.transition = 'opacity 0.2s';
-            downArrow.onmouseenter = () => downArrow.style.opacity = '1';
-            downArrow.onmouseleave = () => downArrow.style.opacity = '0.5';
-            downArrow.onclick = () => {
-                if (category.id) {
-                    chrome.bookmarks.getChildren(spaceId, siblings => {
-                        const currentIndex = siblings.findIndex(s => s.id === category.id);
-                        if (currentIndex > -1 && currentIndex < siblings.length - 1) {
-                            chrome.bookmarks.move(category.id, { index: currentIndex + 1 }, () => {
-                                const cIndex = bookmarks.findIndex(c => c.id === category.id);
-                                if (cIndex < bookmarks.length - 1) {
-                                    const temp = bookmarks[cIndex];
-                                    bookmarks[cIndex] = bookmarks[cIndex + 1];
-                                    bookmarks[cIndex + 1] = temp;
-                                    if (setBookmarks) setBookmarks(bookmarks);
-                                    renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
-                                }
-                            });
-                        }
-                    });
-                }
-            };
-
-            arrowsDiv.appendChild(upArrow);
-            arrowsDiv.appendChild(downArrow);
+            const dragHandle = document.createElement('span');
+            dragHandle.className = 'group-drag-handle';
+            dragHandle.innerHTML = '⋮⋮';
+            dragHandle.style.cursor = 'grab';
+            dragHandle.style.opacity = '0.3';
+            dragHandle.style.marginRight = '10px';
+            dragHandle.title = 'Arrastar Grupo';
             
-            headerDiv.appendChild(categoryTitle);
-            if (spaceId) headerDiv.appendChild(arrowsDiv);
+            const titleContainer = document.createElement('div');
+            titleContainer.style.display = 'flex';
+            titleContainer.style.alignItems = 'center';
+            titleContainer.appendChild(dragHandle);
+            titleContainer.appendChild(categoryTitle);
+            
+            headerDiv.appendChild(titleContainer);
             categoryDiv.appendChild(headerDiv);
 
         // --- Edit Group Title (Double Click) ---
@@ -160,28 +111,44 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
         gridDiv.className = 'bookmarks-grid';
         categoryDiv.appendChild(gridDiv);
 
-        if (getBookmarks && setBookmarks) {
-            setupCategoryDropZone(
-                categoryDiv,
-                category.name,
-                getBookmarks,
-                setBookmarks,
-                (updated) => renderBookmarks(updated, contentArea, iconSize, stateHelpers),
-                spaceId
-            );
+        if (window.Sortable && getBookmarks && setBookmarks && spaceId) {
+            window.Sortable.create(gridDiv, {
+                group: 'shared', // all gridDivs are part of the 'shared' list
+                animation: 150,
+                delay: 200,   // Delay to distinguish tap from drag on touch
+                delayOnTouchOnly: true,
+                onEnd: function (evt) {
+                    if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
+
+                    const itemEl = evt.item; // dragged HTMLElement
+                    const itemId = itemEl.dataset.id;
+                    const newIndex = evt.newIndex;
+                    const targetCategoryId = evt.to.closest('.bookmark-category').dataset.categoryId;
+
+                    if (itemId && targetCategoryId) {
+                        try {
+                            chrome.bookmarks.move(itemId, { parentId: targetCategoryId, index: newIndex }, () => {
+                                // Full reload to keep UI consistent, could optimize later
+                                window.location.reload();
+                            });
+                        } catch (e) {
+                            console.error("Error moving bookmark:", e);
+                        }
+                    }
+                }
+            });
         }
 
-        category.links.forEach(link => {
+        category.links.forEach((link, linkIndex) => {
             const bookmarkItem = document.createElement('a');
-            bookmarkItem.className = 'bookmark-item';
+            bookmarkItem.className = 'bookmark-item animate-cascade';
+            // Start item animation after its category starts animating + small stagger per item
+            bookmarkItem.style.animationDelay = `${(index * 0.05) + (linkIndex * 0.02) + 0.15}s`;
             bookmarkItem.href = link.url;
             bookmarkItem.target = '_blank';
             bookmarkItem.draggable = true;
 
-            if (getBookmarks) {
-                setupDragParams(bookmarkItem, category.name, spaceId);
-            }
-
+            bookmarkItem.dataset.id = link.id || '';
             // --- Delete Button ---
             const deleteBtn = document.createElement('span');
             deleteBtn.className = 'delete-bookmark-btn';
@@ -254,7 +221,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             gridDiv.appendChild(bookmarkItem);
         });
         contentArea.appendChild(categoryDiv);
-        }));
+        });
     }
 
     // --- Create "New Group" Button ---
@@ -300,5 +267,32 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
 
         newGroupContainer.appendChild(newGroupBtn);
         contentArea.appendChild(newGroupContainer);
+    }
+    
+    // Make Categories sortable
+    if (window.Sortable && getBookmarks && setBookmarks && spaceId) {
+        window.Sortable.create(contentArea, {
+            animation: 150,
+            handle: '.group-drag-handle',
+            filter: '.new-group-container',
+            draggable: '.bookmark-category',
+            onEnd: function (evt) {
+                if (evt.oldIndex === evt.newIndex) return;
+                
+                const itemEl = evt.item;
+                const catId = itemEl.dataset.categoryId;
+                
+                if (catId) {
+                    try {
+                        chrome.bookmarks.move(catId, { parentId: spaceId, index: evt.newIndex }, () => {
+                            // Reload to sync state cleanly
+                            window.location.reload();
+                        });
+                    } catch (e) {
+                        console.error('Error moving category', e);
+                    }
+                }
+            }
+        });
     }
 }
