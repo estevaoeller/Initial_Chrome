@@ -338,6 +338,50 @@
         #save-status.show {
             opacity: 1;
         }
+
+        /* TOGGLE SWITCH */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .switch .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--input-bg);
+            border: 1px solid var(--settings-border);
+            transition: .4s;
+            border-radius: 34px;
+        }
+        .switch .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 3px;
+            bottom: 3px;
+            background-color: var(--settings-text);
+            transition: .4s;
+            border-radius: 50%;
+        }
+        .switch input:checked + .slider {
+            background-color: var(--accent);
+            border-color: var(--accent);
+        }
+        .switch input:checked + .slider:before {
+            transform: translateX(22px);
+            background-color: white;
+        }
     </style>
 </head>
 
@@ -360,6 +404,9 @@
                 </button>
                 <button class="nav-btn" data-tab="links">
                     <span>🔗</span> Links Rápidos
+                </button>
+                <button class="nav-btn" data-tab="productivity">
+                    <span>⏱️</span> Produtividade
                 </button>
                 <button class="nav-btn" data-tab="wallpaper">
                     <span>🖼️</span> Papel de Parede
@@ -687,6 +734,59 @@
                                 <input type="text" id="new-link-url" placeholder="https://...">
                             </div>
                             <button id="add-link-btn" class="btn btn-primary" style="height: 42px;">Adicionar</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- TAB: PRODUCTIVITY (NEW) -->
+                <div id="tab-productivity" class="tab-pane">
+                    <div class="section-header">
+                        <h2 class="section-title">Produtividade e Foco</h2>
+                        <p class="section-desc">Configure seu Timer Pomodoro e integração com o Toggl Track.</p>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Status do Módulo</div>
+                        <div class="controls-grid">
+                            <div class="control-item full-width" style="flex-direction: row; align-items: center; justify-content: space-between;">
+                                <label for="pomodoro-enabled" style="font-size: 1.1rem;">Ativar Módulo de Foco (Toggl/Pomodoro)</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="pomodoro-enabled">
+                                    <span class="slider round"></span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Integração Toggl Track</div>
+                        <div class="controls-grid">
+                            <div class="control-item full-width">
+                                <label for="toggl-api-token">API Token (Toggl)</label>
+                                <div style="display: flex; gap: 5px;">
+                                    <input type="password" id="toggl-api-token" placeholder="Encontre-o no final da aba 'Profile settings' no Toggl" style="flex: 1;">
+                                    <button id="toggle-toggl-token-btn" class="btn btn-secondary" title="Mostrar/Ocultar" style="padding: 0 10px; flex-shrink: 0;">👁️</button>
+                                </div>
+                                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0;">Utilizado para sincronizar o Pomodoro com sua conta do Toggl em tempo real. Salvo automaticamente.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="settings-group">
+                        <div class="group-title">Configurações do Pomodoro</div>
+                        <div class="controls-grid">
+                            <div class="control-item">
+                                <label for="pomodoro-work">Tempo de Foco (minutos)</label>
+                                <div class="range-wrapper">
+                                    <input type="number" id="pomodoro-work" min="1" max="120" value="25" class="modern-input">
+                                </div>
+                            </div>
+                            <div class="control-item">
+                                <label for="pomodoro-break">Tempo de Pausa (minutos)</label>
+                                <div class="range-wrapper">
+                                    <input type="number" id="pomodoro-break" min="1" max="60" value="5" class="modern-input">
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>

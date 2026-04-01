@@ -77,6 +77,25 @@ document.addEventListener('DOMContentLoaded', function () {
     const toggleApiKeyBtn = document.getElementById('toggle-api-key-btn');
     const clearApiKeyBtn = document.getElementById('clear-api-key-btn');
 
+    // Productivity Settings
+    const togglApiToken = document.getElementById('toggl-api-token');
+    const pomodoroEnabled = document.getElementById('pomodoro-enabled');
+    const pomodoroWork = document.getElementById('pomodoro-work');
+    const pomodoroBreak = document.getElementById('pomodoro-break');
+    const toggleTogglTokenBtn = document.getElementById('toggle-toggl-token-btn');
+
+    if (toggleTogglTokenBtn && togglApiToken) {
+        toggleTogglTokenBtn.addEventListener('click', () => {
+            if (togglApiToken.type === 'password') {
+                togglApiToken.type = 'text';
+                toggleTogglTokenBtn.textContent = '🙈';
+            } else {
+                togglApiToken.type = 'password';
+                toggleTogglTokenBtn.textContent = '👁️';
+            }
+        });
+    }
+
     // Toggle Wallpaper Configs based on Source
     if (wallpaperSource) {
         wallpaperSource.addEventListener('change', () => {
@@ -196,6 +215,10 @@ document.addEventListener('DOMContentLoaded', function () {
             if (clockStyle) clockStyle.value = settings.clockStyle || 'analog';
             if (userName) userName.value = settings.userName || '';
             if (weatherCity) weatherCity.value = settings.weatherCity || '';
+            if (togglApiToken) togglApiToken.value = settings.togglApiToken || '';
+            if (pomodoroEnabled) pomodoroEnabled.checked = settings.pomodoroEnabled !== false;
+            if (pomodoroWork) pomodoroWork.value = settings.pomodoroWork || 25;
+            if (pomodoroBreak) pomodoroBreak.value = settings.pomodoroBreak || 5;
 
             updateFrequencyDisplay(settings.wallpaperFrequency);
             filterColor.value = ensureFullHex(settings.filterColor);
@@ -315,7 +338,11 @@ document.addEventListener('DOMContentLoaded', function () {
                 weatherCity: weatherCity ? weatherCity.value.trim() : '',
                 wallpaperSource: wallpaperSource ? wallpaperSource.value : 'local',
                 wallpaperTheme: wallpaperTheme ? (wallpaperTheme.value === 'custom' && wallpaperThemeCustom && wallpaperThemeCustom.value.trim() ? wallpaperThemeCustom.value.trim() : wallpaperTheme.value) : 'nature',
-                wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : ''
+                wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : '',
+                togglApiToken: togglApiToken ? togglApiToken.value.trim() : '',
+                pomodoroEnabled: pomodoroEnabled ? pomodoroEnabled.checked : true,
+                pomodoroWork: pomodoroWork ? parseInt(pomodoroWork.value) : 25,
+                pomodoroBreak: pomodoroBreak ? parseInt(pomodoroBreak.value) : 5
             };
 
             chrome.storage.sync.set({ extensionSettings: settings }, function () {
@@ -542,7 +569,11 @@ document.addEventListener('DOMContentLoaded', function () {
         wallpaperSource,
         wallpaperTheme,
         wallpaperThemeCustom,
-        wallpaperApiKey
+        wallpaperApiKey,
+        togglApiToken,
+        pomodoroEnabled,
+        pomodoroWork,
+        pomodoroBreak
     ].forEach(element => {
         if (element) {
             element.addEventListener('input', saveSettings);

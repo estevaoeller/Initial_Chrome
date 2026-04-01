@@ -28,7 +28,12 @@
 
         <!-- MAIN CONTENT -->
         <div id="main-wrapper">
-            <nav id="quick-links-bar"></nav>
+            <div style="display: flex; justify-content: space-between; align-items: baseline; margin-bottom: 20px; font-size: var(--quick-links-size, 13px);">
+                <nav id="quick-links-bar" style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 0;"></nav>
+                <div id="top-right-bar">
+                    <a href="#" id="toggl-toggle-btn" style="text-decoration: none; color: var(--text); opacity: 0.8; font-family: inherit; transition: opacity 0.2s; display: none;">Toggl</a>
+                </div>
+            </div>
             <header id="top-header">
                 <div id="weather-widget" class="weather-widget" style="display: none;" title="Previsão do tempo">
                     <span id="weather-icon">--</span>
@@ -103,6 +108,27 @@
                 </button>
             </div>
         </aside>
+
+        <!-- POMODORO WIDGET -->
+        <div id="pomodoro-widget" class="pomodoro-widget" style="display: none;">
+            <div class="pomodoro-header">
+                <span class="pomodoro-title">⏱️ Foco</span>
+                <span id="pomodoro-mode-badge" class="badge">Trabalho</span>
+            </div>
+            <div class="pomodoro-timer">
+                <span id="pomodoro-time">25:00</span>
+            </div>
+            <div class="pomodoro-controls">
+                <input type="text" id="pomodoro-desc" placeholder="O que fará agora?" class="pomodoro-input" autocomplete="off">
+                <select id="pomodoro-project" class="pomodoro-input" style="display: none;">
+                    <option value="none">Sem Projeto</option>
+                </select>
+                <div class="pomodoro-buttons">
+                    <button id="pomodoro-play-btn" class="pomo-btn play" title="Iniciar">▶️</button>
+                    <button id="pomodoro-stop-btn" class="pomo-btn stop" title="Parar" style="display: none;">⏹️</button>
+                </div>
+            </div>
+        </div>
 
         <!-- Unsplash Info -->
         <div id="unsplash-info" class="unsplash-info" style="display: none;">

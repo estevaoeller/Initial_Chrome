@@ -32,5 +32,9 @@ export const defaultSettings = {
     weatherCity: "",
     wallpaperSource: "local",
     wallpaperTheme: "nature",
-    wallpaperApiKey: ""
+    wallpaperApiKey: "",
+    togglApiToken: "",
+    pomodoroEnabled: true,
+    pomodoroWork: 25,
+    pomodoroBreak: 5
 };

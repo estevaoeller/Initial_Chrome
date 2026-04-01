@@ -36,9 +36,9 @@ import {
     applyBookmarkFontSettings,
     applyBackgroundFilter,
     applyLayoutMode,
-    applySectionAppearance
 } from './settings-handlers.js';
 import { renderBookmarks } from './bookmark-renderer.js';
+import { initPomodoro } from './pomodoro.js';
 
 document.addEventListener('DOMContentLoaded', function () {
     // ---- CONSTANTES E VARIÁVEIS ----
@@ -253,6 +253,8 @@ document.addEventListener('DOMContentLoaded', function () {
             // Refresh weather every 30 mins
             setInterval(() => updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity), 1800000);
         }
+
+        initPomodoro();
 
         manageWallpaper(settingsState);
         const nextWallpaperBtn = document.getElementById('next-wallpaper-btn');

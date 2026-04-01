@@ -1152,3 +1152,126 @@ body.text-behavior-single .bookmark-name {
     opacity: 1 !important;
 }
 
+/* Pomodoro Widget */
+.pomodoro-widget {
+    position: fixed;
+    top: 20px;
+    right: 80px; /* Offset from action sidebar */
+    width: 280px;
+    background: var(--card);
+    border: 1px solid var(--icon-border-color);
+    border-radius: 16px;
+    padding: 20px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    backdrop-filter: blur(10px);
+    z-index: 1000;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    animation: fadeInDown 0.3s ease;
+}
+
+@keyframes fadeInDown {
+    from { opacity: 0; transform: translateY(-10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.pomodoro-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.pomodoro-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.pomodoro-header .badge {
+    background-color: var(--accent);
+    color: white;
+    font-size: 0.75rem;
+    font-weight: bold;
+    padding: 3px 8px;
+    border-radius: 12px;
+}
+
+.pomodoro-header .badge.break {
+    background-color: #10b981; /* Green for break */
+}
+
+.pomodoro-timer {
+    text-align: center;
+    font-size: 4rem;
+    font-weight: 800;
+    font-family: monospace, system-ui;
+    color: var(--text);
+    line-height: 1;
+    margin: 10px 0;
+    letter-spacing: -2px;
+}
+
+.pomodoro-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.pomodoro-input {
+    width: 100%;
+    box-sizing: border-box;
+    padding: 10px 14px;
+    border-radius: 8px;
+    border: 1px solid var(--icon-border-color);
+    background-color: rgba(0, 0, 0, 0.1);
+    color: var(--text);
+    font-size: 0.9rem;
+    outline: none;
+    transition: all 0.2s;
+}
+
+.pomodoro-input:focus {
+    border-color: var(--accent);
+    background-color: rgba(0, 0, 0, 0.2);
+}
+
+.pomodoro-input option {
+    background-color: var(--bg);
+    color: var(--text);
+}
+
+.pomodoro-buttons {
+    display: flex;
+    justify-content: center;
+    gap: 10px;
+}
+
+.pomo-btn {
+    width: 100%;
+    padding: 12px;
+    border: none;
+    border-radius: 8px;
+    font-size: 1.2rem;
+    cursor: pointer;
+    transition: all 0.2s;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.pomo-btn.play {
+    background-color: color-mix(in srgb, var(--accent) 90%, transparent);
+    color: white;
+}
+
+.pomo-btn.stop {
+    background-color: rgba(239, 68, 68, 0.2);
+    color: #ef4444;
+}
+
+.pomo-btn:hover {
+    transform: scale(1.02);
+    filter: brightness(1.2);
+}
+
