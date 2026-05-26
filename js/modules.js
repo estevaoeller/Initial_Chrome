@@ -1,4 +1,5 @@
 // js/modules.js
+import { defaultCustomIcons } from './config.js';
 
 export const ROOT_FOLDER_NAME = 'Pagina Inicial';
 
@@ -639,16 +640,41 @@ export async function manageWallpaper(settingsState, forceNext = false) {
 
 // ========== CUSTOM ICONS LOGIC ==========
 export function saveCustomIconProps(bookmarkId, iconData, callback) {
-    chrome.storage.local.get("customIcons", data => {
-        const customIcons = data.customIcons || {};
-        customIcons[bookmarkId] = iconData;
-        chrome.storage.local.set({ customIcons }, callback);
-    });
+    const key = `icon:${bookmarkId}`;
+    chrome.storage.sync.set({ [key]: iconData }, callback);
+}
+
+export function removeCustomIconProps(bookmarkId, callback) {
+    const key = `icon:${bookmarkId}`;
+    chrome.storage.sync.remove(key, callback);
 }
 
 export function loadCustomIcons(callback) {
-    chrome.storage.local.get("customIcons", data => {
-        callback(data.customIcons || {});
+    chrome.storage.sync.get(null, data => {
+        const customIcons = {};
+        
+        // Find all keys starting with "icon:"
+        Object.keys(data).forEach(key => {
+            if (key.startsWith('icon:')) {
+                const idOrUrl = key.slice(5);
+                customIcons[idOrUrl] = data[key];
+            }
+        });
+
+        // Check if custom icons have been initialized in sync storage before
+        if (!data.customIconsInitialized) {
+            // First time loading: merge defaultCustomIcons and save them to sync storage
+            const initialIcons = Object.assign({}, defaultCustomIcons, customIcons);
+            const toSave = { customIconsInitialized: true };
+            Object.keys(defaultCustomIcons).forEach(idOrUrl => {
+                toSave[`icon:${idOrUrl}`] = defaultCustomIcons[idOrUrl];
+            });
+            chrome.storage.sync.set(toSave, () => {
+                callback(initialIcons);
+            });
+        } else {
+            callback(customIcons);
+        }
     });
 }
 

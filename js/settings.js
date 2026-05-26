@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', function () {
     const resetSettingsBtn = document.getElementById('reset-settings-btn');
     const saveSettingsBtn = document.getElementById('save-settings-btn');
     const closeSettingsBtn = document.getElementById('close-settings-btn');
+    const saveStatus = document.getElementById('save-status');
 
     // New Widget Settings
     const clockStyle = document.getElementById('clock-style');
@@ -651,7 +652,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    function handleDragLeave(e) {
+    function handleDragLeave() {
         this.style.border = 'none';
         this.style.borderBottom = '1px solid var(--settings-border)';
     }
@@ -672,7 +673,7 @@ document.addEventListener('DOMContentLoaded', function () {
         return false;
     }
 
-    function handleDragEnd(e) {
+    function handleDragEnd() {
         this.style.opacity = '1';
         document.querySelectorAll('.draggable-link').forEach(item => {
             item.style.border = 'none';
@@ -741,11 +742,20 @@ document.addEventListener('DOMContentLoaded', function () {
         exportDataBtn.innerHTML = "✔️ Exportado!";
         setTimeout(() => { exportDataBtn.innerHTML = originalText; }, 2000);
 
-        chrome.storage.local.get(['userBookmarks', 'customIcons'], function (resultLocal) {
-            chrome.storage.sync.get(['extensionSettings', 'quickLinks'], function (resultSync) {
+        chrome.storage.sync.get(null, function (resultSync) {
+            chrome.storage.local.get(['userBookmarks'], function (resultLocal) {
+                const customIcons = {};
+                // Filter all keys starting with "icon:"
+                Object.keys(resultSync).forEach(key => {
+                    if (key.startsWith('icon:')) {
+                        const urlOrId = key.slice(5);
+                        customIcons[urlOrId] = resultSync[key];
+                    }
+                });
+
                 const exportData = {
                     bookmarks: resultLocal.userBookmarks || [],
-                    customIcons: resultLocal.customIcons || {},
+                    customIcons: customIcons,
                     settings: resultSync.extensionSettings || defaultSettings,
                     quickLinks: resultSync.quickLinks || [],
                     exportDate: new Date().toISOString()
@@ -788,7 +798,18 @@ document.addEventListener('DOMContentLoaded', function () {
                         }
 
                         if (importData.customIcons) {
-                            chrome.storage.local.set({ customIcons: importData.customIcons });
+                            const iconsToSave = { customIconsInitialized: true };
+                            // Remove existing keys prefix icon: to avoid mixing backups
+                            chrome.storage.sync.get(null, syncData => {
+                                const keysToRemove = Object.keys(syncData).filter(k => k.startsWith('icon:'));
+                                chrome.storage.sync.remove(keysToRemove, () => {
+                                    // Save new custom icons
+                                    Object.keys(importData.customIcons).forEach(urlOrId => {
+                                        iconsToSave[`icon:${urlOrId}`] = importData.customIcons[urlOrId];
+                                    });
+                                    chrome.storage.sync.set(iconsToSave);
+                                });
+                            });
                         }
 
                         if (importData.quickLinks) {

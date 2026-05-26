@@ -1,16 +1,12 @@
 // js/script.js (versão final limpa)
 import {
-    loadBookmarksFromChrome,
-    addBookmarkToChrome,
     applyTheme,
-    toggleTheme,
     updateClock,
     updateDate,
     updateCalendar,
     loadSpacesFromChrome,
     loadGroupsFromSpace,
     createSpace,
-    deleteSpace,
     checkAndMigrateToSpaces,
     getRandomSpaceIcon,
     updateDigitalClock,
@@ -19,6 +15,7 @@ import {
     manageWallpaper,
     loadCustomIcons,
     saveCustomIconProps,
+    removeCustomIconProps,
     updateBookmarkFull
 } from './modules.js';
 import {
@@ -36,6 +33,7 @@ import {
     applyBookmarkFontSettings,
     applyBackgroundFilter,
     applyLayoutMode,
+    applySectionAppearance,
 } from './settings-handlers.js';
 import { renderBookmarks } from './bookmark-renderer.js';
 import { initPomodoro } from './pomodoro.js';
@@ -51,8 +49,6 @@ document.addEventListener('DOMContentLoaded', function () {
     const weatherTemp = document.getElementById('weather-temp');
     const datePlaceholder = document.getElementById('date-placeholder');
     const calendarPlaceholder = document.getElementById('calendar-placeholder');
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    const settingsBtn = document.getElementById('settings-btn');
 
     // Sidebar elements
     const sidebar = document.getElementById('sidebar');
@@ -60,36 +56,32 @@ document.addEventListener('DOMContentLoaded', function () {
     const spacesList = document.getElementById('spaces-list');
     const addSpaceBtn = document.getElementById('add-space-btn');
 
-    const defaultBookmarkCategories = [
-        { name: 'IA', links: [{ name: 'ChatGPT', url: 'https://chat.openai.com/' }, { name: 'Gemini', url: 'https://gemini.google.com/' }] },
-        { name: 'News', links: [{ name: 'Google News', url: 'https://news.google.com/' }] },
-        { name: 'Ferramentas', links: [{ name: 'Photopea', url: 'https://www.photopea.com/' }] }
-    ];
     let currentBookmarks = [];
     let currentSpaces = [];
     let activeSpaceId = null;
 
     const settingsState = {
-        iconSize: 32,
-        iconBorderRadius: 6,
-        iconBorderColor: '#ddd',
-        iconBgColor: '#fff',
+        iconSize: 28,
+        iconBorderRadius: 8,
+        iconBorderColor: '#697c96',
+        iconBgColor: '#7491b9',
+        iconBgOpacity: 0.75,
         iconSpacing: 8,
         iconGap: 8,
-        categoryGap: 20,
+        categoryGap: 12,
         bookmarkFontFamily: 'sans-serif',
-        bookmarkFontSize: 14,
-        bookmarkFontColor: '#333333',
-        bookmarkMinWidth: 100,
+        bookmarkFontSize: 12,
+        bookmarkFontColor: '#e2e8f0',
+        bookmarkMinWidth: 150,
         filterColor: '#000000',
         filterOpacity: 0.3,
-        iconLayout: 'row', // New
-        nameDisplay: 'always', // New
-        textBehavior: 'truncate', // New
-        themePreset: 'light',
+        iconLayout: 'row',
+        nameDisplay: 'always',
+        textBehavior: 'truncate',
+        themePreset: 'dark',
         lastActiveSpace: null,
         sidebarCollapsed: false,
-        sidebarWidth: 200
+        sidebarWidth: 240
     };
 
     // ---- SIDEBAR FUNCTIONS ----
@@ -584,24 +576,19 @@ document.addEventListener('DOMContentLoaded', function () {
                     }
                 });
             } else {
-                // Clear old icon if switched to auto
-                chrome.storage.local.get("customIcons", data => {
-                    const icons = data.customIcons || {};
-                    if (icons[idKey]) {
-                        delete icons[idKey];
-                        chrome.storage.local.set({ customIcons: icons }, () => {
-                            if (currentEditingLink.id) {
-                                updateBookmarkFull(currentEditingLink.id, newName, newUrl, finishSave);
-                            } else {
-                                finishSave();
-                            }
-                        });
-                    } else {
+                // Clear old icon if switched to auto (delete from sync)
+                removeCustomIconProps(idKey, () => {
+                    const proceed = () => {
                         if (currentEditingLink.id) {
                             updateBookmarkFull(currentEditingLink.id, newName, newUrl, finishSave);
                         } else {
                             finishSave();
                         }
+                    };
+                    if (currentEditingLink.id) {
+                        removeCustomIconProps(currentEditingLink.id, proceed);
+                    } else {
+                        proceed();
                     }
                 });
             }

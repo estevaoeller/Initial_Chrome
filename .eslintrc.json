@@ -9,5 +9,6 @@
   },
   "globals": {
     "chrome": "readonly"
-  }
+  },
+  "ignorePatterns": ["js/Sortable.min.js", "js/drag-drop.js", "node_modules/", "Initial_Chrome.zip"]
 }

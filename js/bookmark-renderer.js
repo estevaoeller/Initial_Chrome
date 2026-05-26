@@ -1,4 +1,4 @@
-import { handleDeleteBookmark, renameBookmark, renameGroup, createGroup } from './modules.js';
+import { handleDeleteBookmark, renameGroup, createGroup } from './modules.js';
 // Removed drag-drop.js in favor of CDN SortableJS
 
 export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) {
@@ -193,7 +193,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             favicon.className = 'bookmark-favicon';
             favicon.dataset.url = link.url;
 
-            const customIcon = stateHelpers && stateHelpers.customIcons ? stateHelpers.customIcons[link.url] : null;
+            const customIcon = stateHelpers && stateHelpers.customIcons ? (stateHelpers.customIcons[link.url] || stateHelpers.customIcons[link.id]) : null;
 
             if (customIcon && customIcon.type === 'simpleicons') {
                 let colorHex = customIcon.color ? customIcon.color.replace('#', '') : 'default';

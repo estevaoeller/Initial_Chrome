@@ -45,7 +45,7 @@ describe('Chrome bookmark functions', () => {
 
     loadBookmarksFromChrome(categories => {
       expect(categories).toEqual([
-        { name: 'Cat1', links: [{ name: 'Link1', url: 'http://a.com' }] },
+        { id: '10', name: 'Cat1', links: [{ id: '100', name: 'Link1', url: 'http://a.com' }] },
       ]);
       done();
     });
@@ -66,9 +66,9 @@ describe('Chrome bookmark functions', () => {
       if (id === '1') cb([{ id: 'cat1', title: 'Cat', url: undefined }]);
       else cb([]);
     });
-    chrome.bookmarks.create.mockImplementation((_data, cb) => cb());
+    chrome.bookmarks.create.mockImplementation((data, cb) => cb({ id: 'mock-id', ...data }));
 
-    addBookmarkToChrome('Cat', bookmark, () => {
+    addBookmarkToChrome('1', 'Cat', bookmark, () => {
       expect(chrome.bookmarks.create).toHaveBeenCalledWith(
         { parentId: 'cat1', title: 'Link', url: 'http://example.com' },
         expect.any(Function),
@@ -94,7 +94,7 @@ describe('Chrome bookmark functions', () => {
     });
     chrome.bookmarks.remove.mockImplementation((_id, cb) => cb());
 
-    removeBookmarkFromChrome('Cat', url, () => {
+    removeBookmarkFromChrome('1', 'Cat', url, () => {
       expect(chrome.bookmarks.remove).toHaveBeenCalledWith(
         'bm1',
         expect.any(Function),
@@ -103,4 +103,3 @@ describe('Chrome bookmark functions', () => {
     });
   });
 });
-

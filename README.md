@@ -1,45 +1,53 @@
 # Página Inicial Personalizada
 
-Esta extensão do Chrome substitui a nova guia padrão por uma página personalizável. Ela permite organizar favoritos em categorias, adicionar ou remover links e exibir papéis de parede locais de forma rotativa.
+Esta extensão do Chrome substitui a nova guia padrão por uma página inicial altamente personalizável, premium e focada em produtividade. Ela permite organizar seus favoritos em diferentes **Espaços (Spaces)** e categorias, gerenciar links rápidos e integrar um Timer de Foco diretamente ao **Toggl Track**.
 
-## Instalação
+---
+
+## ✨ Funcionalidades
+
+### 📂 Espaços e Favoritos (Spaces)
+- **Espaços Múltiplos**: Crie contextos separados (ex: 🏠 Home, 💼 Trabalho, 📚 Estudos) com ícones personalizados.
+- **Categorias e Subpastas**: Organize seus links em grupos dentro de cada espaço.
+- **Sincronização Nativa**: Seus favoritos são salvos diretamente na estrutura de bookmarks do Chrome, o que significa que o Chrome Sync cuida do backup e sincronização dos seus links automaticamente.
+- **Organização por Drag & Drop**: Arraste e solte cartões e até categorias inteiras para reordená-las usando a biblioteca SortableJS.
+
+### 🎨 Customização Avançada
+- **Tema Base**: Suporte a múltiplos presets de temas: Claro, Escuro, Solar e Minimalista.
+- **Controle Fino de Layout**: Alterne entre layout de lista vertical ou colunas inteligentes (Masonry).
+- **Aparência dos Cartões**: Ajuste de forma dinâmica o tamanho do ícone, padding interno, gap entre texto e ícone, largura mínima do cartão, arredondamento da borda e cores (fundo, bordas, fontes).
+- **Tipografia Personalizável**: Altere a família da fonte, tamanho e cor dos títulos.
+- **Ícones Inteligentes**: Escolha automaticamente o Favicon oficial do site ou selecione ícones direto de galerias unificadas (**SimpleIcons**, **TechIcons**, **DashboardIcons**) ou URLs personalizadas.
+
+### ⏱️ Produtividade e Foco
+- **Timer Pomodoro**: Módulo de foco integrado para cronometrar ciclos de trabalho e pausas diretamente na aba (desabilitado por padrão nas configurações).
+- **Integração com o Toggl Track**: Sincronize seu cronômetro com sua conta do Toggl. Ao iniciar o Pomodoro na aba, uma entrada de tempo correspondente (com projeto e descrição) é aberta no Toggl em tempo real.
+
+### 🖼️ Fundo Dinâmico
+- **Wallpapers Rotativos**: Suporte a papéis de parede rotativos do Unsplash (via API oficial com filtro de tema ou busca geral).
+- **Filtro de Sobreposição**: Controle de cor e opacidade do filtro escuro aplicado sobre a imagem de fundo para garantir o contraste ideal do texto.
+
+### 💾 Sistema de Backup e Sincronização Seamless
+- **Persistência na Nuvem**: Suas configurações de estilos e ícones customizados são salvas no `chrome.storage.sync`. Isso garante que tudo se mantenha sincronizado na sua conta do Google e sobreviva de forma transparente a reinstalações ou atualizações da extensão.
+- **Exportação/Importação JSON**: Exporte um arquivo de backup completo com todas as suas configurações em um clique.
+
+---
+
+## 🛠️ Instalação
+
 1. Baixe ou clone este repositório em seu computador.
 2. Abra `chrome://extensions/` no Chrome.
-3. Ative o **Modo do desenvolvedor**.
-4. Clique em **Carregar sem compactação** e selecione a pasta deste projeto.
-5. Abra uma nova guia para ver a página inicial personalizada.
+3. Ative o **Modo do desenvolvedor** no canto superior direito.
+4. Clique em **Carregar sem compactação** (Load unpacked) e selecione a pasta deste projeto.
+5. Abra uma nova guia para visualizar sua Página Inicial Personalizada.
 
-## Gerenciamento de favoritos
-Na primeira execução a extensão cria uma pasta chamada **Pagina Inicial** em seus favoritos do Chrome. Cada categoria corresponde a uma subpasta dessa pasta e os links são salvos diretamente no gerenciador de bookmarks do navegador. Ao adicionar ou remover links pela interface da extensão, a estrutura de pastas dos favoritos é atualizada automaticamente.
+---
 
-## Configurações
+## 🚀 Scripts de Desenvolvimento
 
-A página `settings.html` permite personalizar diversos aspectos da extensão.
+No diretório do projeto, você pode executar:
 
-### Fundo Dinâmico
-- **Pasta de Wallpapers**: define a pasta local com as imagens que serão exibidas.
-- **Frequência de Troca**: intervalo, em horas, para alternar o papel de parede.
-- **Cor do Filtro**: cor aplicada sobre a imagem do fundo.
-- **Opacidade do Filtro**: intensidade do filtro de cor.
-
-![Tela de configurações de fundo](docs/imagens/configuracoes.svg)
-
-### Bookmarks
-- **Tamanho dos Ícones**: tamanho dos ícones dos favoritos.
-- **Espaçamento dos Ícones**: espaçamento interno de cada ícone.
-- **Distância entre Ícones**: espaço entre os itens na grade.
-- **Largura Mínima do Bookmark**: largura mínima de cada item.
-- **Exibição do Nome**: mostra o título sempre ou apenas ao passar o mouse.
-- **Arredondamento do Ícone**: raio de arredondamento da borda.
-- **Cor da Borda**: cor aplicada à borda do ícone.
-- **Cor de Fundo do Ícone**: cor de fundo para cada ícone.
-- **Fonte dos Favoritos**: família tipográfica usada nos títulos.
-- **Tamanho da Fonte**: tamanho dos textos dos favoritos.
-- **Cor da Fonte**: cor aplicada aos textos dos favoritos.
-
-![Exemplo após aplicar as configurações](docs/imagens/aplicacao.svg)
-
-### Dados
-- **Exportar Dados**: gera um arquivo `.json` com as configurações atuais.
-- **Importar Dados**: permite carregar um arquivo `.json` previamente exportado.
-- **Reiniciar Configurações**: restaura todos os valores padrão.
+- `npm install`: Instala as dependências de desenvolvimento (ESLint, Prettier, Jest).
+- `npm test`: Executa os testes unitários da lógica dos Bookmarks usando o Jest.
+- `npm run lint`: Valida o estilo de código do projeto de forma estática.
+- `npm run build`: Atualiza a versão patch e gera automaticamente no `manifest.json` a descrição contendo a data, hora e versão finalizada do release.
