@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "Página Inicial Personalizada",
-  "version": "0.1.10",
-  "description": "v0.1.10 de 28/05/2026 13:06 - Uma página inicial personalizada para otimizar o acesso a bookmarks e oferecer uma experiência visual única.",
+  "version": "0.1.11",
+  "description": "v0.1.11 de 28/05/2026 13:16 - Uma página inicial personalizada para otimizar o acesso a bookmarks e oferecer uma experiência visual única.",
   "chrome_url_overrides": {
     "newtab": "newtab.html"
   },

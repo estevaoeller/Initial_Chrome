@@ -12,6 +12,14 @@ Esta extensão do Chrome substitui a nova guia padrão por uma página inicial a
 - **Sincronização Nativa**: Seus favoritos são salvos diretamente na estrutura de bookmarks do Chrome, o que significa que o Chrome Sync cuida do backup e sincronização dos seus links automaticamente.
 - **Organização por Drag & Drop**: Arraste e solte cartões e até categorias inteiras para reordená-las usando a biblioteca SortableJS.
 
+### 🔍 Sistema de Busca de Bookmarks
+- **Busca Fuzzy Ultrarrápida**: Procure por nome ou URL em toda a sua base de favoritos.
+- **Filtro Dinâmico por Espaço**: Filtre os resultados exibindo apenas marcadores de um Espaço específico (ex: "Trabalho").
+- **Destaque Visual (Highlight)**: Termos que correspondem à pesquisa são visualmente realçados na interface.
+- **Caminho de Navegação (Breadcrumbs)**: Exibe a estrutura completa do link (ex: `📁 Espaço › Grupo • URL`).
+- **Preservação de Ícones**: Mostra os ícones customizados (SimpleIcons, Devicons, etc.) diretamente na listagem de resultados.
+- **Navegação Eficiente por Teclado**: Use setas para mover a seleção e `Enter` para abrir.
+
 ### 🎨 Customização Avançada
 - **Tema Base**: Suporte a múltiplos presets de temas: Claro, Escuro, Solar e Minimalista.
 - **Controle Fino de Layout**: Alterne entre layout de lista vertical ou colunas inteligentes (Masonry).
@@ -30,6 +38,16 @@ Esta extensão do Chrome substitui a nova guia padrão por uma página inicial a
 ### 💾 Sistema de Backup e Sincronização Seamless
 - **Persistência na Nuvem**: Suas configurações de estilos e ícones customizados são salvas no `chrome.storage.sync`. Isso garante que tudo se mantenha sincronizado na sua conta do Google e sobreviva de forma transparente a reinstalações ou atualizações da extensão.
 - **Exportação/Importação JSON**: Exporte um arquivo de backup completo com todas as suas configurações em um clique.
+
+---
+
+## ⌨️ Atalhos de Teclado (Busca)
+
+- **`Alt+K`**: Abre / Fecha o modal de busca.
+- **`/` (Barra)**: Abre o modal de busca (quando nenhum outro campo de texto estiver em foco).
+- **`↑` e `↓`**: Navega entre os resultados da busca.
+- **`Enter`**: Abre o bookmark selecionado.
+- **`Esc`**: Fecha o modal de busca.
 
 ---
 
