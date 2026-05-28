@@ -137,6 +137,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Setup settings observer
         setupSettingsObserver(widgets.tickClock);
+
+        // Setup sidebar actions
+        setupSidebarActions();
     }
 
     function setupSettingsObserver(tickClock) {
@@ -335,6 +338,65 @@ document.addEventListener('DOMContentLoaded', () => {
 
             if (area === 'sync' && changes.quickLinks) {
                 quickLinksManager.renderQuickLinks(changes.quickLinks.newValue || []);
+            }
+        });
+    }
+
+    function setupSidebarActions() {
+        // Theme Toggle
+        const themeToggleBtn = document.getElementById('theme-toggle-btn');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                const themes = ['light', 'dark', 'solar', 'minimal'];
+                const currentClass = Array.from(document.body.classList).find(c => c.endsWith('-theme'));
+                const current = currentClass ? currentClass.replace('-theme', '') : 'light';
+                const nextIndex = (themes.indexOf(current) + 1) % themes.length;
+                const nextTheme = themes[nextIndex];
+
+                chrome.storage.sync.get(['extensionSettings'], res => {
+                    const s = res.extensionSettings || {};
+                    s.themePreset = nextTheme;
+                    chrome.storage.sync.set({ extensionSettings: s });
+                });
+            });
+        }
+
+        // Settings Button (Custom Size)
+        const settingsBtn = document.getElementById('settings-btn');
+        if (settingsBtn) {
+            const newSettingsBtn = settingsBtn.cloneNode(true);
+            settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
+
+            newSettingsBtn.addEventListener('click', () => {
+                const width = Math.round(window.screen.availWidth * 0.35);
+                const height = Math.round(window.screen.availHeight * 0.8);
+                const left = Math.round((window.screen.availWidth - width) / 2);
+                const top = Math.round((window.screen.availHeight - height) / 2);
+
+                chrome.windows.create({
+                    url: 'settings.html',
+                    type: 'popup',
+                    width: width,
+                    height: height,
+                    left: left,
+                    top: top
+                });
+            });
+        }
+
+        // Chrome Shortcuts
+        const shortcuts = {
+            'chrome-bookmarks-btn': 'chrome://bookmarks',
+            'chrome-history-btn': 'chrome://history',
+            'chrome-downloads-btn': 'chrome://downloads'
+        };
+
+        Object.keys(shortcuts).forEach(id => {
+            const btn = document.getElementById(id);
+            if (btn) {
+                btn.addEventListener('click', () => {
+                    chrome.tabs.create({ url: shortcuts[id] });
+                });
             }
         });
     }
