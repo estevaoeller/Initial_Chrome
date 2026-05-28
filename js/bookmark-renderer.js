@@ -1,5 +1,14 @@
-import { handleDeleteBookmark, renameGroup, createGroup } from './modules.js';
+import { handleDeleteBookmark, renameGroup, createGroup, addBookmarkToChrome } from './modules.js';
 // Removed drag-drop.js in favor of CDN SortableJS
+
+// Track internal drag state globally
+document.addEventListener('dragstart', (e) => {
+    document.body.classList.add('dragging-internal');
+});
+
+document.addEventListener('dragend', () => {
+    document.body.classList.remove('dragging-internal');
+});
 
 export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) {
     contentArea.innerHTML = '';
@@ -128,8 +137,20 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
                     if (itemId && targetCategoryId) {
                         try {
                             chrome.bookmarks.move(itemId, { parentId: targetCategoryId, index: newIndex }, () => {
-                                // Full reload to keep UI consistent, could optimize later
-                                window.location.reload();
+                                // Update local state without full reload
+                                const currentList = getBookmarks();
+                                const sourceCategoryId = evt.from.closest('.bookmark-category').dataset.categoryId;
+                                const sourceCategory = currentList.find(c => c.id === sourceCategoryId);
+                                const targetCategory = currentList.find(c => c.id === targetCategoryId);
+
+                                if (sourceCategory && targetCategory) {
+                                    const linkIndex = sourceCategory.links.findIndex(l => l.id === itemId);
+                                    if (linkIndex > -1) {
+                                        const [movedLink] = sourceCategory.links.splice(linkIndex, 1);
+                                        targetCategory.links.splice(newIndex, 0, movedLink);
+                                        setBookmarks(currentList);
+                                    }
+                                }
                             });
                         } catch (e) {
                             console.error("Error moving bookmark:", e);
@@ -220,6 +241,101 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             bookmarkItem.appendChild(deleteBtn);
             gridDiv.appendChild(bookmarkItem);
         });
+
+        // --- Drag & Drop for External Links (Option 1) ---
+        if (spaceId && setBookmarks) {
+            categoryDiv.addEventListener('dragover', (e) => {
+                if (document.body.classList.contains('dragging-internal')) return;
+                if (e.dataTransfer.types.includes('text/uri-list') || 
+                    e.dataTransfer.types.includes('text/plain') || 
+                    e.dataTransfer.types.includes('text/html')) {
+                    e.preventDefault();
+                    e.dataTransfer.dropEffect = 'copy';
+                    categoryDiv.classList.add('drag-over');
+                }
+            });
+
+            categoryDiv.addEventListener('dragenter', (e) => {
+                if (document.body.classList.contains('dragging-internal')) return;
+                if (e.dataTransfer.types.includes('text/uri-list') || 
+                    e.dataTransfer.types.includes('text/plain') || 
+                    e.dataTransfer.types.includes('text/html')) {
+                    e.preventDefault();
+                    categoryDiv.classList.add('drag-over');
+                }
+            });
+
+            categoryDiv.addEventListener('dragleave', (e) => {
+                if (document.body.classList.contains('dragging-internal')) return;
+                if (!categoryDiv.contains(e.relatedTarget)) {
+                    categoryDiv.classList.remove('drag-over');
+                }
+            });
+
+            categoryDiv.addEventListener('drop', async (e) => {
+                if (document.body.classList.contains('dragging-internal')) return;
+                if (e.dataTransfer.types.includes('text/uri-list') || 
+                    e.dataTransfer.types.includes('text/plain') || 
+                    e.dataTransfer.types.includes('text/html')) {
+                    e.preventDefault();
+                    categoryDiv.classList.remove('drag-over');
+
+                    let url = '';
+                    let name = '';
+
+                    // 1. Tentar extrair do text/html para obter o texto do link original
+                    const htmlData = e.dataTransfer.getData('text/html');
+                    if (htmlData) {
+                        try {
+                            const parser = new DOMParser();
+                            const doc = parser.parseFromString(htmlData, 'text/html');
+                            const a = doc.querySelector('a');
+                            if (a) {
+                                url = a.href;
+                                name = a.textContent.trim() || a.title.trim();
+                            }
+                        } catch (err) {
+                            console.error('Erro ao extrair text/html do drag:', err);
+                        }
+                    }
+
+                    // 2. Fallback para text/uri-list ou text/plain
+                    if (!url) {
+                        url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                    }
+
+                    url = url ? url.trim() : '';
+                    if (url) {
+                        try {
+                            // Adiciona o protocolo caso não exista
+                            if (!/^https?:\/\//i.test(url)) {
+                                url = 'https://' + url;
+                            }
+                            const parsedUrl = new URL(url);
+                            if (!name) {
+                                name = parsedUrl.hostname.replace('www.', '');
+                                name = name.charAt(0).toUpperCase() + name.slice(1);
+                            }
+                        } catch (err) {
+                            console.error('URL inválida recebida:', url);
+                            return;
+                        }
+
+                        const newItem = { name: name, url: url };
+                        addBookmarkToChrome(spaceId, category.name, newItem, (createdNode) => {
+                            if (createdNode) {
+                                newItem.id = createdNode.id;
+                                newItem.name = createdNode.title;
+                            }
+                            category.links.push(newItem);
+                            setBookmarks(bookmarks);
+                            renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
+                        });
+                    }
+                }
+            });
+        }
+
         contentArea.appendChild(categoryDiv);
         });
     }
@@ -285,8 +401,14 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
                 if (catId) {
                     try {
                         chrome.bookmarks.move(catId, { parentId: spaceId, index: evt.newIndex }, () => {
-                            // Reload to sync state cleanly
-                            window.location.reload();
+                            // Update local state without full reload
+                            const currentList = getBookmarks();
+                            const catIndex = currentList.findIndex(c => c.id === catId);
+                            if (catIndex > -1) {
+                                const [movedCat] = currentList.splice(catIndex, 1);
+                                currentList.splice(evt.newIndex, 0, movedCat);
+                                setBookmarks(currentList);
+                            }
                         });
                     } catch (e) {
                         console.error('Error moving category', e);
