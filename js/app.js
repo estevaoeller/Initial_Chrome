@@ -32,6 +32,7 @@ import { QuickLinksManager } from './features/quick-links.js';
 import { EditModalManager } from './features/edit-modal.js';
 import { SearchManager } from './features/search.js';
 import { ContextMenuManager } from './features/context-menu.js';
+import { ShortcutsManager } from './features/shortcuts.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const contentArea = document.getElementById('content-area');
@@ -72,9 +73,28 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchManager = new SearchManager();
     const contextMenuManager = new ContextMenuManager();
     
+    const shortcutsManager = new ShortcutsManager({
+        sidebarManager: sidebarManager,
+        getBookmarks: () => currentBookmarks,
+        setBookmarks: (newVal) => { currentBookmarks = newVal; },
+        contentArea: contentArea,
+        settingsState: settingsState,
+        stateHelpers: () => {
+            return {
+                spaceId: sidebarManager.activeSpaceId,
+                getBookmarks: () => currentBookmarks,
+                setBookmarks: (newVal) => { currentBookmarks = newVal; },
+                customIcons: settingsState.customIcons || {},
+                iconSize: settingsState.iconSize
+            };
+        }
+    });
+    
     // Callback when space is changed
     const onSpaceSelected = (spaceId) => {
         loadCustomIcons(customIcons => {
+            // Save to settingsState so ShortcutsManager can access it on the fly
+            settingsState.customIcons = customIcons;
             loadGroupsFromSpace(spaceId, groups => {
                 currentBookmarks = groups;
                 const stateHelpers = {
@@ -108,6 +128,7 @@ document.addEventListener('DOMContentLoaded', () => {
         editModalManager.init();
         searchManager.init();
         contextMenuManager.init();
+        shortcutsManager.init();
 
         // Theme and Background initialization
         chrome.storage.sync.get(['extensionSettings', 'theme'], result => {
