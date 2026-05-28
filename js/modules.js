@@ -366,6 +366,7 @@ export function applyTheme(theme) {
     const validTheme = THEME_LIST.includes(theme) ? theme : "light";
     document.body.classList.remove(...THEME_CLASSES);
     document.body.classList.add(`${validTheme}-theme`);
+    localStorage.setItem('themePreset', validTheme);
 }
 
 export function toggleTheme() {

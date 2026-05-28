@@ -10,6 +10,12 @@
 </head>
 
 <body>
+    <script>
+        (function() {
+            const cachedTheme = localStorage.getItem('themePreset') || 'dark';
+            document.body.classList.add(`${cachedTheme}-theme`);
+        })();
+    </script>
     <div id="background-filter"></div>
 
     <div id="app-container">
@@ -53,6 +59,29 @@
             </header>
 
             <main id="content-area">
+                <!-- SKELETON LOADERS (Hidden automatically when bookmarks are rendered) -->
+                <div id="loading-skeletons" class="loading-skeletons">
+                    <div class="skeleton-category">
+                        <div class="skeleton-header">
+                            <div class="skeleton-title"></div>
+                        </div>
+                        <div class="skeleton-grid">
+                            <div class="skeleton-item"><div class="skeleton-icon"></div><div class="skeleton-name"></div></div>
+                            <div class="skeleton-item"><div class="skeleton-icon"></div><div class="skeleton-name"></div></div>
+                            <div class="skeleton-item"><div class="skeleton-icon"></div><div class="skeleton-name"></div></div>
+                            <div class="skeleton-item"><div class="skeleton-icon"></div><div class="skeleton-name"></div></div>
+                        </div>
+                    </div>
+                    <div class="skeleton-category">
+                        <div class="skeleton-header">
+                            <div class="skeleton-title"></div>
+                        </div>
+                        <div class="skeleton-grid">
+                            <div class="skeleton-item"><div class="skeleton-icon"></div><div class="skeleton-name"></div></div>
+                            <div class="skeleton-item"><div class="skeleton-icon"></div><div class="skeleton-name"></div></div>
+                        </div>
+                    </div>
+                </div>
             </main>
         </div>
 

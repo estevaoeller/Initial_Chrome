@@ -1430,3 +1430,76 @@ body.text-behavior-single .bookmark-name {
     font-weight: bold;
 }
 
+/* ========== SKELETON LOADING STATE ========== */
+.loading-skeletons {
+    display: block;
+    width: 100%;
+}
+
+.skeleton-category {
+    background-color: var(--card);
+    border-radius: 8px;
+    padding: 15px;
+    margin-bottom: var(--category-gap, 20px);
+    border: 1px solid var(--icon-border-color);
+}
+
+.skeleton-header {
+    border-bottom: 2px solid var(--icon-border-color);
+    padding-bottom: 10px;
+    margin-bottom: 15px;
+}
+
+.skeleton-title {
+    width: 120px;
+    height: 20px;
+    background-color: color-mix(in srgb, var(--text) 10%, transparent);
+    border-radius: 4px;
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+    gap: 12px;
+}
+
+.skeleton-item {
+    display: flex;
+    align-items: center;
+    padding: 8px;
+    background-color: var(--card);
+    border: 1px solid var(--icon-border-color);
+    border-radius: 6px;
+    gap: 8px;
+}
+
+.skeleton-icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 6px;
+    background-color: color-mix(in srgb, var(--text) 10%, transparent);
+    flex-shrink: 0;
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+.skeleton-name {
+    width: 70%;
+    height: 12px;
+    background-color: color-mix(in srgb, var(--text) 8%, transparent);
+    border-radius: 3px;
+    animation: skeleton-pulse 1.5s infinite ease-in-out;
+}
+
+@keyframes skeleton-pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.3;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
