@@ -118,40 +118,22 @@ export function loadSpacesFromChrome(callback) {
  * Load groups (categories) from a specific space
  */
 export function loadGroupsFromSpace(spaceId, callback) {
-    chrome.bookmarks.getChildren(spaceId, children => {
-        const groups = [];
-        children.forEach(child => {
-            if (!child.url) {
-                const group = { id: child.id, name: child.title, links: [] };
-                chrome.bookmarks.getChildren(child.id, bookmarks => {
-                    bookmarks.forEach(bm => {
-                        if (bm.url) {
-                            group.links.push({ id: bm.id, name: bm.title, url: bm.url });
+    chrome.bookmarks.getSubTree(spaceId, nodes => {
+        const categories = [];
+        if (nodes && nodes[0] && nodes[0].children) {
+            nodes[0].children.forEach(catNode => {
+                if (!catNode.url) {
+                    const category = { id: catNode.id, name: catNode.title, links: [] };
+                    (catNode.children || []).forEach(child => {
+                        if (child.url) {
+                            category.links.push({ id: child.id, name: child.title, url: child.url });
                         }
                     });
-                });
-                groups.push(group);
-            }
-        });
-        // Need to wait for all getChildren calls
-        // Using a simpler approach with getSubTree
-        chrome.bookmarks.getSubTree(spaceId, nodes => {
-            const categories = [];
-            if (nodes[0].children) {
-                nodes[0].children.forEach(catNode => {
-                    if (!catNode.url) {
-                        const category = { id: catNode.id, name: catNode.title, links: [] };
-                        (catNode.children || []).forEach(child => {
-                            if (child.url) {
-                                category.links.push({ id: child.id, name: child.title, url: child.url });
-                            }
-                        });
-                        categories.push(category);
-                    }
-                });
-            }
-            callback(categories);
-        });
+                    categories.push(category);
+                }
+            });
+        }
+        callback(categories);
     });
 }
 

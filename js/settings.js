@@ -729,9 +729,6 @@ document.addEventListener('DOMContentLoaded', function () {
     if (quickLinksSize) {
         quickLinksSize.addEventListener('input', (e) => {
             if (quickLinksSizeValue) quickLinksSizeValue.textContent = e.target.value + 'px';
-            saveSettings(); // Save font size immediately or waiting for button? Just updating preview.
-            // But saveSettings handles saving extensionSettings which includes quickLinksSize.
-            // We can auto-save here too.
             saveSettings();
         });
     }

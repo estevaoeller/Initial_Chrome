@@ -95,10 +95,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 spaceItem.classList.add('active');
             }
             spaceItem.dataset.spaceId = space.id;
-            spaceItem.innerHTML = `
-                <span class="space-icon">${space.icon}</span>
-                <span class="space-name">${space.name}</span>
-            `;
+            const spaceIconSpan = document.createElement('span');
+            spaceIconSpan.className = 'space-icon';
+            spaceIconSpan.textContent = space.icon;
+
+            const spaceNameSpan = document.createElement('span');
+            spaceNameSpan.className = 'space-name';
+            spaceNameSpan.textContent = space.name;
+
+            spaceItem.appendChild(spaceIconSpan);
+            spaceItem.appendChild(spaceNameSpan);
             spaceItem.addEventListener('click', () => selectSpace(space.id));
             spacesList.appendChild(spaceItem);
         });
@@ -157,6 +163,14 @@ document.addEventListener('DOMContentLoaded', function () {
                 selectSpace(newSpace.id);
             }
         });
+    }
+
+    function tickClock() {
+        if (settingsState.clockStyle === 'digital') {
+            updateDigitalClock(digitalClockPlaceholder);
+        } else {
+            updateClock(analogClockPlaceholder);
+        }
     }
 
     // ---- FUNÇÃO PRINCIPAL ----
@@ -223,18 +237,17 @@ document.addEventListener('DOMContentLoaded', function () {
             applyTheme(theme);
         });
 
-        // Initialize Widgets
+
+
         if (settingsState.clockStyle === 'digital') {
             analogClockPlaceholder.style.display = 'none';
             digitalClockPlaceholder.style.display = 'block';
-            updateDigitalClock(digitalClockPlaceholder);
-            setInterval(() => updateDigitalClock(digitalClockPlaceholder), 1000);
         } else {
             analogClockPlaceholder.style.display = 'block';
             digitalClockPlaceholder.style.display = 'none';
-            updateClock(analogClockPlaceholder);
-            setInterval(() => updateClock(analogClockPlaceholder), 1000);
         }
+        tickClock();
+        setInterval(tickClock, 1000);
 
         updateGreeting(greetingPlaceholder, settingsState.userName);
         // Refresh greeting smoothly every 10 min
@@ -313,7 +326,7 @@ document.addEventListener('DOMContentLoaded', function () {
 
         // Real-time Updates
         chrome.storage.onChanged.addListener((changes, namespace) => {
-            if (namespace === 'local') {
+            if (namespace === 'sync') {
                 if (changes.quickLinks) {
                     renderQuickLinks(changes.quickLinks.newValue || []);
                 }
@@ -746,17 +759,14 @@ document.addEventListener('DOMContentLoaded', function () {
             // Widget Reactivity
             if (newSettings.clockStyle && newSettings.clockStyle !== settingsState.clockStyle) {
                 settingsState.clockStyle = newSettings.clockStyle;
-                const analogClockPlaceholder = document.getElementById('analog-clock-placeholder');
-                const digitalClockPlaceholder = document.getElementById('digital-clock-placeholder');
                 if (settingsState.clockStyle === 'digital') {
                     analogClockPlaceholder.style.display = 'none';
                     digitalClockPlaceholder.style.display = 'block';
-                    updateDigitalClock(digitalClockPlaceholder);
                 } else {
                     analogClockPlaceholder.style.display = 'block';
                     digitalClockPlaceholder.style.display = 'none';
-                    updateClock(analogClockPlaceholder);
                 }
+                tickClock();
             }
 
             if (newSettings.userName !== undefined && newSettings.userName !== settingsState.userName) {

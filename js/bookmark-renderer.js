@@ -2,7 +2,7 @@ import { handleDeleteBookmark, renameGroup, createGroup, addBookmarkToChrome } f
 // Removed drag-drop.js in favor of CDN SortableJS
 
 // Track internal drag state globally
-document.addEventListener('dragstart', (e) => {
+document.addEventListener('dragstart', () => {
     document.body.classList.add('dragging-internal');
 });
 
@@ -215,6 +215,10 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             favicon.dataset.url = link.url;
 
             const customIcon = stateHelpers && stateHelpers.customIcons ? (stateHelpers.customIcons[link.url] || stateHelpers.customIcons[link.id]) : null;
+
+            if (customIcon) {
+                favicon.dataset.isCustom = "true";
+            }
 
             if (customIcon && customIcon.type === 'simpleicons') {
                 let colorHex = customIcon.color ? customIcon.color.replace('#', '') : 'default';
