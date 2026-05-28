@@ -315,6 +315,40 @@
         </div>
     </div>
 
+    <!-- Custom Right-Click Context Menu -->
+    <div id="context-menu" class="context-menu glass-effect" style="display: none;">
+        <button class="context-menu-item" data-action="open-tab">
+            <span class="context-menu-icon">🔗</span>
+            <span class="context-menu-text">Abrir em Nova Guia</span>
+        </button>
+        <button class="context-menu-item" data-action="open-incognito">
+            <span class="context-menu-icon">🕵️</span>
+            <span class="context-menu-text">Abrir em Guia Anônima</span>
+        </button>
+        <button class="context-menu-item" data-action="copy">
+            <span class="context-menu-icon">📋</span>
+            <span class="context-menu-text">Copiar Link</span>
+        </button>
+        <div class="context-menu-divider"></div>
+        <button class="context-menu-item" data-action="edit">
+            <span class="context-menu-icon">✏️</span>
+            <span class="context-menu-text">Editar Link</span>
+        </button>
+        <button class="context-menu-item" data-action="move">
+            <span class="context-menu-icon">📂</span>
+            <span class="context-menu-text">Mover para...</span>
+            <span class="context-menu-arrow">▶</span>
+            <div id="context-menu-submenu" class="context-menu-submenu glass-effect">
+                <!-- Populado dinamicamente -->
+            </div>
+        </button>
+        <div class="context-menu-divider"></div>
+        <button class="context-menu-item delete-item" data-action="delete">
+            <span class="context-menu-icon">🗑️</span>
+            <span class="context-menu-text">Excluir</span>
+        </button>
+    </div>
+
     <script type="module" src="js/app.js"></script>
 </body>
 

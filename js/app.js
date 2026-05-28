@@ -31,6 +31,7 @@ import { SidebarManager } from './features/sidebar.js';
 import { QuickLinksManager } from './features/quick-links.js';
 import { EditModalManager } from './features/edit-modal.js';
 import { SearchManager } from './features/search.js';
+import { ContextMenuManager } from './features/context-menu.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     const contentArea = document.getElementById('content-area');
@@ -69,6 +70,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const quickLinksManager = new QuickLinksManager();
     const editModalManager = new EditModalManager(settingsState);
     const searchManager = new SearchManager();
+    const contextMenuManager = new ContextMenuManager();
     
     // Callback when space is changed
     const onSpaceSelected = (spaceId) => {
@@ -105,6 +107,7 @@ document.addEventListener('DOMContentLoaded', () => {
         quickLinksManager.init();
         editModalManager.init();
         searchManager.init();
+        contextMenuManager.init();
 
         // Theme and Background initialization
         chrome.storage.sync.get(['extensionSettings', 'theme'], result => {

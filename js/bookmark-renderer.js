@@ -170,6 +170,24 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             bookmarkItem.draggable = true;
 
             bookmarkItem.dataset.id = link.id || '';
+
+            bookmarkItem.addEventListener('contextmenu', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                const contextMenuEvent = new CustomEvent('openContextMenu', {
+                    detail: {
+                        x: event.clientX,
+                        y: event.clientY,
+                        link: link,
+                        category: category,
+                        bookmarks: bookmarks,
+                        contentArea: contentArea,
+                        iconSize: iconSize,
+                        stateHelpers: stateHelpers
+                    }
+                });
+                window.dispatchEvent(contextMenuEvent);
+            });
             // --- Delete Button ---
             const deleteBtn = document.createElement('span');
             deleteBtn.className = 'delete-bookmark-btn';
