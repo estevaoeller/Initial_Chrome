@@ -73,23 +73,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const searchManager = new SearchManager();
     const contextMenuManager = new ContextMenuManager();
     
-    const shortcutsManager = new ShortcutsManager({
-        sidebarManager: sidebarManager,
-        getBookmarks: () => currentBookmarks,
-        setBookmarks: (newVal) => { currentBookmarks = newVal; },
-        contentArea: contentArea,
-        settingsState: settingsState,
-        stateHelpers: () => {
-            return {
-                spaceId: sidebarManager.activeSpaceId,
-                getBookmarks: () => currentBookmarks,
-                setBookmarks: (newVal) => { currentBookmarks = newVal; },
-                customIcons: settingsState.customIcons || {},
-                iconSize: settingsState.iconSize
-            };
-        }
-    });
-    
     // Callback when space is changed
     const onSpaceSelected = (spaceId) => {
         loadCustomIcons(customIcons => {
@@ -110,6 +93,23 @@ document.addEventListener('DOMContentLoaded', () => {
     };
 
     const sidebarManager = new SidebarManager(settingsState, onSpaceSelected);
+
+    const shortcutsManager = new ShortcutsManager({
+        sidebarManager: sidebarManager,
+        getBookmarks: () => currentBookmarks,
+        setBookmarks: (newVal) => { currentBookmarks = newVal; },
+        contentArea: contentArea,
+        settingsState: settingsState,
+        stateHelpers: () => {
+            return {
+                spaceId: sidebarManager.activeSpaceId,
+                getBookmarks: () => currentBookmarks,
+                setBookmarks: (newVal) => { currentBookmarks = newVal; },
+                customIcons: settingsState.customIcons || {},
+                iconSize: settingsState.iconSize
+            };
+        }
+    });
 
     function initialize() {
         // First, check if migration is needed
