@@ -4,214 +4,253 @@ import { defaultCustomIcons } from './config.js';
 export const ROOT_FOLDER_NAME = 'Pagina Inicial';
 
 export function saveBookmarks(bookmarksToSave) {
-    chrome.storage.local.set({ 'userBookmarks': bookmarksToSave }, function () {
-        if (chrome.runtime.lastError) {
-            console.error("Erro ao salvar bookmarks:", chrome.runtime.lastError.message);
-        } else {
-            console.log("Bookmarks salvos com sucesso!");
-        }
-    });
+  chrome.storage.local.set({ userBookmarks: bookmarksToSave }, function () {
+    if (chrome.runtime.lastError) {
+      console.error(
+        'Erro ao salvar bookmarks:',
+        chrome.runtime.lastError.message,
+      );
+    } else {
+      console.log('Bookmarks salvos com sucesso!');
+    }
+  });
 }
 
 export function loadBookmarks(callback) {
-    chrome.storage.local.get('userBookmarks', function (data) {
-        if (chrome.runtime.lastError) {
-            console.error("Erro ao carregar bookmarks:", chrome.runtime.lastError.message);
-            callback(null);
-            return;
-        }
-        if (data.userBookmarks && data.userBookmarks.length > 0) {
-            callback(data.userBookmarks);
-        } else {
-            callback(null);
-        }
-    });
+  chrome.storage.local.get('userBookmarks', function (data) {
+    if (chrome.runtime.lastError) {
+      console.error(
+        'Erro ao carregar bookmarks:',
+        chrome.runtime.lastError.message,
+      );
+      callback(null);
+      return;
+    }
+    if (data.userBookmarks && data.userBookmarks.length > 0) {
+      callback(data.userBookmarks);
+    } else {
+      callback(null);
+    }
+  });
 }
 
 export function getRootFolder(callback) {
-    chrome.bookmarks.getTree(nodes => {
-        const queue = [...nodes];
-        while (queue.length) {
-            const node = queue.shift();
-            if (!node.url && node.title === ROOT_FOLDER_NAME) {
-                callback(node);
-                return;
-            }
-            if (node.children) queue.push(...node.children);
-        }
-        callback(null);
-    });
+  chrome.bookmarks.getTree((nodes) => {
+    const queue = [...nodes];
+    while (queue.length) {
+      const node = queue.shift();
+      if (!node.url && node.title === ROOT_FOLDER_NAME) {
+        callback(node);
+        return;
+      }
+      if (node.children) queue.push(...node.children);
+    }
+    callback(null);
+  });
 }
 
 export function renameBookmark(bookmarkId, newTitle, callback) {
-    chrome.bookmarks.update(bookmarkId, { title: newTitle }, () => {
-        if (callback) callback();
-    });
+  chrome.bookmarks.update(bookmarkId, { title: newTitle }, () => {
+    if (callback) callback();
+  });
 }
 
 export function loadBookmarksFromChrome(callback) {
-    getRootFolder(folder => {
-        if (!folder) {
-            callback([]);
-            return;
-        }
-        chrome.bookmarks.getSubTree(folder.id, nodes => {
-            const categories = [];
-            if (nodes[0].children) {
-                nodes[0].children.forEach(catNode => {
-                    if (!catNode.url) {
-                        const category = { id: catNode.id, name: catNode.title, links: [] };
-                        (catNode.children || []).forEach(child => {
-                            if (child.url) {
-                                category.links.push({ id: child.id, name: child.title, url: child.url });
-                            }
-                        });
-                        categories.push(category);
-                    }
+  getRootFolder((folder) => {
+    if (!folder) {
+      callback([]);
+      return;
+    }
+    chrome.bookmarks.getSubTree(folder.id, (nodes) => {
+      const categories = [];
+      if (nodes[0].children) {
+        nodes[0].children.forEach((catNode) => {
+          if (!catNode.url) {
+            const category = { id: catNode.id, name: catNode.title, links: [] };
+            (catNode.children || []).forEach((child) => {
+              if (child.url) {
+                category.links.push({
+                  id: child.id,
+                  name: child.title,
+                  url: child.url,
                 });
-            }
-            callback(categories);
+              }
+            });
+            categories.push(category);
+          }
         });
+      }
+      callback(categories);
     });
+  });
 }
 
 // ========== SPACES FUNCTIONALITY ==========
 
 const DEFAULT_SPACE_ICON = '📁';
-const DEFAULT_SPACE_ICONS = ['🏠', '💼', '📋', '🎯', '📚', '🔧', '🎨', '🎵', '🎮', '📰'];
+const DEFAULT_SPACE_ICONS = [
+  '🏠',
+  '💼',
+  '📋',
+  '🎯',
+  '📚',
+  '🔧',
+  '🎨',
+  '🎵',
+  '🎮',
+  '📰',
+];
 
 /**
  * Load all spaces (first-level folders inside root)
  */
 export function loadSpacesFromChrome(callback) {
-    getRootFolder(folder => {
-        if (!folder) {
-            callback([]);
-            return;
+  getRootFolder((folder) => {
+    if (!folder) {
+      callback([]);
+      return;
+    }
+    chrome.bookmarks.getChildren(folder.id, (children) => {
+      const spaces = [];
+      children.forEach((child) => {
+        if (!child.url) {
+          // Extract icon from title if present (format: "emoji Name" or just "Name")
+          const titleParts = child.title.match(
+            /^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s*(.+)$/u,
+          );
+          let icon = DEFAULT_SPACE_ICON;
+          let name = child.title;
+          if (titleParts) {
+            icon = titleParts[1];
+            name = titleParts[2];
+          }
+          spaces.push({
+            id: child.id,
+            name: name,
+            icon: icon,
+            fullTitle: child.title,
+          });
         }
-        chrome.bookmarks.getChildren(folder.id, children => {
-            const spaces = [];
-            children.forEach(child => {
-                if (!child.url) {
-                    // Extract icon from title if present (format: "emoji Name" or just "Name")
-                    const titleParts = child.title.match(/^(\p{Emoji_Presentation}|\p{Emoji}\uFE0F?)\s*(.+)$/u);
-                    let icon = DEFAULT_SPACE_ICON;
-                    let name = child.title;
-                    if (titleParts) {
-                        icon = titleParts[1];
-                        name = titleParts[2];
-                    }
-                    spaces.push({
-                        id: child.id,
-                        name: name,
-                        icon: icon,
-                        fullTitle: child.title
-                    });
-                }
-            });
-            callback(spaces);
-        });
+      });
+      callback(spaces);
     });
+  });
 }
 
 /**
  * Load groups (categories) from a specific space
  */
 export function loadGroupsFromSpace(spaceId, callback) {
-    chrome.bookmarks.getSubTree(spaceId, nodes => {
-        const categories = [];
-        if (nodes && nodes[0] && nodes[0].children) {
-            nodes[0].children.forEach(catNode => {
-                if (!catNode.url) {
-                    const category = { id: catNode.id, name: catNode.title, links: [] };
-                    (catNode.children || []).forEach(child => {
-                        if (child.url) {
-                            category.links.push({ id: child.id, name: child.title, url: child.url });
-                        }
-                    });
-                    categories.push(category);
-                }
-            });
+  chrome.bookmarks.getSubTree(spaceId, (nodes) => {
+    const categories = [];
+    if (nodes && nodes[0] && nodes[0].children) {
+      nodes[0].children.forEach((catNode) => {
+        if (!catNode.url) {
+          const category = { id: catNode.id, name: catNode.title, links: [] };
+          (catNode.children || []).forEach((child) => {
+            if (child.url) {
+              category.links.push({
+                id: child.id,
+                name: child.title,
+                url: child.url,
+              });
+            }
+          });
+          categories.push(category);
         }
-        callback(categories);
-    });
+      });
+    }
+    callback(categories);
+  });
 }
 
 /**
  * Create a new space
  */
 export function createSpace(name, icon, callback) {
-    getRootFolder(root => {
-        if (!root) {
-            if (callback) callback(null);
-            return;
-        }
-        const fullTitle = icon ? `${icon} ${name}` : name;
-        chrome.bookmarks.create({ parentId: root.id, title: fullTitle }, newFolder => {
-            if (callback) callback({
-                id: newFolder.id,
-                name: name,
-                icon: icon || DEFAULT_SPACE_ICON,
-                fullTitle: fullTitle
-            });
-        });
-    });
+  getRootFolder((root) => {
+    if (!root) {
+      if (callback) callback(null);
+      return;
+    }
+    const fullTitle = icon ? `${icon} ${name}` : name;
+    chrome.bookmarks.create(
+      { parentId: root.id, title: fullTitle },
+      (newFolder) => {
+        if (callback)
+          callback({
+            id: newFolder.id,
+            name: name,
+            icon: icon || DEFAULT_SPACE_ICON,
+            fullTitle: fullTitle,
+          });
+      },
+    );
+  });
 }
 
 /**
  * Delete a space (and all its contents)
  */
 export function deleteSpace(spaceId, callback) {
-    chrome.bookmarks.removeTree(spaceId, () => {
-        if (callback) callback();
-    });
+  chrome.bookmarks.removeTree(spaceId, () => {
+    if (callback) callback();
+  });
 }
 
 /**
  * Rename a space
  */
 export function renameSpace(spaceId, newName, newIcon, callback) {
-    const fullTitle = newIcon ? `${newIcon} ${newName}` : newName;
-    chrome.bookmarks.update(spaceId, { title: fullTitle }, () => {
-        if (callback) callback();
-    });
+  const fullTitle = newIcon ? `${newIcon} ${newName}` : newName;
+  chrome.bookmarks.update(spaceId, { title: fullTitle }, () => {
+    if (callback) callback();
+  });
 }
 
 /**
  * Move a space to a new index under the root folder
  */
 export function moveSpace(spaceId, newIndex, callback) {
-    getRootFolder(root => {
-        if (!root) {
-            if (callback) callback();
-            return;
-        }
-        chrome.bookmarks.move(spaceId, { parentId: root.id, index: newIndex }, () => {
-            if (callback) callback();
-        });
-    });
+  getRootFolder((root) => {
+    if (!root) {
+      if (callback) callback();
+      return;
+    }
+    chrome.bookmarks.move(
+      spaceId,
+      { parentId: root.id, index: newIndex },
+      () => {
+        if (callback) callback();
+      },
+    );
+  });
 }
 
 /**
  * Rename a group (category)
  */
 export function renameGroup(groupId, newName, callback) {
-    chrome.bookmarks.update(groupId, { title: newName }, () => {
-        if (callback) callback();
-    });
+  chrome.bookmarks.update(groupId, { title: newName }, () => {
+    if (callback) callback();
+  });
 }
 
 /**
  * Create a new group (category) inside a space
  */
 export function createGroup(spaceId, groupName, callback) {
-    chrome.bookmarks.create({ parentId: spaceId, title: groupName }, newGroup => {
-        if (callback) callback({
-            id: newGroup.id,
-            name: newGroup.title,
-            links: []
+  chrome.bookmarks.create(
+    { parentId: spaceId, title: groupName },
+    (newGroup) => {
+      if (callback)
+        callback({
+          id: newGroup.id,
+          name: newGroup.title,
+          links: [],
         });
-    });
+    },
+  );
 }
 
 /**
@@ -220,522 +259,662 @@ export function createGroup(spaceId, groupName, callback) {
  * New structure: Root > Spaces > Groups > Bookmarks
  */
 export function checkAndMigrateToSpaces(callback) {
-    getRootFolder(root => {
-        if (!root) {
-            if (callback) callback(false);
-            return;
-        }
-        chrome.bookmarks.getChildren(root.id, children => {
-            // Check if any child has bookmarks directly (old structure)
-            // or if all children are folders with folders inside (new structure)
-            let hasDirectBookmarks = false;
-            let hasGroups = false;
+  getRootFolder((root) => {
+    if (!root) {
+      if (callback) callback(false);
+      return;
+    }
+    chrome.bookmarks.getChildren(root.id, (children) => {
+      // Check if any child has bookmarks directly (old structure)
+      // or if all children are folders with folders inside (new structure)
+      let hasDirectBookmarks = false;
+      let hasGroups = false;
 
-            const checkPromises = children.map(child => {
-                return new Promise(resolve => {
-                    if (child.url) {
-                        hasDirectBookmarks = true;
-                        resolve();
-                    } else {
-                        chrome.bookmarks.getChildren(child.id, grandchildren => {
-                            const hasUrls = grandchildren.some(gc => gc.url);
-                            if (hasUrls) {
-                                hasDirectBookmarks = true;
-                            }
-                            const hasFolders = grandchildren.some(gc => !gc.url);
-                            if (hasFolders) {
-                                hasGroups = true;
-                            }
-                            resolve();
-                        });
-                    }
-                });
+      const checkPromises = children.map((child) => {
+        return new Promise((resolve) => {
+          if (child.url) {
+            hasDirectBookmarks = true;
+            resolve();
+          } else {
+            chrome.bookmarks.getChildren(child.id, (grandchildren) => {
+              const hasUrls = grandchildren.some((gc) => gc.url);
+              if (hasUrls) {
+                hasDirectBookmarks = true;
+              }
+              const hasFolders = grandchildren.some((gc) => !gc.url);
+              if (hasFolders) {
+                hasGroups = true;
+              }
+              resolve();
             });
-
-            Promise.all(checkPromises).then(() => {
-                // If we have direct bookmarks but no nested groups, we need to migrate
-                if (hasDirectBookmarks && !hasGroups) {
-                    migrateToSpacesStructure(root.id, children, callback);
-                } else {
-                    if (callback) callback(false);
-                }
-            });
+          }
         });
+      });
+
+      Promise.all(checkPromises).then(() => {
+        // If we have direct bookmarks but no nested groups, we need to migrate
+        if (hasDirectBookmarks && !hasGroups) {
+          migrateToSpacesStructure(root.id, children, callback);
+        } else {
+          if (callback) callback(false);
+        }
+      });
     });
+  });
 }
 
 /**
  * Migrate old structure to new spaces structure
  */
 function migrateToSpacesStructure(rootId, existingCategories, callback) {
-    // Create "Home" space and move all existing categories into it
-    chrome.bookmarks.create({ parentId: rootId, title: '🏠 Home', index: 0 }, homeSpace => {
-        const movePromises = existingCategories.map(cat => {
-            return new Promise(resolve => {
-                chrome.bookmarks.move(cat.id, { parentId: homeSpace.id }, () => {
-                    resolve();
-                });
-            });
+  // Create "Home" space and move all existing categories into it
+  chrome.bookmarks.create(
+    { parentId: rootId, title: '🏠 Home', index: 0 },
+    (homeSpace) => {
+      const movePromises = existingCategories.map((cat) => {
+        return new Promise((resolve) => {
+          chrome.bookmarks.move(cat.id, { parentId: homeSpace.id }, () => {
+            resolve();
+          });
         });
+      });
 
-        Promise.all(movePromises).then(() => {
-            console.log('Migration to Spaces structure complete!');
-            if (callback) callback(true);
-        });
-    });
+      Promise.all(movePromises).then(() => {
+        console.log('Migration to Spaces structure complete!');
+        if (callback) callback(true);
+      });
+    },
+  );
 }
 
 /**
  * Get a random icon for new spaces
  */
 export function getRandomSpaceIcon() {
-    return DEFAULT_SPACE_ICONS[Math.floor(Math.random() * DEFAULT_SPACE_ICONS.length)];
+  return DEFAULT_SPACE_ICONS[
+    Math.floor(Math.random() * DEFAULT_SPACE_ICONS.length)
+  ];
 }
 
 export function moveBookmark(bookmarkId, destinationFolderId, index, callback) {
-    chrome.bookmarks.move(bookmarkId, { parentId: destinationFolderId, index: index }, () => {
-        if (callback) callback();
-    });
+  chrome.bookmarks.move(
+    bookmarkId,
+    { parentId: destinationFolderId, index: index },
+    () => {
+      if (callback) callback();
+    },
+  );
 }
 
 export function addBookmarkToChrome(spaceId, categoryName, bookmark, callback) {
-    if (!spaceId) { if (callback) callback(); return; }
-    chrome.bookmarks.getChildren(spaceId, children => {
-        let category = children.find(c => c.title === categoryName && !c.url);
-        const createBookmark = folderId => chrome.bookmarks.create({ parentId: folderId, title: bookmark.name, url: bookmark.url }, (newNode) => callback && callback(newNode));
-        if (category) {
-            createBookmark(category.id);
-        } else {
-            chrome.bookmarks.create({ parentId: spaceId, title: categoryName }, newFolder => {
-                createBookmark(newFolder.id);
-            });
-        }
-    });
+  if (!spaceId) {
+    if (callback) callback();
+    return;
+  }
+  chrome.bookmarks.getChildren(spaceId, (children) => {
+    let category = children.find((c) => c.title === categoryName && !c.url);
+    const createBookmark = (folderId) =>
+      chrome.bookmarks.create(
+        { parentId: folderId, title: bookmark.name, url: bookmark.url },
+        (newNode) => callback && callback(newNode),
+      );
+    if (category) {
+      createBookmark(category.id);
+    } else {
+      chrome.bookmarks.create(
+        { parentId: spaceId, title: categoryName },
+        (newFolder) => {
+          createBookmark(newFolder.id);
+        },
+      );
+    }
+  });
 }
 
-export function removeBookmarkFromChrome(spaceId, categoryName, bookmarkUrl, callback) {
-    if (!spaceId) { if (callback) callback(); return; }
-    chrome.bookmarks.getChildren(spaceId, children => {
-        const category = children.find(c => c.title === categoryName && !c.url);
-        if (!category) { if (callback) callback(); return; }
-        chrome.bookmarks.getChildren(category.id, bookmarks => {
-            const bm = bookmarks.find(b => b.url === bookmarkUrl);
-            if (bm) {
-                chrome.bookmarks.remove(bm.id, () => callback && callback());
-            } else {
-                if (callback) callback();
-            }
-        });
+export function removeBookmarkFromChrome(
+  spaceId,
+  categoryName,
+  bookmarkUrl,
+  callback,
+) {
+  if (!spaceId) {
+    if (callback) callback();
+    return;
+  }
+  chrome.bookmarks.getChildren(spaceId, (children) => {
+    const category = children.find((c) => c.title === categoryName && !c.url);
+    if (!category) {
+      if (callback) callback();
+      return;
+    }
+    chrome.bookmarks.getChildren(category.id, (bookmarks) => {
+      const bm = bookmarks.find((b) => b.url === bookmarkUrl);
+      if (bm) {
+        chrome.bookmarks.remove(bm.id, () => callback && callback());
+      } else {
+        if (callback) callback();
+      }
     });
+  });
 }
 
 export function createPlaceholder() {
-    const placeholder = document.createElement('div');
-    placeholder.className = 'drop-placeholder';
-    return placeholder;
+  const placeholder = document.createElement('div');
+  placeholder.className = 'drop-placeholder';
+  return placeholder;
 }
 
 export function removePlaceholder(placeholder) {
-    if (placeholder && placeholder.parentNode) {
-        placeholder.parentNode.removeChild(placeholder);
-    }
+  if (placeholder && placeholder.parentNode) {
+    placeholder.parentNode.removeChild(placeholder);
+  }
 }
 
 export function getDragAfterElement(container, y) {
-    const draggableElements = [...container.querySelectorAll('.bookmark-item:not(.dragging)')];
-    return draggableElements.reduce((closest, child) => {
-        const box = child.getBoundingClientRect();
-        const offset = y - box.top - box.height / 2;
-        if (offset < 0 && offset > closest.offset) {
-            return { offset: offset, element: child };
-        } else {
-            return closest;
-        }
-    }, { offset: Number.NEGATIVE_INFINITY }).element;
+  const draggableElements = [
+    ...container.querySelectorAll('.bookmark-item:not(.dragging)'),
+  ];
+  return draggableElements.reduce(
+    (closest, child) => {
+      const box = child.getBoundingClientRect();
+      const offset = y - box.top - box.height / 2;
+      if (offset < 0 && offset > closest.offset) {
+        return { offset: offset, element: child };
+      } else {
+        return closest;
+      }
+    },
+    { offset: Number.NEGATIVE_INFINITY },
+  ).element;
 }
 
-export function handleDeleteBookmark(urlToDelete, categoryNameToDeleteFrom, currentBookmarks, renderBookmarks, spaceId) {
-    const categoryIndex = currentBookmarks.findIndex(cat => cat.name === categoryNameToDeleteFrom);
-    if (categoryIndex > -1) {
-        const category = currentBookmarks[categoryIndex];
-        const linkIndex = category.links.findIndex(link => link.url === urlToDelete);
-        if (linkIndex > -1) {
-            if (confirm(`Tem certeza que deseja excluir o bookmark "${category.links[linkIndex].name}"?`)) {
-                removeBookmarkFromChrome(spaceId, category.name, urlToDelete, () => {
-                    category.links.splice(linkIndex, 1);
-                    renderBookmarks(currentBookmarks);
-                });
-            }
-        } else {
-            console.warn("Link não encontrado para exclusão no array de dados:", urlToDelete);
-        }
+export function handleDeleteBookmark(
+  urlToDelete,
+  categoryNameToDeleteFrom,
+  currentBookmarks,
+  renderBookmarks,
+  spaceId,
+) {
+  const categoryIndex = currentBookmarks.findIndex(
+    (cat) => cat.name === categoryNameToDeleteFrom,
+  );
+  if (categoryIndex > -1) {
+    const category = currentBookmarks[categoryIndex];
+    const linkIndex = category.links.findIndex(
+      (link) => link.url === urlToDelete,
+    );
+    if (linkIndex > -1) {
+      if (
+        confirm(
+          `Tem certeza que deseja excluir o bookmark "${category.links[linkIndex].name}"?`,
+        )
+      ) {
+        removeBookmarkFromChrome(spaceId, category.name, urlToDelete, () => {
+          category.links.splice(linkIndex, 1);
+          renderBookmarks(currentBookmarks);
+        });
+      }
     } else {
-        console.warn("Categoria não encontrada para exclusão no array de dados:", categoryNameToDeleteFrom);
+      console.warn(
+        'Link não encontrado para exclusão no array de dados:',
+        urlToDelete,
+      );
     }
+  } else {
+    console.warn(
+      'Categoria não encontrada para exclusão no array de dados:',
+      categoryNameToDeleteFrom,
+    );
+  }
 }
 
-const THEME_LIST = ["light", "dark", "solar", "minimal"];
-const THEME_CLASSES = THEME_LIST.map(t => `${t}-theme`);
+const THEME_LIST = ['light', 'dark', 'solar', 'minimal'];
+const THEME_CLASSES = THEME_LIST.map((t) => `${t}-theme`);
 
 export function applyTheme(theme) {
-    const validTheme = THEME_LIST.includes(theme) ? theme : "light";
-    document.body.classList.remove(...THEME_CLASSES);
-    document.body.classList.add(`${validTheme}-theme`);
-    localStorage.setItem('themePreset', validTheme);
+  document.body.classList.remove(...THEME_CLASSES);
+
+  // Clear any previously injected custom theme variables from inline style
+  const variables = [
+    '--bg',
+    '--card',
+    '--text',
+    '--accent',
+    '--icon-bg-color',
+    '--icon-border-color',
+    '--bookmark-font-color',
+    '--section-bg-color',
+    '--section-bg-opacity',
+    '--section-line-color',
+    '--filter-color',
+    '--filter-opacity',
+  ];
+  variables.forEach((v) => document.body.style.removeProperty(v));
+
+  if (THEME_LIST.includes(theme)) {
+    document.body.classList.add(`${theme}-theme`);
+    localStorage.setItem('themePreset', theme);
+  } else {
+    // Custom theme! Load variables from sync storage
+    chrome.storage.sync.get(['customThemes'], (result) => {
+      const customThemes = result.customThemes || {};
+      const themeConfig = customThemes[theme];
+      if (themeConfig) {
+        // Apply variables to document.body
+        Object.keys(themeConfig.variables || {}).forEach((v) => {
+          document.body.style.setProperty(v, themeConfig.variables[v]);
+        });
+        localStorage.setItem('themePreset', theme);
+      } else {
+        // Fallback to light
+        document.body.classList.add('light-theme');
+        localStorage.setItem('themePreset', 'light');
+      }
+    });
+  }
 }
 
 export function toggleTheme() {
-    const current = THEME_LIST.find(t => document.body.classList.contains(`${t}-theme`)) || "light";
-    const next = THEME_LIST[(THEME_LIST.indexOf(current) + 1) % THEME_LIST.length];
-    applyTheme(next);
-    chrome.storage.sync.get(["extensionSettings"], data => {
-        const settings = data.extensionSettings || {};
-        settings.themePreset = next;
-        chrome.storage.sync.set({ extensionSettings: settings });
-    });
+  const current =
+    THEME_LIST.find((t) => document.body.classList.contains(`${t}-theme`)) ||
+    'light';
+  const next =
+    THEME_LIST[(THEME_LIST.indexOf(current) + 1) % THEME_LIST.length];
+  applyTheme(next);
+  chrome.storage.sync.get(['extensionSettings'], (data) => {
+    const settings = data.extensionSettings || {};
+    settings.themePreset = next;
+    chrome.storage.sync.set({ extensionSettings: settings });
+  });
 }
 
 export function updateClock(analogClockPlaceholder) {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    const seconds = now.getSeconds();
-    analogClockPlaceholder.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  const seconds = now.getSeconds();
+  analogClockPlaceholder.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
 }
 
 export function updateDate(datePlaceholder) {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
-    datePlaceholder.textContent = now.toLocaleDateString('pt-BR', options);
+  const now = new Date();
+  const options = {
+    weekday: 'long',
+    year: 'numeric',
+    month: 'long',
+    day: 'numeric',
+  };
+  datePlaceholder.textContent = now.toLocaleDateString('pt-BR', options);
 }
 
 export function updateCalendar(calendarPlaceholder) {
-    const now = new Date();
-    const year = now.getFullYear();
-    const month = now.getMonth();
-    const firstDayOfMonth = new Date(year, month, 1).getDay();
-    const daysInMonth = new Date(year, month + 1, 0).getDate();
+  const now = new Date();
+  const year = now.getFullYear();
+  const month = now.getMonth();
+  const firstDayOfMonth = new Date(year, month, 1).getDay();
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-    let calendarHtml = `<h3>${now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</h3>`;
-    calendarHtml += `<p><a href="https://calendar.google.com/calendar/" target="_blank">Google Agenda</a></p>`;
-    calendarHtml += `<table style="width:100%; text-align:center;">`;
-    calendarHtml += `<thead><tr><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th></tr></thead>`;
-    calendarHtml += `<tbody><tr>`;
+  let calendarHtml = `<h3>${now.toLocaleDateString('pt-BR', { month: 'long', year: 'numeric' })}</h3>`;
+  calendarHtml += `<p><a href="https://calendar.google.com/calendar/" target="_blank">Google Agenda</a></p>`;
+  calendarHtml += `<table style="width:100%; text-align:center;">`;
+  calendarHtml += `<thead><tr><th>Dom</th><th>Seg</th><th>Ter</th><th>Qua</th><th>Qui</th><th>Sex</th><th>Sáb</th></tr></thead>`;
+  calendarHtml += `<tbody><tr>`;
 
-    for (let i = 0; i < firstDayOfMonth; i++) {
-        calendarHtml += `<td></td>`;
+  for (let i = 0; i < firstDayOfMonth; i++) {
+    calendarHtml += `<td></td>`;
+  }
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    if ((firstDayOfMonth + day - 1) % 7 === 0) {
+      calendarHtml += `</tr><tr>`;
     }
+    calendarHtml += `<td>${day}</td>`;
+  }
 
-    for (let day = 1; day <= daysInMonth; day++) {
-        if ((firstDayOfMonth + day - 1) % 7 === 0) {
-            calendarHtml += `</tr><tr>`;
-        }
-        calendarHtml += `<td>${day}</td>`;
-    }
+  for (let i = (firstDayOfMonth + daysInMonth) % 7; i > 0 && i < 7; i++) {
+    calendarHtml += `<td></td>`;
+  }
 
-    for (let i = (firstDayOfMonth + daysInMonth) % 7; i > 0 && i < 7; i++) {
-        calendarHtml += `<td></td>`;
-    }
-
-    calendarHtml += `</tr></tbody></table>`;
-    calendarPlaceholder.innerHTML = calendarHtml;
+  calendarHtml += `</tr></tbody></table>`;
+  calendarPlaceholder.innerHTML = calendarHtml;
 }
 
 export function updateDigitalClock(digitalClockPlaceholder) {
-    const now = new Date();
-    const hours = now.getHours();
-    const minutes = now.getMinutes();
-    digitalClockPlaceholder.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+  const now = new Date();
+  const hours = now.getHours();
+  const minutes = now.getMinutes();
+  digitalClockPlaceholder.textContent = `${hours.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
 }
 
 export function updateGreeting(greetingPlaceholder, userName) {
-    if (!greetingPlaceholder) return;
-    const hour = new Date().getHours();
-    let greeting = 'Boa noite';
-    if (hour >= 5 && hour < 12) greeting = 'Bom dia';
-    else if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
+  if (!greetingPlaceholder) return;
+  const hour = new Date().getHours();
+  let greeting = 'Boa noite';
+  if (hour >= 5 && hour < 12) greeting = 'Bom dia';
+  else if (hour >= 12 && hour < 18) greeting = 'Boa tarde';
 
-    greetingPlaceholder.textContent = userName ? `${greeting}, ${userName}` : greeting;
+  greetingPlaceholder.textContent = userName
+    ? `${greeting}, ${userName}`
+    : greeting;
 }
 
-export async function updateWeather(weatherWidget, weatherIcon, weatherTemp, city) {
-    if (!weatherWidget || !city) return;
-    try {
-        // Simple geocoding using Open-Meteo
-        const geoRes = await fetch(`https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`);
-        const geoData = await geoRes.json();
+export async function updateWeather(
+  weatherWidget,
+  weatherIcon,
+  weatherTemp,
+  city,
+) {
+  if (!weatherWidget || !city) return;
+  try {
+    // Simple geocoding using Open-Meteo
+    const geoRes = await fetch(
+      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`,
+    );
+    const geoData = await geoRes.json();
 
-        if (geoData.results && geoData.results.length > 0) {
-            const { latitude, longitude } = geoData.results[0];
-            const weatherRes = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`);
-            const weatherData = await weatherRes.json();
+    if (geoData.results && geoData.results.length > 0) {
+      const { latitude, longitude } = geoData.results[0];
+      const weatherRes = await fetch(
+        `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
+      );
+      const weatherData = await weatherRes.json();
 
-            if (weatherData.current_weather) {
-                const temp = weatherData.current_weather.temperature;
-                const weathercode = weatherData.current_weather.weathercode;
+      if (weatherData.current_weather) {
+        const temp = weatherData.current_weather.temperature;
+        const weathercode = weatherData.current_weather.weathercode;
 
-                // Keep it simple for weather codes
-                let icon = '☁️';
-                if (weathercode === 0) icon = '☀️';
-                else if (weathercode >= 1 && weathercode <= 3) icon = '⛅';
-                else if (weathercode >= 61 && weathercode <= 69) icon = '🌧️';
-                else if (weathercode >= 71 && weathercode <= 79) icon = '❄️';
-                else if (weathercode >= 95) icon = '⛈️';
+        // Keep it simple for weather codes
+        let icon = '☁️';
+        if (weathercode === 0) icon = '☀️';
+        else if (weathercode >= 1 && weathercode <= 3) icon = '⛅';
+        else if (weathercode >= 61 && weathercode <= 69) icon = '🌧️';
+        else if (weathercode >= 71 && weathercode <= 79) icon = '❄️';
+        else if (weathercode >= 95) icon = '⛈️';
 
-                if (weatherIcon) weatherIcon.textContent = icon;
-                if (weatherTemp) weatherTemp.textContent = `${temp}°C`;
-                weatherWidget.style.display = 'flex';
-                weatherWidget.title = `${geoData.results[0].name}: ${temp}°C`;
-            }
-        }
-    } catch (error) {
-        console.error("Falha ao buscar clima:", error);
+        if (weatherIcon) weatherIcon.textContent = icon;
+        if (weatherTemp) weatherTemp.textContent = `${temp}°C`;
+        weatherWidget.style.display = 'flex';
+        weatherWidget.title = `${geoData.results[0].name}: ${temp}°C`;
+      }
     }
+  } catch (error) {
+    console.error('Falha ao buscar clima:', error);
+  }
 }
 
 export async function manageWallpaper(settingsState, forceNext = false) {
-    const body = document.body;
-    const unsplashInfoDiv = document.getElementById('unsplash-info');
+  const body = document.body;
+  const unsplashInfoDiv = document.getElementById('unsplash-info');
 
-    const hideUnsplashInfo = () => {
-        if (unsplashInfoDiv) unsplashInfoDiv.style.display = 'none';
-    };
+  const hideUnsplashInfo = () => {
+    if (unsplashInfoDiv) unsplashInfoDiv.style.display = 'none';
+  };
 
-    if (settingsState.wallpaperSource === 'none') {
-        body.style.backgroundImage = 'none';
-        hideUnsplashInfo();
-        return;
-    }
-
-    const setBackground = (url) => {
-        body.style.backgroundImage = `url('${url}')`;
-        body.style.backgroundSize = 'cover';
-        body.style.backgroundPosition = 'center';
-        body.style.backgroundRepeat = 'no-repeat';
-    };
-
-    const displayUnsplashInfo = (data) => {
-        if (!unsplashInfoDiv || !data) return;
-        const linkEl = document.getElementById('unsplash-link');
-        const locEl = document.getElementById('unsplash-location');
-        const dateEl = document.getElementById('unsplash-date');
-        const viewsEl = document.getElementById('unsplash-views');
-        const userEl = document.getElementById('unsplash-user');
-
-        if (linkEl) linkEl.href = data.link || '#';
-        if (locEl) locEl.textContent = data.location ? `📍 ${data.location}` : '';
-        if (dateEl) {
-            const dateObj = new Date(data.date);
-            dateEl.textContent = data.date ? `📅 ${dateObj.toLocaleDateString('pt-BR')}` : '';
-        }
-        if (viewsEl) viewsEl.textContent = data.stats ? `👁️ ${data.stats.toLocaleString('pt-BR')} ${data.statsLabel || 'visualizações'}` : '';
-        if (userEl) userEl.textContent = data.user ? `👤 ${data.user}` : '';
-
-        unsplashInfoDiv.style.display = 'flex';
-    };
-
-    if (settingsState.wallpaperSource === 'unsplash') {
-        const theme = settingsState.wallpaperTheme || 'nature';
-        const apiKey = settingsState.wallpaperApiKey || '';
-        const freqHours = settingsState.wallpaperFrequency || 1;
-        const freqMs = freqHours * 60 * 60 * 1000;
-
-        chrome.storage.local.get(['cachedWallpaper'], async (result) => {
-            const cache = result.cachedWallpaper;
-            const now = Date.now();
-
-            // Check if we have a valid cache
-            if (!forceNext && cache && cache.source === 'unsplash' && cache.theme === theme && cache.apiKey === apiKey) {
-                const age = now - cache.timestamp;
-                if (age < freqMs && cache.url) {
-                    // Use cache
-                    setBackground(cache.url);
-                    if (cache.unsplashData) {
-                        displayUnsplashInfo(cache.unsplashData);
-                    } else {
-                        hideUnsplashInfo();
-                    }
-                    return;
-                }
-            }
-
-            // Cache missed or expired. Fetch new.
-            let newUrl = '';
-            let unsplashData = null;
-
-            let actualTheme = theme;
-            if (theme === 'random') {
-                const presetThemes = ['nature', 'city', 'space', 'minimalist', 'abstract', 'architecture', 'technology', 'landscape'];
-                actualTheme = presetThemes[Math.floor(Math.random() * presetThemes.length)];
-            }
-
-            if (!apiKey) {
-                console.warn("Unsplash API Key missing. Fallback for loremflickr.");
-                const seed = now.toString();
-                newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
-            } else {
-                try {
-                    const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(actualTheme)}&orientation=landscape`;
-                    const response = await fetch(apiUrl, {
-                        headers: { 'Authorization': `Client-ID ${apiKey}` }
-                    });
-
-                    if (!response.ok) throw new Error(`Unsplash API Error: ${response.status}`);
-
-                    const data = await response.json();
-                    if (data && data.urls && data.urls.regular) {
-                        newUrl = data.urls.regular;
-
-                        // Parse Unsplash Data
-                        unsplashData = {
-                            link: data.links?.html || `https://unsplash.com/photos/${data.id}`,
-                            location: data.location?.name,
-                            date: data.created_at,
-                            stats: data.views || data.downloads || data.likes || 0,
-                            statsLabel: data.views ? 'visualizações' : (data.downloads ? 'downloads' : 'curtidas'),
-                            user: data.user?.name
-                        };
-                    } else {
-                        throw new Error("Invalid Unsplash response format");
-                    }
-                } catch (error) {
-                    console.error("Falha ao buscar Unsplash Oficial:", error);
-                    const seed = now.toString();
-                    newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
-                }
-            }
-
-            // Apply to UI
-            setBackground(newUrl);
-            if (unsplashData) {
-                displayUnsplashInfo(unsplashData);
-            } else {
-                hideUnsplashInfo();
-            }
-
-            // Save new cache
-            chrome.storage.local.set({
-                cachedWallpaper: {
-                    source: 'unsplash',
-                    theme: theme,
-                    apiKey: apiKey,
-                    url: newUrl,
-                    timestamp: now,
-                    unsplashData: unsplashData
-                }
-            });
-        });
-        return;
-    }
-
-    // Default to local folder logic which is handled in script.js interval
+  if (settingsState.wallpaperSource === 'none') {
+    body.style.backgroundImage = 'none';
     hideUnsplashInfo();
-    // Clear cache if changing source to local to avoid stale data if switched back
-    chrome.storage.local.remove(['cachedWallpaper']);
+    return;
+  }
+
+  const setBackground = (url) => {
+    body.style.backgroundImage = `url('${url}')`;
+    body.style.backgroundSize = 'cover';
+    body.style.backgroundPosition = 'center';
+    body.style.backgroundRepeat = 'no-repeat';
+  };
+
+  const displayUnsplashInfo = (data) => {
+    if (!unsplashInfoDiv || !data) return;
+    const linkEl = document.getElementById('unsplash-link');
+    const locEl = document.getElementById('unsplash-location');
+    const dateEl = document.getElementById('unsplash-date');
+    const viewsEl = document.getElementById('unsplash-views');
+    const userEl = document.getElementById('unsplash-user');
+
+    if (linkEl) linkEl.href = data.link || '#';
+    if (locEl) locEl.textContent = data.location ? `📍 ${data.location}` : '';
+    if (dateEl) {
+      const dateObj = new Date(data.date);
+      dateEl.textContent = data.date
+        ? `📅 ${dateObj.toLocaleDateString('pt-BR')}`
+        : '';
+    }
+    if (viewsEl)
+      viewsEl.textContent = data.stats
+        ? `👁️ ${data.stats.toLocaleString('pt-BR')} ${data.statsLabel || 'visualizações'}`
+        : '';
+    if (userEl) userEl.textContent = data.user ? `👤 ${data.user}` : '';
+
+    unsplashInfoDiv.style.display = 'flex';
+  };
+
+  if (settingsState.wallpaperSource === 'unsplash') {
+    const theme = settingsState.wallpaperTheme || 'nature';
+    const apiKey = settingsState.wallpaperApiKey || '';
+    const freqHours = settingsState.wallpaperFrequency || 1;
+    const freqMs = freqHours * 60 * 60 * 1000;
+
+    chrome.storage.local.get(['cachedWallpaper'], async (result) => {
+      const cache = result.cachedWallpaper;
+      const now = Date.now();
+
+      // Check if we have a valid cache
+      if (
+        !forceNext &&
+        cache &&
+        cache.source === 'unsplash' &&
+        cache.theme === theme &&
+        cache.apiKey === apiKey
+      ) {
+        const age = now - cache.timestamp;
+        if (age < freqMs && cache.url) {
+          // Use cache
+          setBackground(cache.url);
+          if (cache.unsplashData) {
+            displayUnsplashInfo(cache.unsplashData);
+          } else {
+            hideUnsplashInfo();
+          }
+          return;
+        }
+      }
+
+      // Cache missed or expired. Fetch new.
+      let newUrl = '';
+      let unsplashData = null;
+
+      let actualTheme = theme;
+      if (theme === 'random') {
+        const presetThemes = [
+          'nature',
+          'city',
+          'space',
+          'minimalist',
+          'abstract',
+          'architecture',
+          'technology',
+          'landscape',
+        ];
+        actualTheme =
+          presetThemes[Math.floor(Math.random() * presetThemes.length)];
+      }
+
+      if (!apiKey) {
+        console.warn('Unsplash API Key missing. Fallback for loremflickr.');
+        const seed = now.toString();
+        newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
+      } else {
+        try {
+          const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(actualTheme)}&orientation=landscape`;
+          const response = await fetch(apiUrl, {
+            headers: { Authorization: `Client-ID ${apiKey}` },
+          });
+
+          if (!response.ok)
+            throw new Error(`Unsplash API Error: ${response.status}`);
+
+          const data = await response.json();
+          if (data && data.urls && data.urls.regular) {
+            newUrl = data.urls.regular;
+
+            // Parse Unsplash Data
+            unsplashData = {
+              link:
+                data.links?.html || `https://unsplash.com/photos/${data.id}`,
+              location: data.location?.name,
+              date: data.created_at,
+              stats: data.views || data.downloads || data.likes || 0,
+              statsLabel: data.views
+                ? 'visualizações'
+                : data.downloads
+                  ? 'downloads'
+                  : 'curtidas',
+              user: data.user?.name,
+            };
+          } else {
+            throw new Error('Invalid Unsplash response format');
+          }
+        } catch (error) {
+          console.error('Falha ao buscar Unsplash Oficial:', error);
+          const seed = now.toString();
+          newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
+        }
+      }
+
+      // Apply to UI
+      setBackground(newUrl);
+      if (unsplashData) {
+        displayUnsplashInfo(unsplashData);
+      } else {
+        hideUnsplashInfo();
+      }
+
+      // Save new cache
+      chrome.storage.local.set({
+        cachedWallpaper: {
+          source: 'unsplash',
+          theme: theme,
+          apiKey: apiKey,
+          url: newUrl,
+          timestamp: now,
+          unsplashData: unsplashData,
+        },
+      });
+    });
+    return;
+  }
+
+  // Default to local folder logic which is handled in script.js interval
+  hideUnsplashInfo();
+  // Clear cache if changing source to local to avoid stale data if switched back
+  chrome.storage.local.remove(['cachedWallpaper']);
 }
-
-
 
 // ========== CUSTOM ICONS LOGIC ==========
 export function saveCustomIconProps(bookmarkId, iconData, callback) {
-    const key = `icon:${bookmarkId}`;
-    chrome.storage.sync.get(['customIconsKeys'], result => {
-        const keys = result.customIconsKeys || [];
-        if (!keys.includes(key)) {
-            keys.push(key);
-        }
-        chrome.storage.sync.set({ [key]: iconData, customIconsKeys: keys }, callback);
-    });
+  const key = `icon:${bookmarkId}`;
+  chrome.storage.sync.get(['customIconsKeys'], (result) => {
+    const keys = result.customIconsKeys || [];
+    if (!keys.includes(key)) {
+      keys.push(key);
+    }
+    chrome.storage.sync.set(
+      { [key]: iconData, customIconsKeys: keys },
+      callback,
+    );
+  });
 }
 
 export function removeCustomIconProps(bookmarkId, callback) {
-    const key = `icon:${bookmarkId}`;
-    chrome.storage.sync.get(['customIconsKeys'], result => {
-        let keys = result.customIconsKeys || [];
-        keys = keys.filter(k => k !== key);
-        chrome.storage.sync.remove(key, () => {
-            chrome.storage.sync.set({ customIconsKeys: keys }, callback);
-        });
+  const key = `icon:${bookmarkId}`;
+  chrome.storage.sync.get(['customIconsKeys'], (result) => {
+    let keys = result.customIconsKeys || [];
+    keys = keys.filter((k) => k !== key);
+    chrome.storage.sync.remove(key, () => {
+      chrome.storage.sync.set({ customIconsKeys: keys }, callback);
     });
+  });
 }
 
 export function loadCustomIcons(callback) {
-    chrome.storage.sync.get(['customIconsKeys', 'customIconsInitialized'], result => {
-        const keys = result.customIconsKeys;
-        const initialized = result.customIconsInitialized;
-        
-        if (keys !== undefined) {
-            // High-efficiency path: load only the custom icon keys we know exist
-            if (keys.length === 0) {
-                callback({});
-                return;
-            }
-            chrome.storage.sync.get(keys, data => {
-                const customIcons = {};
-                keys.forEach(k => {
-                    if (data[k]) {
-                        const idOrUrl = k.slice(5);
-                        customIcons[idOrUrl] = data[k];
-                    }
-                });
-                callback(customIcons);
-            });
-        } else {
-            // One-time migration path / Fallback if customIconsKeys doesn't exist yet
-            chrome.storage.sync.get(null, data => {
-                const customIcons = {};
-                const foundKeys = [];
-                
-                Object.keys(data).forEach(key => {
-                    if (key.startsWith('icon:')) {
-                        foundKeys.push(key);
-                        const idOrUrl = key.slice(5);
-                        customIcons[idOrUrl] = data[key];
-                    }
-                });
+  chrome.storage.sync.get(
+    ['customIconsKeys', 'customIconsInitialized'],
+    (result) => {
+      const keys = result.customIconsKeys;
+      const initialized = result.customIconsInitialized;
 
-                const toSave = { customIconsKeys: foundKeys };
-                let finalIcons = customIcons;
-
-                if (!initialized) {
-                    // First time initialization logic
-                    finalIcons = Object.assign({}, defaultCustomIcons, customIcons);
-                    toSave.customIconsInitialized = true;
-                    Object.keys(defaultCustomIcons).forEach(idOrUrl => {
-                        const defaultKey = `icon:${idOrUrl}`;
-                        if (!toSave.customIconsKeys.includes(defaultKey)) {
-                            toSave.customIconsKeys.push(defaultKey);
-                        }
-                        toSave[defaultKey] = defaultCustomIcons[idOrUrl];
-                    });
-                }
-                
-                chrome.storage.sync.set(toSave, () => {
-                    callback(finalIcons);
-                });
-            });
+      if (keys !== undefined) {
+        // High-efficiency path: load only the custom icon keys we know exist
+        if (keys.length === 0) {
+          callback({});
+          return;
         }
-    });
+        chrome.storage.sync.get(keys, (data) => {
+          const customIcons = {};
+          keys.forEach((k) => {
+            if (data[k]) {
+              const idOrUrl = k.slice(5);
+              customIcons[idOrUrl] = data[k];
+            }
+          });
+          callback(customIcons);
+        });
+      } else {
+        // One-time migration path / Fallback if customIconsKeys doesn't exist yet
+        chrome.storage.sync.get(null, (data) => {
+          const customIcons = {};
+          const foundKeys = [];
+
+          Object.keys(data).forEach((key) => {
+            if (key.startsWith('icon:')) {
+              foundKeys.push(key);
+              const idOrUrl = key.slice(5);
+              customIcons[idOrUrl] = data[key];
+            }
+          });
+
+          const toSave = { customIconsKeys: foundKeys };
+          let finalIcons = customIcons;
+
+          if (!initialized) {
+            // First time initialization logic
+            finalIcons = Object.assign({}, defaultCustomIcons, customIcons);
+            toSave.customIconsInitialized = true;
+            Object.keys(defaultCustomIcons).forEach((idOrUrl) => {
+              const defaultKey = `icon:${idOrUrl}`;
+              if (!toSave.customIconsKeys.includes(defaultKey)) {
+                toSave.customIconsKeys.push(defaultKey);
+              }
+              toSave[defaultKey] = defaultCustomIcons[idOrUrl];
+            });
+          }
+
+          chrome.storage.sync.set(toSave, () => {
+            callback(finalIcons);
+          });
+        });
+      }
+    },
+  );
 }
 
-
 export function updateBookmarkFull(bookmarkId, newTitle, newUrl, callback) {
-    chrome.bookmarks.update(bookmarkId, { title: newTitle, url: newUrl }, () => {
-        if (callback) callback();
-    });
+  chrome.bookmarks.update(bookmarkId, { title: newTitle, url: newUrl }, () => {
+    if (callback) callback();
+  });
 }
 
 // ========== DYNAMIC SORTABLE LOGIC ==========
 export function loadSortable(callback) {
-    if (window.Sortable) {
-        if (callback) callback(window.Sortable);
-        return;
-    }
-    const script = document.createElement('script');
-    script.src = 'js/Sortable.min.js';
-    script.onload = () => {
-        if (callback) callback(window.Sortable);
-    };
-    script.onerror = (err) => console.error('Erro ao carregar SortableJS:', err);
-    document.head.appendChild(script);
+  if (window.Sortable) {
+    if (callback) callback(window.Sortable);
+    return;
+  }
+  const script = document.createElement('script');
+  script.src = 'js/Sortable.min.js';
+  script.onload = () => {
+    if (callback) callback(window.Sortable);
+  };
+  script.onerror = (err) => console.error('Erro ao carregar SortableJS:', err);
+  document.head.appendChild(script);
 }

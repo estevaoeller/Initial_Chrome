@@ -1,7 +1,7 @@
 const ROOT_FOLDER_NAME = 'Pagina Inicial';
 
 function getRootFolder(callback) {
-  chrome.bookmarks.getTree(function(nodes) {
+  chrome.bookmarks.getTree(function (nodes) {
     const queue = [...nodes];
     while (queue.length) {
       const node = queue.shift();
@@ -16,7 +16,7 @@ function getRootFolder(callback) {
 }
 
 chrome.runtime.onInstalled.addListener(() => {
-  getRootFolder(folder => {
+  getRootFolder((folder) => {
     if (!folder) {
       chrome.bookmarks.create({ title: ROOT_FOLDER_NAME }, () => {
         if (chrome.runtime.lastError) {
@@ -35,11 +35,11 @@ chrome.alarms.onAlarm.addListener((alarm) => {
       const mode = res.pomodoroMode || 'work';
       const titles = {
         work: 'Foco concluído! 🍅',
-        break: 'Pausa finalizada! ☕'
+        break: 'Pausa finalizada! ☕',
       };
       const messages = {
         work: 'Ótimo trabalho! Tire um momento para descansar.',
-        break: 'Pronto para começar outra sessão de foco?'
+        break: 'Pronto para começar outra sessão de foco?',
       };
 
       chrome.notifications.create('pomodoro-notification', {
@@ -48,7 +48,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
         title: titles[mode] || 'Pomodoro Timer',
         message: messages[mode] || 'Seu timer acabou.',
         priority: 2,
-        requireInteraction: true // Keep notification until user dismisses
+        requireInteraction: true, // Keep notification until user dismisses
       });
 
       // Clear active state
@@ -68,7 +68,7 @@ const CACHE_NAME = 'favicon-cache-v1';
 const CACHEABLE_HOSTS = [
   'www.google.com',
   'cdn.simpleicons.org',
-  'cdn.jsdelivr.net'
+  'cdn.jsdelivr.net',
 ];
 
 self.addEventListener('fetch', (event) => {
@@ -77,12 +77,14 @@ self.addEventListener('fetch', (event) => {
   // Check if target is a cacheable favicon host
   if (CACHEABLE_HOSTS.includes(url.hostname)) {
     // Specifically filter to make sure it's an icon request
-    const isGoogleFavicon = url.hostname === 'www.google.com' && url.pathname.startsWith('/s2/favicons');
+    const isGoogleFavicon =
+      url.hostname === 'www.google.com' &&
+      url.pathname.startsWith('/s2/favicons');
     const isSimpleIcon = url.hostname === 'cdn.simpleicons.org';
-    const isJsDelivrIcon = url.hostname === 'cdn.jsdelivr.net' && (
-      url.pathname.includes('/devicon') || 
-      url.pathname.includes('/dashboard-icons')
-    );
+    const isJsDelivrIcon =
+      url.hostname === 'cdn.jsdelivr.net' &&
+      (url.pathname.includes('/devicon') ||
+        url.pathname.includes('/dashboard-icons'));
 
     if (isGoogleFavicon || isSimpleIcon || isJsDelivrIcon) {
       event.respondWith(
@@ -91,17 +93,117 @@ self.addEventListener('fetch', (event) => {
             if (cachedResponse) {
               return cachedResponse;
             }
-            return fetch(event.request).then((networkResponse) => {
-              if (networkResponse && networkResponse.status === 200) {
-                cache.put(event.request, networkResponse.clone());
-              }
-              return networkResponse;
-            }).catch(() => {
-              return new Response('', { status: 404 });
-            });
+            return fetch(event.request)
+              .then((networkResponse) => {
+                if (networkResponse && networkResponse.status === 200) {
+                  cache.put(event.request, networkResponse.clone());
+                }
+                return networkResponse;
+              })
+              .catch(() => {
+                return new Response('', { status: 404 });
+              });
           });
-        })
+        }),
       );
     }
   }
 });
+
+// --- Context Menu for Adding Bookmarks ---
+
+function rebuildContextMenus() {
+  // Clear all first to prevent duplication
+  chrome.contextMenus.removeAll(() => {
+    getRootFolder((root) => {
+      if (!root) return;
+      // Get all child folders under root (which represent the spaces)
+      chrome.bookmarks.getChildren(root.id, (children) => {
+        const spaces = children.filter((c) => !c.url);
+        if (spaces.length === 0) return;
+
+        // Create parent menu item
+        chrome.contextMenus.create({
+          id: 'add-to-dashboard-root',
+          title: 'Adicionar à Página Inicial',
+          contexts: ['page', 'link'],
+        });
+
+        // Add submenus for each Space
+        spaces.forEach((space) => {
+          chrome.contextMenus.create({
+            id: `space-${space.id}`,
+            parentId: 'add-to-dashboard-root',
+            title: space.title,
+            contexts: ['page', 'link'],
+          });
+        });
+      });
+    });
+  });
+}
+
+// Listen to context menu clicks
+chrome.contextMenus.onClicked.addListener((info, tab) => {
+  if (info.menuItemId.startsWith('space-')) {
+    const spaceId = info.menuItemId.replace('space-', '');
+    const url = info.linkUrl || info.pageUrl || tab.url;
+    const title = info.selectionText || tab.title || 'Novo Favorito';
+
+    // Get children of the space folder to check for '📥 Inbox'
+    chrome.bookmarks.getChildren(spaceId, (children) => {
+      const inboxFolder = children.find(
+        (c) => !c.url && c.title === '📥 Inbox',
+      );
+
+      const createBookmark = (parentId) => {
+        chrome.bookmarks.create({ parentId, title, url }, () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Erro ao adicionar bookmark via context menu:',
+              chrome.runtime.lastError,
+            );
+            return;
+          }
+          // Show a notification
+          chrome.notifications.create('bookmark-added-notification', {
+            type: 'basic',
+            iconUrl: 'icons/icon128.png',
+            title: 'Favorito Adicionado! 📥',
+            message: `"${title}" foi adicionado com sucesso em 📥 Inbox.`,
+            priority: 1,
+          });
+        });
+      };
+
+      if (inboxFolder) {
+        createBookmark(inboxFolder.id);
+      } else {
+        // Create the folder first
+        chrome.bookmarks.create(
+          { parentId: spaceId, title: '📥 Inbox' },
+          (newInbox) => {
+            if (chrome.runtime.lastError) {
+              console.error(
+                'Erro ao criar pasta Inbox:',
+                chrome.runtime.lastError,
+              );
+              return;
+            }
+            createBookmark(newInbox.id);
+          },
+        );
+      }
+    });
+  }
+});
+
+// Rebuild context menu when spaces are modified in Chrome bookmarks
+chrome.bookmarks.onCreated.addListener(rebuildContextMenus);
+chrome.bookmarks.onRemoved.addListener(rebuildContextMenus);
+chrome.bookmarks.onChanged.addListener(rebuildContextMenus);
+chrome.bookmarks.onMoved.addListener(rebuildContextMenus);
+
+// Initial build on startup/load
+chrome.runtime.onInstalled.addListener(rebuildContextMenus);
+rebuildContextMenus();

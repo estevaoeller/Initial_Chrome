@@ -21,7 +21,8 @@ const hh = String(now.getHours()).padStart(2, '0');
 const min = String(now.getMinutes()).padStart(2, '0');
 
 // Update Description
-const baseDesc = "Uma página inicial personalizada para otimizar o acesso a bookmarks e oferecer uma experiência visual única.";
+const baseDesc =
+  'Uma página inicial personalizada para otimizar o acesso a bookmarks e oferecer uma experiência visual única.';
 manifest.description = `v${manifest.version} de ${dd}/${mm}/${year} ${hh}:${min} - ${baseDesc}`;
 
 let output = JSON.stringify(manifest, null, 2);
@@ -29,4 +30,6 @@ if (newline === '\r\n') {
   output = output.replace(/\n/g, newline);
 }
 fs.writeFileSync(manifestPath, output, 'utf8');
-console.log(`Manifest updated to version ${manifest.version} with description "${manifest.description}"`);
+console.log(
+  `Manifest updated to version ${manifest.version} with description "${manifest.description}"`,
+);
