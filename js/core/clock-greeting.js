@@ -7,7 +7,16 @@ import {
     updateWeather
 } from '../modules.js';
 
+let activeIntervals = [];
+
+export function destroyWidgets() {
+    activeIntervals.forEach(clearInterval);
+    activeIntervals = [];
+}
+
 export function initWidgets(settingsState) {
+    destroyWidgets();
+
     const analogClockPlaceholder = document.getElementById('analog-clock-placeholder');
     const digitalClockPlaceholder = document.getElementById('digital-clock-placeholder');
     const greetingPlaceholder = document.getElementById('greeting-placeholder');
@@ -34,26 +43,26 @@ export function initWidgets(settingsState) {
             digitalClockPlaceholder.style.display = 'none';
         }
         tickClock();
-        setInterval(tickClock, 1000);
+        activeIntervals.push(setInterval(tickClock, 1000));
     }
 
     if (greetingPlaceholder) {
         updateGreeting(greetingPlaceholder, settingsState.userName);
-        setInterval(() => updateGreeting(greetingPlaceholder, settingsState.userName), 600000);
+        activeIntervals.push(setInterval(() => updateGreeting(greetingPlaceholder, settingsState.userName), 600000));
     }
 
     if (settingsState.weatherCity && weatherWidget && weatherIcon && weatherTemp) {
         updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity);
-        setInterval(() => updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity), 1800000);
+        activeIntervals.push(setInterval(() => updateWeather(weatherWidget, weatherIcon, weatherTemp, settingsState.weatherCity), 1800000));
     }
 
     if (datePlaceholder) {
         updateDate(datePlaceholder);
-        setInterval(() => updateDate(datePlaceholder), 60000);
+        activeIntervals.push(setInterval(() => updateDate(datePlaceholder), 60000));
     }
     if (calendarPlaceholder) {
         updateCalendar(calendarPlaceholder);
-        setInterval(() => updateCalendar(calendarPlaceholder), 3600000);
+        activeIntervals.push(setInterval(() => updateCalendar(calendarPlaceholder), 3600000));
     }
 
     return { tickClock };

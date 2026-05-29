@@ -75,19 +75,28 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Callback when space is changed
     const onSpaceSelected = (spaceId) => {
+        contentArea.classList.add('switching-space');
         loadCustomIcons(customIcons => {
             // Save to settingsState so ShortcutsManager can access it on the fly
             settingsState.customIcons = customIcons;
-            loadGroupsFromSpace(spaceId, groups => {
-                currentBookmarks = groups;
-                const stateHelpers = {
-                    spaceId: spaceId,
-                    getBookmarks: () => currentBookmarks,
-                    setBookmarks: (newVal) => { currentBookmarks = newVal; },
-                    customIcons: customIcons,
-                    iconSize: settingsState.iconSize
-                };
-                renderBookmarks(currentBookmarks, contentArea, settingsState.iconSize, stateHelpers);
+            chrome.storage.sync.get(['collapsedGroups'], result => {
+                const collapsedGroups = result.collapsedGroups || [];
+                settingsState.collapsedGroups = collapsedGroups;
+                loadGroupsFromSpace(spaceId, groups => {
+                    currentBookmarks = groups;
+                    const stateHelpers = {
+                        spaceId: spaceId,
+                        getBookmarks: () => currentBookmarks,
+                        setBookmarks: (newVal) => { currentBookmarks = newVal; },
+                        customIcons: customIcons,
+                        iconSize: settingsState.iconSize,
+                        collapsedGroups: collapsedGroups
+                    };
+                    renderBookmarks(currentBookmarks, contentArea, settingsState.iconSize, stateHelpers);
+                    setTimeout(() => {
+                        contentArea.classList.remove('switching-space');
+                    }, 50);
+                });
             });
         });
     };
@@ -106,7 +115,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 getBookmarks: () => currentBookmarks,
                 setBookmarks: (newVal) => { currentBookmarks = newVal; },
                 customIcons: settingsState.customIcons || {},
-                iconSize: settingsState.iconSize
+                iconSize: settingsState.iconSize,
+                collapsedGroups: settingsState.collapsedGroups || []
             };
         }
     });

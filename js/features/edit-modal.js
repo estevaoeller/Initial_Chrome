@@ -73,6 +73,7 @@ export class EditModalManager {
 
         // --- Listen to global event ---
         window.addEventListener('openEditModal', (e) => {
+            this.previouslyFocusedElement = document.activeElement;
             const { link, stateHelpers } = e.detail;
             this.currentEditingLink = link;
             this.currentStateHelpers = stateHelpers;
@@ -124,7 +125,13 @@ export class EditModalManager {
 
             // Show modal
             this.modal.style.display = 'flex';
-            setTimeout(() => this.modal.classList.add('show'), 10);
+            setTimeout(() => {
+                this.modal.classList.add('show');
+                if (this.inputName) {
+                    this.inputName.focus();
+                    this.inputName.select();
+                }
+            }, 10);
         });
 
         // --- Close Logic ---
@@ -136,6 +143,29 @@ export class EditModalManager {
 
         // --- Save Logic ---
         this.saveBtn.addEventListener('click', () => this.handleSave());
+
+        // Focus trap
+        this.modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && this.modal.classList.contains('show')) {
+                const focusables = Array.from(this.modal.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => {
+                    return el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+                });
+                if (focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        last.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        first.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
     }
 
     updatePreview() {
@@ -184,6 +214,9 @@ export class EditModalManager {
         this.modal.classList.remove('show');
         setTimeout(() => { this.modal.style.display = 'none'; }, 300);
         this.currentEditingLink = null;
+        if (this.previouslyFocusedElement) {
+            this.previouslyFocusedElement.focus();
+        }
     }
 
     handleSave() {

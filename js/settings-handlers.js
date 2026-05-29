@@ -3,7 +3,7 @@ import { defaultSettings } from './config.js';
 export function applyIconSizeSetting(size) {
     document.documentElement.style.setProperty('--icon-size', `${size}px`);
     document.querySelectorAll('.bookmark-favicon').forEach(img => {
-        if (img.dataset.url && img.dataset.isCustom !== "true") {
+        if (img.dataset.url && img.getAttribute('data-is-custom') !== 'true') {
             if (size > 0) {
                 img.src = `https://www.google.com/s2/favicons?domain=${img.dataset.url}&sz=${size}`;
             } else {

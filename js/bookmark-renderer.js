@@ -1,5 +1,18 @@
-import { handleDeleteBookmark, renameGroup, createGroup, addBookmarkToChrome } from './modules.js';
-// Removed drag-drop.js in favor of CDN SortableJS
+import { handleDeleteBookmark, renameGroup, createGroup, addBookmarkToChrome, loadSortable } from './modules.js';
+
+// Setup lazy loading IntersectionObserver globally
+const faviconObserver = new IntersectionObserver((entries, observer) => {
+    entries.forEach(entry => {
+        if (entry.isIntersecting) {
+            const img = entry.target;
+            if (img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+            }
+            observer.unobserve(img);
+        }
+    });
+}, { rootMargin: '100px' });
 
 // Track internal drag state globally
 document.addEventListener('dragstart', () => {
@@ -11,16 +24,63 @@ document.addEventListener('dragend', () => {
 });
 
 export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) {
-    contentArea.innerHTML = '';
     const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
+    const collapsedGroups = (stateHelpers && stateHelpers.collapsedGroups) || [];
 
-    if (bookmarks && bookmarks.length > 0) {
-        bookmarks.forEach((category, index) => {
-            const categoryDiv = document.createElement('div');
+    // Hide loading skeletons if present
+    const loadingSkeletons = document.getElementById('loading-skeletons');
+    if (loadingSkeletons) {
+        loadingSkeletons.style.display = 'none';
+    }
+
+    if (!bookmarks || bookmarks.length === 0) {
+        contentArea.innerHTML = '';
+        return;
+    }
+
+    // Keep track of DOM categories to delete later if they are not in the new bookmarks list
+    const existingCategoryDivs = Array.from(contentArea.querySelectorAll('.bookmark-category'));
+    const newCategoryIds = new Set(bookmarks.map(c => c.id).filter(Boolean));
+
+    // Remove categories that are no longer in new list
+    existingCategoryDivs.forEach(div => {
+        if (div.dataset.categoryId && !newCategoryIds.has(div.dataset.categoryId)) {
+            div.remove();
+        }
+    });
+
+    // Remove new group container if it exists, to insert it at the very end later
+    const existingNewGroupContainer = contentArea.querySelector('.new-group-container');
+    if (existingNewGroupContainer) {
+        existingNewGroupContainer.remove();
+    }
+
+    bookmarks.forEach((category, catIndex) => {
+        let categoryDiv = contentArea.querySelector(`.bookmark-category[data-category-id="${category.id}"]`);
+        let isNewCategory = false;
+
+        if (!categoryDiv) {
+            // Create Category Div
+            categoryDiv = document.createElement('div');
             categoryDiv.className = 'bookmark-category animate-cascade';
-            categoryDiv.style.animationDelay = `${index * 0.05}s`;
+            categoryDiv.dataset.categoryId = category.id || '';
+            isNewCategory = true;
+        }
 
-            const headerDiv = document.createElement('div');
+        categoryDiv.style.animationDelay = `${catIndex * 0.05}s`;
+
+        // We either update or create the elements inside categoryDiv
+        let headerDiv = categoryDiv.querySelector('.category-header');
+        let titleContainer = null;
+        let dragHandle = null;
+        let toggleBtn = null;
+        let categoryTitle = null;
+
+        const isCollapsed = collapsedGroups.includes(category.id);
+
+        if (!headerDiv) {
+            headerDiv = document.createElement('div');
+            headerDiv.className = 'category-header';
             headerDiv.style.display = 'flex';
             headerDiv.style.justifyContent = 'space-between';
             headerDiv.style.alignItems = 'center';
@@ -28,150 +88,174 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
             headerDiv.style.paddingBottom = '10px';
             headerDiv.style.marginBottom = '15px';
 
-            const categoryTitle = document.createElement('h2');
-            categoryTitle.textContent = category.name;
-            categoryTitle.title = "Duplo clique para renomear este grupo";
-            categoryTitle.style.cursor = "text";
-            categoryTitle.style.borderBottom = 'none'; // Overrides CSS default
-            categoryTitle.style.paddingBottom = '0';
-            categoryTitle.style.marginBottom = '0';
-            categoryTitle.style.marginTop = '0';
+            titleContainer = document.createElement('div');
+            titleContainer.className = 'title-container';
+            titleContainer.style.display = 'flex';
+            titleContainer.style.alignItems = 'center';
 
-            // Set data-id on categoryDiv
-            categoryDiv.dataset.categoryId = category.id || '';
-            
-            const dragHandle = document.createElement('span');
+            dragHandle = document.createElement('span');
             dragHandle.className = 'group-drag-handle';
             dragHandle.innerHTML = '⋮⋮';
             dragHandle.style.cursor = 'grab';
             dragHandle.style.opacity = '0.3';
             dragHandle.style.marginRight = '10px';
             dragHandle.title = 'Arrastar Grupo';
-            
-            const titleContainer = document.createElement('div');
-            titleContainer.style.display = 'flex';
-            titleContainer.style.alignItems = 'center';
+
+            toggleBtn = document.createElement('button');
+            toggleBtn.className = 'group-toggle-btn';
+            toggleBtn.innerHTML = '▼';
+            toggleBtn.title = "Recolher / Expandir Grupo";
+            toggleBtn.setAttribute('aria-label', `Recolher ou expandir o grupo ${category.name}`);
+
+            categoryTitle = document.createElement('h2');
+            categoryTitle.title = "Duplo clique para renomear este grupo";
+            categoryTitle.style.cursor = "text";
+            categoryTitle.style.borderBottom = 'none';
+            categoryTitle.style.paddingBottom = '0';
+            categoryTitle.style.marginBottom = '0';
+            categoryTitle.style.marginTop = '0';
+
             titleContainer.appendChild(dragHandle);
+            titleContainer.appendChild(toggleBtn);
             titleContainer.appendChild(categoryTitle);
-            
             headerDiv.appendChild(titleContainer);
             categoryDiv.appendChild(headerDiv);
 
-        // --- Edit Group Title (Double Click) ---
-        categoryTitle.addEventListener('dblclick', () => {
-            const currentName = categoryTitle.textContent;
-            const input = document.createElement('input');
-            input.type = 'text';
-            input.value = currentName;
-            input.className = 'group-name-edit';
-            input.style.fontSize = window.getComputedStyle(categoryTitle).fontSize;
-            input.style.fontWeight = window.getComputedStyle(categoryTitle).fontWeight;
-            input.style.fontFamily = window.getComputedStyle(categoryTitle).fontFamily;
-            input.style.color = window.getComputedStyle(categoryTitle).color;
-            input.style.background = 'transparent';
-            input.style.border = '1px solid var(--accent)';
-            input.style.borderRadius = '4px';
-            input.style.padding = '2px 5px';
-            input.style.margin = window.getComputedStyle(categoryTitle).margin;
-            input.style.outline = 'none';
-            input.style.width = '100%';
+            // Double Click Rename Event
+            categoryTitle.addEventListener('dblclick', () => {
+                const currentName = categoryTitle.textContent;
+                const input = document.createElement('input');
+                input.type = 'text';
+                input.value = currentName;
+                input.className = 'group-name-edit';
+                input.style.fontSize = window.getComputedStyle(categoryTitle).fontSize;
+                input.style.fontWeight = window.getComputedStyle(categoryTitle).fontWeight;
+                input.style.fontFamily = window.getComputedStyle(categoryTitle).fontFamily;
+                input.style.color = window.getComputedStyle(categoryTitle).color;
+                input.style.background = 'transparent';
+                input.style.border = '1px solid var(--accent)';
+                input.style.borderRadius = '4px';
+                input.style.padding = '2px 5px';
+                input.style.margin = window.getComputedStyle(categoryTitle).margin;
+                input.style.outline = 'none';
+                input.style.width = '100%';
 
-            headerDiv.insertBefore(input, categoryTitle);
-            categoryTitle.style.display = 'none';
-            input.focus();
-            input.select();
+                headerDiv.insertBefore(input, titleContainer);
+                titleContainer.style.display = 'none';
+                input.focus();
+                input.select();
 
-            function saveGroupEdit() {
-                const newName = input.value.trim();
-                if (newName && newName !== currentName) {
-                    if (category.id) {
-                        renameGroup(category.id, newName, () => {
+                function saveGroupEdit() {
+                    const newName = input.value.trim();
+                    if (newName && newName !== currentName) {
+                        if (category.id) {
+                            renameGroup(category.id, newName, () => {
+                                category.name = newName;
+                                categoryTitle.textContent = newName;
+                                finishEdit();
+                                if (setBookmarks) setBookmarks(bookmarks);
+                            });
+                        } else {
                             category.name = newName;
                             categoryTitle.textContent = newName;
                             finishEdit();
                             if (setBookmarks) setBookmarks(bookmarks);
-                        });
-                    } else {
-                        // Resiliência caso falte o ID temporariamente
-                        category.name = newName;
-                        categoryTitle.textContent = newName;
-                        finishEdit();
-                        if (setBookmarks) setBookmarks(bookmarks);
-                    }
-                } else {
-                    finishEdit();
-                }
-            }
-
-            function finishEdit() {
-                if (input.parentNode) input.parentNode.removeChild(input);
-                categoryTitle.style.display = '';
-            }
-
-            input.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') saveGroupEdit();
-                if (e.key === 'Escape') finishEdit();
-            });
-
-            input.addEventListener('blur', saveGroupEdit);
-        });
-
-        const gridDiv = document.createElement('div');
-        gridDiv.className = 'bookmarks-grid';
-        categoryDiv.appendChild(gridDiv);
-
-        if (window.Sortable && getBookmarks && setBookmarks && spaceId) {
-            window.Sortable.create(gridDiv, {
-                group: 'shared', // all gridDivs are part of the 'shared' list
-                animation: 150,
-                delay: 200,   // Delay to distinguish tap from drag on touch
-                delayOnTouchOnly: true,
-                onEnd: function (evt) {
-                    if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
-
-                    const itemEl = evt.item; // dragged HTMLElement
-                    const itemId = itemEl.dataset.id;
-                    const newIndex = evt.newIndex;
-                    const targetCategoryId = evt.to.closest('.bookmark-category').dataset.categoryId;
-
-                    if (itemId && targetCategoryId) {
-                        try {
-                            chrome.bookmarks.move(itemId, { parentId: targetCategoryId, index: newIndex }, () => {
-                                // Update local state without full reload
-                                const currentList = getBookmarks();
-                                const sourceCategoryId = evt.from.closest('.bookmark-category').dataset.categoryId;
-                                const sourceCategory = currentList.find(c => c.id === sourceCategoryId);
-                                const targetCategory = currentList.find(c => c.id === targetCategoryId);
-
-                                if (sourceCategory && targetCategory) {
-                                    const linkIndex = sourceCategory.links.findIndex(l => l.id === itemId);
-                                    if (linkIndex > -1) {
-                                        const [movedLink] = sourceCategory.links.splice(linkIndex, 1);
-                                        targetCategory.links.splice(newIndex, 0, movedLink);
-                                        setBookmarks(currentList);
-                                    }
-                                }
-                            });
-                        } catch (e) {
-                            console.error("Error moving bookmark:", e);
                         }
+                    } else {
+                        finishEdit();
                     }
                 }
+
+                function finishEdit() {
+                    if (input.parentNode) input.parentNode.removeChild(input);
+                    titleContainer.style.display = 'flex';
+                }
+
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') saveGroupEdit();
+                    if (e.key === 'Escape') finishEdit();
+                });
+
+                input.addEventListener('blur', saveGroupEdit);
             });
+        } else {
+            titleContainer = headerDiv.querySelector('.title-container');
+            toggleBtn = headerDiv.querySelector('.group-toggle-btn');
+            categoryTitle = headerDiv.querySelector('h2');
         }
 
+        // Update values
+        categoryTitle.textContent = category.name;
+        toggleBtn.classList.toggle('collapsed', isCollapsed);
+        toggleBtn.setAttribute('aria-label', `${isCollapsed ? 'Expandir' : 'Recolher'} grupo ${category.name}`);
+
+        let gridDiv = categoryDiv.querySelector('.bookmarks-grid');
+        if (!gridDiv) {
+            gridDiv = document.createElement('div');
+            gridDiv.className = 'bookmarks-grid';
+            categoryDiv.appendChild(gridDiv);
+        }
+
+        gridDiv.classList.toggle('collapsed', isCollapsed);
+
+        // Remove old click handler if exists and define a fresh one
+        const newToggleBtn = toggleBtn.cloneNode(true);
+        toggleBtn.parentNode.replaceChild(newToggleBtn, toggleBtn);
+        newToggleBtn.addEventListener('click', () => {
+            const collapsed = gridDiv.classList.toggle('collapsed');
+            newToggleBtn.classList.toggle('collapsed', collapsed);
+            newToggleBtn.setAttribute('aria-label', `${collapsed ? 'Expandir' : 'Recolher'} grupo ${category.name}`);
+            
+            chrome.storage.sync.get(['collapsedGroups'], result => {
+                let currentCollapsed = result.collapsedGroups || [];
+                if (collapsed) {
+                    if (!currentCollapsed.includes(category.id)) {
+                        currentCollapsed.push(category.id);
+                    }
+                } else {
+                    currentCollapsed = currentCollapsed.filter(id => id !== category.id);
+                }
+                if (stateHelpers) {
+                    stateHelpers.collapsedGroups = currentCollapsed;
+                }
+                chrome.storage.sync.set({ collapsedGroups: currentCollapsed });
+            });
+        });
+
+        // RECONCILE BOOKMARKS INSIDE THE GRID
+        const existingItems = Array.from(gridDiv.querySelectorAll('.bookmark-item'));
+        const newLinkIds = new Set(category.links.map(l => l.id).filter(Boolean));
+
+        // Remove links that are no longer present
+        existingItems.forEach(item => {
+            if (item.dataset.id && !newLinkIds.has(item.dataset.id)) {
+                item.remove();
+            }
+        });
+
+        // Add/Update links
         category.links.forEach((link, linkIndex) => {
-            const bookmarkItem = document.createElement('a');
-            bookmarkItem.className = 'bookmark-item animate-cascade';
-            // Start item animation after its category starts animating + small stagger per item
-            bookmarkItem.style.animationDelay = `${(index * 0.05) + (linkIndex * 0.02) + 0.15}s`;
+            let bookmarkItem = gridDiv.querySelector(`.bookmark-item[data-id="${link.id}"]`);
+            let isNewLink = false;
+
+            if (!bookmarkItem) {
+                bookmarkItem = document.createElement('a');
+                bookmarkItem.className = 'bookmark-item animate-cascade';
+                bookmarkItem.dataset.id = link.id || '';
+                isNewLink = true;
+            }
+
+            bookmarkItem.style.animationDelay = `${(catIndex * 0.05) + (linkIndex * 0.02) + 0.15}s`;
             bookmarkItem.href = link.url;
             bookmarkItem.target = '_blank';
             bookmarkItem.draggable = true;
+            bookmarkItem.title = `${link.name}\n${link.url}`;
 
-            bookmarkItem.dataset.id = link.id || '';
+            // Recreate click & contextmenu event listeners to avoid memory leaks
+            const newBookmarkItem = bookmarkItem.cloneNode(false);
+            newBookmarkItem.className = bookmarkItem.className;
 
-            bookmarkItem.addEventListener('contextmenu', event => {
+            newBookmarkItem.addEventListener('contextmenu', event => {
                 event.preventDefault();
                 event.stopPropagation();
                 const contextMenuEvent = new CustomEvent('openContextMenu', {
@@ -188,33 +272,49 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
                 });
                 window.dispatchEvent(contextMenuEvent);
             });
-            // --- Delete Button ---
-            const deleteBtn = document.createElement('span');
-            deleteBtn.className = 'delete-bookmark-btn';
-            deleteBtn.innerHTML = '&times;';
-            deleteBtn.title = "Excluir";
-            deleteBtn.addEventListener('click', event => {
-                event.preventDefault();
-                event.stopPropagation();
-                handleDeleteBookmark(
-                    link.url,
-                    category.name,
-                    bookmarks,
-                    updated => renderBookmarks(updated, contentArea, iconSize, stateHelpers),
-                    spaceId
-                );
-            });
 
-            // --- Edit Button ---
+            // Re-render children inside newBookmarkItem
+            const favicon = document.createElement('img');
+            favicon.className = 'bookmark-favicon';
+            favicon.dataset.url = link.url;
+            favicon.alt = '';
+
+            const customIcon = stateHelpers && stateHelpers.customIcons ? (stateHelpers.customIcons[link.url] || stateHelpers.customIcons[link.id]) : null;
+            favicon.setAttribute('data-is-custom', customIcon ? 'true' : 'false');
+
+            let srcUrl = '';
+            if (customIcon && customIcon.type === 'simpleicons') {
+                let colorHex = customIcon.color ? customIcon.color.replace('#', '') : 'default';
+                srcUrl = `https://cdn.simpleicons.org/${customIcon.value}/${colorHex}`;
+            } else if (customIcon && customIcon.type === 'techicons') {
+                const suffix = customIcon.color === 'original' ? 'original' : 'plain';
+                srcUrl = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${customIcon.value}/${customIcon.value}-${suffix}.svg`;
+            } else if (customIcon && customIcon.type === 'dashboardicons') {
+                srcUrl = `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/${customIcon.value}.svg`;
+            } else if (customIcon && customIcon.type === 'custom') {
+                srcUrl = customIcon.value;
+            } else {
+                srcUrl = `https://www.google.com/s2/favicons?domain=${link.url}&sz=${iconSize}`;
+            }
+
+            // Lazy Load using IntersectionObserver
+            favicon.dataset.src = srcUrl;
+            faviconObserver.observe(favicon);
+
+            const bookmarkName = document.createElement('span');
+            bookmarkName.className = 'bookmark-name';
+            bookmarkName.textContent = link.name;
+
+            // Edit Button
             const editBtn = document.createElement('span');
             editBtn.className = 'edit-bookmark-btn';
             editBtn.innerHTML = '✎';
             editBtn.title = "Editar Link";
+            editBtn.setAttribute('role', 'button');
+            editBtn.setAttribute('aria-label', `Editar link para ${link.name}`);
             editBtn.addEventListener('click', event => {
                 event.preventDefault();
                 event.stopPropagation();
-
-                // Dispara o evento para abrir o modal
                 const editEvent = new CustomEvent('openEditModal', {
                     detail: {
                         link: link,
@@ -228,139 +328,195 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
                 window.dispatchEvent(editEvent);
             });
 
-            const favicon = document.createElement('img');
-            favicon.className = 'bookmark-favicon';
-            favicon.dataset.url = link.url;
+            // Delete Button
+            const deleteBtn = document.createElement('span');
+            deleteBtn.className = 'delete-bookmark-btn';
+            deleteBtn.innerHTML = '&times;';
+            deleteBtn.title = "Excluir";
+            deleteBtn.setAttribute('role', 'button');
+            deleteBtn.setAttribute('aria-label', `Excluir link para ${link.name}`);
+            deleteBtn.addEventListener('click', event => {
+                event.preventDefault();
+                event.stopPropagation();
+                handleDeleteBookmark(
+                    link.url,
+                    category.name,
+                    bookmarks,
+                    updated => renderBookmarks(updated, contentArea, iconSize, stateHelpers),
+                    spaceId
+                );
+            });
 
-            const customIcon = stateHelpers && stateHelpers.customIcons ? (stateHelpers.customIcons[link.url] || stateHelpers.customIcons[link.id]) : null;
+            newBookmarkItem.appendChild(favicon);
+            newBookmarkItem.appendChild(bookmarkName);
+            newBookmarkItem.appendChild(editBtn);
+            newBookmarkItem.appendChild(deleteBtn);
 
-            if (customIcon) {
-                favicon.dataset.isCustom = "true";
-            }
-
-            if (customIcon && customIcon.type === 'simpleicons') {
-                let colorHex = customIcon.color ? customIcon.color.replace('#', '') : 'default';
-                favicon.src = `https://cdn.simpleicons.org/${customIcon.value}/${colorHex}`;
-            } else if (customIcon && customIcon.type === 'techicons') {
-                const suffix = customIcon.color === 'original' ? 'original' : 'plain';
-                favicon.src = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${customIcon.value}/${customIcon.value}-${suffix}.svg`;
-            } else if (customIcon && customIcon.type === 'dashboardicons') {
-                favicon.src = `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/${customIcon.value}.svg`;
-            } else if (customIcon && customIcon.type === 'custom') {
-                favicon.src = customIcon.value;
+            if (isNewLink) {
+                gridDiv.appendChild(newBookmarkItem);
             } else {
-                favicon.src = `https://www.google.com/s2/favicons?domain=${link.url}&sz=${iconSize}`;
+                bookmarkItem.parentNode.replaceChild(newBookmarkItem, bookmarkItem);
             }
-            favicon.alt = '';
-
-            const bookmarkName = document.createElement('span');
-            bookmarkName.className = 'bookmark-name';
-            bookmarkName.textContent = link.name;
-
-            bookmarkItem.appendChild(favicon);
-            bookmarkItem.appendChild(bookmarkName);
-            bookmarkItem.appendChild(editBtn);
-            bookmarkItem.appendChild(deleteBtn);
-            gridDiv.appendChild(bookmarkItem);
         });
 
-        // --- Drag & Drop for External Links (Option 1) ---
+        // Ensure proper order of links in DOM matches array order
+        category.links.forEach((link, linkIndex) => {
+            const el = gridDiv.querySelector(`.bookmark-item[data-id="${link.id}"]`);
+            if (el && gridDiv.children[linkIndex] !== el) {
+                gridDiv.insertBefore(el, gridDiv.children[linkIndex]);
+            }
+        });
+
+        // Drag and Drop for External Links
         if (spaceId && setBookmarks) {
-            categoryDiv.addEventListener('dragover', (e) => {
-                if (document.body.classList.contains('dragging-internal')) return;
-                if (e.dataTransfer.types.includes('text/uri-list') || 
-                    e.dataTransfer.types.includes('text/plain') || 
-                    e.dataTransfer.types.includes('text/html')) {
-                    e.preventDefault();
-                    e.dataTransfer.dropEffect = 'copy';
-                    categoryDiv.classList.add('drag-over');
-                }
-            });
-
-            categoryDiv.addEventListener('dragenter', (e) => {
-                if (document.body.classList.contains('dragging-internal')) return;
-                if (e.dataTransfer.types.includes('text/uri-list') || 
-                    e.dataTransfer.types.includes('text/plain') || 
-                    e.dataTransfer.types.includes('text/html')) {
-                    e.preventDefault();
-                    categoryDiv.classList.add('drag-over');
-                }
-            });
-
-            categoryDiv.addEventListener('dragleave', (e) => {
-                if (document.body.classList.contains('dragging-internal')) return;
-                if (!categoryDiv.contains(e.relatedTarget)) {
-                    categoryDiv.classList.remove('drag-over');
-                }
-            });
-
-            categoryDiv.addEventListener('drop', async (e) => {
-                if (document.body.classList.contains('dragging-internal')) return;
-                if (e.dataTransfer.types.includes('text/uri-list') || 
-                    e.dataTransfer.types.includes('text/plain') || 
-                    e.dataTransfer.types.includes('text/html')) {
-                    e.preventDefault();
-                    categoryDiv.classList.remove('drag-over');
-
-                    let url = '';
-                    let name = '';
-
-                    // 1. Tentar extrair do text/html para obter o texto do link original
-                    const htmlData = e.dataTransfer.getData('text/html');
-                    if (htmlData) {
-                        try {
-                            const parser = new DOMParser();
-                            const doc = parser.parseFromString(htmlData, 'text/html');
-                            const a = doc.querySelector('a');
-                            if (a) {
-                                url = a.href;
-                                name = a.textContent.trim() || a.title.trim();
-                            }
-                        } catch (err) {
-                            console.error('Erro ao extrair text/html do drag:', err);
-                        }
+            if (isNewCategory) {
+                categoryDiv.addEventListener('dragover', (e) => {
+                    if (document.body.classList.contains('dragging-internal')) return;
+                    if (e.dataTransfer.types.includes('text/uri-list') || 
+                        e.dataTransfer.types.includes('text/plain') || 
+                        e.dataTransfer.types.includes('text/html')) {
+                        e.preventDefault();
+                        e.dataTransfer.dropEffect = 'copy';
+                        categoryDiv.classList.add('drag-over');
                     }
+                });
 
-                    // 2. Fallback para text/uri-list ou text/plain
-                    if (!url) {
-                        url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                categoryDiv.addEventListener('dragenter', (e) => {
+                    if (document.body.classList.contains('dragging-internal')) return;
+                    if (e.dataTransfer.types.includes('text/uri-list') || 
+                        e.dataTransfer.types.includes('text/plain') || 
+                        e.dataTransfer.types.includes('text/html')) {
+                        e.preventDefault();
+                        categoryDiv.classList.add('drag-over');
                     }
+                });
 
-                    url = url ? url.trim() : '';
-                    if (url) {
-                        try {
-                            // Adiciona o protocolo caso não exista
-                            if (!/^https?:\/\//i.test(url)) {
-                                url = 'https://' + url;
+                categoryDiv.addEventListener('dragleave', (e) => {
+                    if (document.body.classList.contains('dragging-internal')) return;
+                    if (!categoryDiv.contains(e.relatedTarget)) {
+                        categoryDiv.classList.remove('drag-over');
+                    }
+                });
+
+                categoryDiv.addEventListener('drop', async (e) => {
+                    if (document.body.classList.contains('dragging-internal')) return;
+                    if (e.dataTransfer.types.includes('text/uri-list') || 
+                        e.dataTransfer.types.includes('text/plain') || 
+                        e.dataTransfer.types.includes('text/html')) {
+                        e.preventDefault();
+                        categoryDiv.classList.remove('drag-over');
+
+                        let url = '';
+                        let name = '';
+
+                        const htmlData = e.dataTransfer.getData('text/html');
+                        if (htmlData) {
+                            try {
+                                const parser = new DOMParser();
+                                const doc = parser.parseFromString(htmlData, 'text/html');
+                                const a = doc.querySelector('a');
+                                if (a) {
+                                    url = a.href;
+                                    name = a.textContent.trim() || a.title.trim();
+                                }
+                            } catch (err) {
+                                console.error('Erro ao extrair text/html do drag:', err);
                             }
-                            const parsedUrl = new URL(url);
-                            if (!name) {
-                                name = parsedUrl.hostname.replace('www.', '');
-                                name = name.charAt(0).toUpperCase() + name.slice(1);
-                            }
-                        } catch (err) {
-                            console.error('URL inválida recebida:', url);
-                            return;
                         }
 
-                        const newItem = { name: name, url: url };
-                        addBookmarkToChrome(spaceId, category.name, newItem, (createdNode) => {
-                            if (createdNode) {
-                                newItem.id = createdNode.id;
-                                newItem.name = createdNode.title;
+                        if (!url) {
+                            url = e.dataTransfer.getData('text/uri-list') || e.dataTransfer.getData('text/plain');
+                        }
+
+                        url = url ? url.trim() : '';
+                        if (url) {
+                            try {
+                                if (!/^https?:\/\//i.test(url)) {
+                                    url = 'https://' + url;
+                                }
+                                const parsedUrl = new URL(url);
+                                if (!name) {
+                                    name = parsedUrl.hostname.replace('www.', '');
+                                    name = name.charAt(0).toUpperCase() + name.slice(1);
+                                }
+                            } catch (err) {
+                                console.error('URL inválida recebida:', url);
+                                return;
                             }
-                            category.links.push(newItem);
-                            setBookmarks(bookmarks);
-                            renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
-                        });
+
+                            const newItem = { name: name, url: url };
+                            addBookmarkToChrome(spaceId, category.name, newItem, (createdNode) => {
+                                if (createdNode) {
+                                    newItem.id = createdNode.id;
+                                    newItem.name = createdNode.title;
+                                }
+                                category.links.push(newItem);
+                                setBookmarks(bookmarks);
+                                renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers);
+                            });
+                        }
                     }
+                });
+            }
+        }
+
+        // Initialize Sortable for items inside category grid
+        if (spaceId && getBookmarks && setBookmarks) {
+            loadSortable((Sortable) => {
+                if (!gridDiv.SortableInstance) {
+                    gridDiv.SortableInstance = Sortable.create(gridDiv, {
+                        group: 'shared',
+                        animation: 150,
+                        delay: 200,
+                        delayOnTouchOnly: true,
+                        onEnd: function (evt) {
+                            if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
+
+                            const itemEl = evt.item;
+                            const itemId = itemEl.dataset.id;
+                            const newIndex = evt.newIndex;
+                            const targetCategoryId = evt.to.closest('.bookmark-category').dataset.categoryId;
+
+                            if (itemId && targetCategoryId) {
+                                try {
+                                    chrome.bookmarks.move(itemId, { parentId: targetCategoryId, index: newIndex }, () => {
+                                        const currentList = getBookmarks();
+                                        const sourceCategoryId = evt.from.closest('.bookmark-category').dataset.categoryId;
+                                        const sourceCategory = currentList.find(c => c.id === sourceCategoryId);
+                                        const targetCategory = currentList.find(c => c.id === targetCategoryId);
+
+                                        if (sourceCategory && targetCategory) {
+                                            const linkIndex = sourceCategory.links.findIndex(l => l.id === itemId);
+                                            if (linkIndex > -1) {
+                                                const [movedLink] = sourceCategory.links.splice(linkIndex, 1);
+                                                targetCategory.links.splice(newIndex, 0, movedLink);
+                                                setBookmarks(currentList);
+                                            }
+                                        }
+                                    });
+                                } catch (e) {
+                                    console.error("Error moving bookmark:", e);
+                                }
+                            }
+                        }
+                    });
                 }
             });
         }
 
-        contentArea.appendChild(categoryDiv);
-        });
-    }
+        // Insert categoryDiv into contentArea at the correct index if new
+        if (isNewCategory) {
+            contentArea.appendChild(categoryDiv);
+        }
+    });
+
+    // Ensure category order in DOM matches bookmarks array order
+    bookmarks.forEach((category, catIndex) => {
+        const el = contentArea.querySelector(`.bookmark-category[data-category-id="${category.id}"]`);
+        if (el && contentArea.children[catIndex] !== el) {
+            contentArea.insertBefore(el, contentArea.children[catIndex]);
+        }
+    });
 
     // --- Create "New Group" Button ---
     if (getBookmarks && setBookmarks && spaceId) {
@@ -381,6 +537,7 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
         newGroupBtn.style.border = '1px dashed var(--settings-border)';
         newGroupBtn.style.borderRadius = '8px';
         newGroupBtn.style.transition = 'all 0.2s';
+        newGroupBtn.setAttribute('aria-label', 'Criar um novo grupo de marcadores');
 
         newGroupBtn.addEventListener('mouseenter', () => {
             newGroupBtn.style.border = '1px solid var(--accent)';
@@ -406,36 +563,39 @@ export function renderBookmarks(bookmarks, contentArea, iconSize, stateHelpers) 
         newGroupContainer.appendChild(newGroupBtn);
         contentArea.appendChild(newGroupContainer);
     }
-    
-    // Make Categories sortable
-    if (window.Sortable && getBookmarks && setBookmarks && spaceId) {
-        window.Sortable.create(contentArea, {
-            animation: 150,
-            handle: '.group-drag-handle',
-            filter: '.new-group-container',
-            draggable: '.bookmark-category',
-            onEnd: function (evt) {
-                if (evt.oldIndex === evt.newIndex) return;
-                
-                const itemEl = evt.item;
-                const catId = itemEl.dataset.categoryId;
-                
-                if (catId) {
-                    try {
-                        chrome.bookmarks.move(catId, { parentId: spaceId, index: evt.newIndex }, () => {
-                            // Update local state without full reload
-                            const currentList = getBookmarks();
-                            const catIndex = currentList.findIndex(c => c.id === catId);
-                            if (catIndex > -1) {
-                                const [movedCat] = currentList.splice(catIndex, 1);
-                                currentList.splice(evt.newIndex, 0, movedCat);
-                                setBookmarks(currentList);
+
+    // Make Categories sortable under contentArea
+    if (spaceId && getBookmarks && setBookmarks) {
+        loadSortable((Sortable) => {
+            if (!contentArea.SortableInstance) {
+                contentArea.SortableInstance = Sortable.create(contentArea, {
+                    animation: 150,
+                    handle: '.group-drag-handle',
+                    filter: '.new-group-container',
+                    draggable: '.bookmark-category',
+                    onEnd: function (evt) {
+                        if (evt.oldIndex === evt.newIndex) return;
+                        
+                        const itemEl = evt.item;
+                        const catId = itemEl.dataset.categoryId;
+                        
+                        if (catId) {
+                            try {
+                                chrome.bookmarks.move(catId, { parentId: spaceId, index: evt.newIndex }, () => {
+                                    const currentList = getBookmarks();
+                                    const catIndex = currentList.findIndex(c => c.id === catId);
+                                    if (catIndex > -1) {
+                                        const [movedCat] = currentList.splice(catIndex, 1);
+                                        currentList.splice(evt.newIndex, 0, movedCat);
+                                        setBookmarks(currentList);
+                                    }
+                                });
+                            } catch (e) {
+                                        console.error('Error moving category', e);
                             }
-                        });
-                    } catch (e) {
-                        console.error('Error moving category', e);
+                        }
                     }
-                }
+                });
             }
         });
     }

@@ -94,6 +94,29 @@ export class ShortcutsManager {
                 return;
             }
         });
+
+        // Focus trap
+        this.modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && this.isOpen) {
+                const focusables = Array.from(this.modal.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => {
+                    return el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+                });
+                if (focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        last.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        first.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
     }
 
     toggle() {
@@ -105,9 +128,13 @@ export class ShortcutsManager {
     }
 
     open() {
+        this.previouslyFocusedElement = document.activeElement;
         this.isOpen = true;
         this.modal.style.display = 'flex';
-        setTimeout(() => this.modal.classList.add('show'), 10);
+        setTimeout(() => {
+            this.modal.classList.add('show');
+            if (this.closeBtn) this.closeBtn.focus();
+        }, 10);
     }
 
     close() {
@@ -118,6 +145,9 @@ export class ShortcutsManager {
                 this.modal.style.display = 'none';
             }
         }, 300);
+        if (this.previouslyFocusedElement) {
+            this.previouslyFocusedElement.focus();
+        }
     }
 
     switchSpaceFlow(number) {

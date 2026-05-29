@@ -92,6 +92,29 @@ export class SearchManager {
                 this.close();
             }
         });
+
+        // Focus trap
+        this.modal.addEventListener('keydown', (e) => {
+            if (e.key === 'Tab' && this.isOpen) {
+                const focusables = Array.from(this.modal.querySelectorAll('button, input, [href], select, textarea, [tabindex]:not([tabindex="-1"])')).filter(el => {
+                    return el.offsetWidth > 0 || el.offsetHeight > 0 || el.getClientRects().length > 0;
+                });
+                if (focusables.length === 0) return;
+                const first = focusables[0];
+                const last = focusables[focusables.length - 1];
+                if (e.shiftKey) {
+                    if (document.activeElement === first) {
+                        last.focus();
+                        e.preventDefault();
+                    }
+                } else {
+                    if (document.activeElement === last) {
+                        first.focus();
+                        e.preventDefault();
+                    }
+                }
+            }
+        });
     }
 
     toggle() {
@@ -103,6 +126,7 @@ export class SearchManager {
     }
 
     open() {
+        this.previouslyFocusedElement = document.activeElement;
         this.isOpen = true;
         this.modal.style.display = 'flex';
         // Add class for anims (needs a tiny delay for browser transitions)
@@ -129,6 +153,9 @@ export class SearchManager {
                 this.modal.style.display = 'none';
             }
         }, 300);
+        if (this.previouslyFocusedElement) {
+            this.previouslyFocusedElement.focus();
+        }
     }
 
     fetchBookmarksAndSpaces() {

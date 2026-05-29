@@ -62,3 +62,46 @@ chrome.notifications.onClicked.addListener((notificationId) => {
     chrome.tabs.create({ url: 'chrome://newtab/' });
   }
 });
+
+// --- Favicon Caching Logic ---
+const CACHE_NAME = 'favicon-cache-v1';
+const CACHEABLE_HOSTS = [
+  'www.google.com',
+  'cdn.simpleicons.org',
+  'cdn.jsdelivr.net'
+];
+
+self.addEventListener('fetch', (event) => {
+  const url = new URL(event.request.url);
+
+  // Check if target is a cacheable favicon host
+  if (CACHEABLE_HOSTS.includes(url.hostname)) {
+    // Specifically filter to make sure it's an icon request
+    const isGoogleFavicon = url.hostname === 'www.google.com' && url.pathname.startsWith('/s2/favicons');
+    const isSimpleIcon = url.hostname === 'cdn.simpleicons.org';
+    const isJsDelivrIcon = url.hostname === 'cdn.jsdelivr.net' && (
+      url.pathname.includes('/devicon') || 
+      url.pathname.includes('/dashboard-icons')
+    );
+
+    if (isGoogleFavicon || isSimpleIcon || isJsDelivrIcon) {
+      event.respondWith(
+        caches.open(CACHE_NAME).then((cache) => {
+          return cache.match(event.request).then((cachedResponse) => {
+            if (cachedResponse) {
+              return cachedResponse;
+            }
+            return fetch(event.request).then((networkResponse) => {
+              if (networkResponse && networkResponse.status === 200) {
+                cache.put(event.request, networkResponse.clone());
+              }
+              return networkResponse;
+            }).catch(() => {
+              return new Response('', { status: 404 });
+            });
+          });
+        })
+      );
+    }
+  }
+});

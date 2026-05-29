@@ -1,3 +1,13 @@
+function escapeHtml(str) {
+    if (!str) return '';
+    return str
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;')
+        .replace(/'/g, '&#039;');
+}
+
 export class SettingsQuickLinksManager {
     constructor() {
         this.quickLinksList = document.getElementById('quick-links-list');
@@ -39,8 +49,8 @@ export class SettingsQuickLinksManager {
                 <div style="display:flex; align-items:center; gap:10px; flex:1; overflow:hidden;">
                     <span style="cursor:grab; font-size:1.2em; opacity:0.5; user-select:none;">☰</span>
                     <div style="overflow:hidden; white-space:nowrap; text-overflow:ellipsis;">
-                        <strong style="color:var(--text);">${link.name}</strong>
-                        <div style="font-size:0.8em; opacity:0.7; overflow:hidden; text-overflow:ellipsis;">${link.url}</div>
+                        <strong style="color:var(--text);">${escapeHtml(link.name)}</strong>
+                        <div style="font-size:0.8em; opacity:0.7; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(link.url)}</div>
                     </div>
                 </div>
                 <button class="delete-link-btn" data-index="${index}" style="background:transparent; border:none; cursor:pointer; font-size:1.2em; padding:5px;">🗑️</button>

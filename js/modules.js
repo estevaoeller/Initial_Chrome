@@ -178,6 +178,21 @@ export function renameSpace(spaceId, newName, newIcon, callback) {
 }
 
 /**
+ * Move a space to a new index under the root folder
+ */
+export function moveSpace(spaceId, newIndex, callback) {
+    getRootFolder(root => {
+        if (!root) {
+            if (callback) callback();
+            return;
+        }
+        chrome.bookmarks.move(spaceId, { parentId: root.id, index: newIndex }, () => {
+            if (callback) callback();
+        });
+    });
+}
+
+/**
  * Rename a group (category)
  */
 export function renameGroup(groupId, newName, callback) {
@@ -508,13 +523,13 @@ export async function manageWallpaper(settingsState, forceNext = false) {
         const userEl = document.getElementById('unsplash-user');
 
         if (linkEl) linkEl.href = data.link || '#';
-        if (locEl) locEl.innerHTML = data.location ? `📍 ${data.location}` : '';
+        if (locEl) locEl.textContent = data.location ? `📍 ${data.location}` : '';
         if (dateEl) {
             const dateObj = new Date(data.date);
-            dateEl.innerHTML = data.date ? `📅 ${dateObj.toLocaleDateString('pt-BR')}` : '';
+            dateEl.textContent = data.date ? `📅 ${dateObj.toLocaleDateString('pt-BR')}` : '';
         }
-        if (viewsEl) viewsEl.innerHTML = data.stats ? `👁️ ${data.stats.toLocaleString('pt-BR')} ${data.statsLabel || 'visualizações'}` : '';
-        if (userEl) userEl.innerHTML = data.user ? `👤 ${data.user}` : '';
+        if (viewsEl) viewsEl.textContent = data.stats ? `👁️ ${data.stats.toLocaleString('pt-BR')} ${data.statsLabel || 'visualizações'}` : '';
+        if (userEl) userEl.textContent = data.user ? `👤 ${data.user}` : '';
 
         unsplashInfoDiv.style.display = 'flex';
     };
@@ -624,39 +639,81 @@ export async function manageWallpaper(settingsState, forceNext = false) {
 // ========== CUSTOM ICONS LOGIC ==========
 export function saveCustomIconProps(bookmarkId, iconData, callback) {
     const key = `icon:${bookmarkId}`;
-    chrome.storage.sync.set({ [key]: iconData }, callback);
+    chrome.storage.sync.get(['customIconsKeys'], result => {
+        const keys = result.customIconsKeys || [];
+        if (!keys.includes(key)) {
+            keys.push(key);
+        }
+        chrome.storage.sync.set({ [key]: iconData, customIconsKeys: keys }, callback);
+    });
 }
 
 export function removeCustomIconProps(bookmarkId, callback) {
     const key = `icon:${bookmarkId}`;
-    chrome.storage.sync.remove(key, callback);
+    chrome.storage.sync.get(['customIconsKeys'], result => {
+        let keys = result.customIconsKeys || [];
+        keys = keys.filter(k => k !== key);
+        chrome.storage.sync.remove(key, () => {
+            chrome.storage.sync.set({ customIconsKeys: keys }, callback);
+        });
+    });
 }
 
 export function loadCustomIcons(callback) {
-    chrome.storage.sync.get(null, data => {
-        const customIcons = {};
+    chrome.storage.sync.get(['customIconsKeys', 'customIconsInitialized'], result => {
+        const keys = result.customIconsKeys;
+        const initialized = result.customIconsInitialized;
         
-        // Find all keys starting with "icon:"
-        Object.keys(data).forEach(key => {
-            if (key.startsWith('icon:')) {
-                const idOrUrl = key.slice(5);
-                customIcons[idOrUrl] = data[key];
+        if (keys !== undefined) {
+            // High-efficiency path: load only the custom icon keys we know exist
+            if (keys.length === 0) {
+                callback({});
+                return;
             }
-        });
-
-        // Check if custom icons have been initialized in sync storage before
-        if (!data.customIconsInitialized) {
-            // First time loading: merge defaultCustomIcons and save them to sync storage
-            const initialIcons = Object.assign({}, defaultCustomIcons, customIcons);
-            const toSave = { customIconsInitialized: true };
-            Object.keys(defaultCustomIcons).forEach(idOrUrl => {
-                toSave[`icon:${idOrUrl}`] = defaultCustomIcons[idOrUrl];
-            });
-            chrome.storage.sync.set(toSave, () => {
-                callback(initialIcons);
+            chrome.storage.sync.get(keys, data => {
+                const customIcons = {};
+                keys.forEach(k => {
+                    if (data[k]) {
+                        const idOrUrl = k.slice(5);
+                        customIcons[idOrUrl] = data[k];
+                    }
+                });
+                callback(customIcons);
             });
         } else {
-            callback(customIcons);
+            // One-time migration path / Fallback if customIconsKeys doesn't exist yet
+            chrome.storage.sync.get(null, data => {
+                const customIcons = {};
+                const foundKeys = [];
+                
+                Object.keys(data).forEach(key => {
+                    if (key.startsWith('icon:')) {
+                        foundKeys.push(key);
+                        const idOrUrl = key.slice(5);
+                        customIcons[idOrUrl] = data[key];
+                    }
+                });
+
+                const toSave = { customIconsKeys: foundKeys };
+                let finalIcons = customIcons;
+
+                if (!initialized) {
+                    // First time initialization logic
+                    finalIcons = Object.assign({}, defaultCustomIcons, customIcons);
+                    toSave.customIconsInitialized = true;
+                    Object.keys(defaultCustomIcons).forEach(idOrUrl => {
+                        const defaultKey = `icon:${idOrUrl}`;
+                        if (!toSave.customIconsKeys.includes(defaultKey)) {
+                            toSave.customIconsKeys.push(defaultKey);
+                        }
+                        toSave[defaultKey] = defaultCustomIcons[idOrUrl];
+                    });
+                }
+                
+                chrome.storage.sync.set(toSave, () => {
+                    callback(finalIcons);
+                });
+            });
         }
     });
 }
@@ -666,4 +723,19 @@ export function updateBookmarkFull(bookmarkId, newTitle, newUrl, callback) {
     chrome.bookmarks.update(bookmarkId, { title: newTitle, url: newUrl }, () => {
         if (callback) callback();
     });
+}
+
+// ========== DYNAMIC SORTABLE LOGIC ==========
+export function loadSortable(callback) {
+    if (window.Sortable) {
+        if (callback) callback(window.Sortable);
+        return;
+    }
+    const script = document.createElement('script');
+    script.src = 'js/Sortable.min.js';
+    script.onload = () => {
+        if (callback) callback(window.Sortable);
+    };
+    script.onerror = (err) => console.error('Erro ao carregar SortableJS:', err);
+    document.head.appendChild(script);
 }
