@@ -38,6 +38,7 @@ export const defaultSettings = {
   pomodoroWork: 25,
   pomodoroBreak: 5,
   rssUrl: 'https://hnrss.org/frontpage',
+  solidSurfaces: false,
   todoEnabled: true,
   quotesEnabled: true,
   rssEnabled: true,

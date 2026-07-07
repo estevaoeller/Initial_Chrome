@@ -106,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const todoEnabled = document.getElementById('todo-enabled');
   const quotesEnabled = document.getElementById('quotes-enabled');
   const rssEnabled = document.getElementById('rss-enabled');
+  const solidSurfaces = document.getElementById('solid-surfaces');
 
   // Productivity Settings
   const togglApiToken = document.getElementById('toggl-api-token');
@@ -318,6 +319,8 @@ document.addEventListener('DOMContentLoaded', () => {
       if (quotesEnabled)
         quotesEnabled.checked = settings.quotesEnabled !== false;
       if (rssEnabled) rssEnabled.checked = settings.rssEnabled !== false;
+      if (solidSurfaces)
+        solidSurfaces.checked = settings.solidSurfaces === true;
 
       updateFrequencyDisplay(settings.wallpaperFrequency);
       if (filterColor) filterColor.value = ensureFullHex(settings.filterColor);
@@ -516,6 +519,7 @@ document.addEventListener('DOMContentLoaded', () => {
         todoEnabled: todoEnabled ? todoEnabled.checked : true,
         quotesEnabled: quotesEnabled ? quotesEnabled.checked : true,
         rssEnabled: rssEnabled ? rssEnabled.checked : true,
+        solidSurfaces: solidSurfaces ? solidSurfaces.checked : false,
       };
 
       // Tokens de API nunca vão para o sync nem para o export
@@ -815,6 +819,7 @@ document.addEventListener('DOMContentLoaded', () => {
     todoEnabled,
     quotesEnabled,
     rssEnabled,
+    solidSurfaces,
   ].forEach((element) => {
     if (element) {
       element.addEventListener('input', saveSettings);

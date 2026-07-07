@@ -1362,8 +1362,8 @@ body.text-behavior-single .bookmark-name {
 /* ========== SEARCH MODAL ========== */
 .search-modal-content {
   max-width: 600px !important;
-  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
-  border-radius: 16px !important;
+  background: var(--surface-strong) !important;
+  border-radius: var(--radius-lg) !important;
   display: flex;
   flex-direction: column;
 }
@@ -1610,11 +1610,11 @@ body.text-behavior-single .bookmark-name {
   position: fixed;
   z-index: 3000;
   min-width: 180px;
-  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--icon-border-color);
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: var(--surface-strong) !important;
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   padding: 6px 0;
   display: flex;
   flex-direction: column;
@@ -1700,11 +1700,11 @@ body.text-behavior-single .bookmark-name {
   left: 100%;
   top: -6px;
   min-width: 160px;
-  background: color-mix(in srgb, var(--card) 90%, transparent) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--icon-border-color);
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: var(--surface-strong) !important;
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   padding: 6px 0;
   display: none;
   flex-direction: column;
@@ -1749,9 +1749,9 @@ body.text-behavior-single .bookmark-name {
 /* ========== SHORTCUTS CHEATSHEET MODAL ========== */
 .shortcuts-modal-content {
   max-width: 450px !important;
-  border-radius: 16px !important;
-  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
-  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg) !important;
+  background: var(--surface-strong) !important;
+  backdrop-filter: blur(var(--surface-blur));
 }
 
 .shortcuts-list {

@@ -226,6 +226,12 @@ document.addEventListener('DOMContentLoaded', () => {
     // Update widgets visibility
     updateWidgetVisibilities(settingsState);
 
+    // Modo sólido: desliga o efeito glass (backdrop-filter) das superfícies
+    document.body.classList.toggle(
+      'solid-surfaces',
+      settingsState.solidSurfaces === true,
+    );
+
     // Wallpaper
     manageWallpaper(settingsState);
     const nextWallpaperBtn = document.getElementById('next-wallpaper-btn');
@@ -562,6 +568,17 @@ document.addEventListener('DOMContentLoaded', () => {
           settingsState.rssEnabled = newSettings.rssEnabled;
           updateWidgetVisibilities(settingsState);
           if (ensureOptionalWidgets) ensureOptionalWidgets();
+        }
+
+        if (
+          newSettings.solidSurfaces !== undefined &&
+          newSettings.solidSurfaces !== settingsState.solidSurfaces
+        ) {
+          settingsState.solidSurfaces = newSettings.solidSurfaces;
+          document.body.classList.toggle(
+            'solid-surfaces',
+            settingsState.solidSurfaces === true,
+          );
         }
 
         if (

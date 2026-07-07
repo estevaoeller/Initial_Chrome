@@ -4,6 +4,16 @@
    As superfícies (--surface*) derivam das cores do tema ativo
    (--card / --text), então se adaptam automaticamente a cada tema. */
 
+/* Fonte da UI — Inter Variable empacotada na extensão (sem CDN).
+   Fonte oficial: https://rsms.me/inter/ (SIL Open Font License) */
+@font-face {
+  font-family: 'Inter';
+  src: url('../fonts/InterVariable.woff2') format('woff2-variations');
+  font-weight: 100 900;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
   /* ===== Espaçamento (base 4px) ===== */
   --space-1: 4px;
@@ -58,4 +68,32 @@
   --success: #10b981;
   --warning: #f59e0b;
   --on-accent: #ffffff;
+}
+
+/* ===== Modo Sólido =====
+   Desliga o glass: superfícies opacas e sem backdrop-filter.
+   Ativado via settings (body.solid-surfaces). */
+body.solid-surfaces {
+  --surface: var(--card);
+  --surface-strong: var(--card);
+  --surface-blur: 0px;
+}
+
+body.solid-surfaces
+  :is(
+    #sidebar,
+    #sidebar-toggle,
+    #action-sidebar,
+    .bookmark-category,
+    .quote-widget,
+    .todo-widget,
+    .rss-widget,
+    .pomodoro-widget,
+    .modal-content.glass-effect,
+    .search-modal-content,
+    .shortcuts-modal-content,
+    .context-menu,
+    .context-menu-submenu
+  ) {
+  backdrop-filter: none;
 }
