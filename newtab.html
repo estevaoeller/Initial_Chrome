@@ -4,16 +4,12 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Nova Aba Personalizada</title>
+    <link rel="stylesheet" href="css/tokens.css" />
     <link rel="stylesheet" href="css/style.css" />
   </head>
 
   <body>
-    <script>
-      (function () {
-        const cachedTheme = localStorage.getItem('themePreset') || 'dark';
-        document.body.classList.add(`${cachedTheme}-theme`);
-      })();
-    </script>
+    <script src="js/theme-cache.js"></script>
     <div id="background-filter"></div>
 
     <div id="app-container">
@@ -42,30 +38,31 @@
         aria-label="Alternar barra lateral"
         aria-expanded="true"
       >
-        ◀
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="14"
+          height="14"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          stroke-width="2"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6"></polyline>
+        </svg>
       </button>
 
       <!-- MAIN CONTENT -->
       <div id="main-wrapper">
-        <div
-          style="
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            font-size: var(--quick-links-size, 13px);
-          "
-        >
-          <nav
-            id="quick-links-bar"
-            style="display: flex; gap: 15px; flex-wrap: wrap; margin-bottom: 0"
-          ></nav>
-          <div id="top-right-bar" style="display: flex; gap: 15px">
+        <div class="top-bar">
+          <nav id="quick-links-bar"></nav>
+          <div id="top-right-bar">
             <a
               href="#"
               id="toggl-toggle-btn"
               class="quick-link"
-              style="text-decoration: none; display: none"
+              style="display: none"
               >Toggl</a
             >
           </div>
@@ -112,7 +109,24 @@
           <!-- To-Do List Widget -->
           <div id="todo-widget" class="todo-widget">
             <div class="todo-header">
-              <h4>📋 Minhas Tarefas</h4>
+              <h4 class="widget-title">
+                <svg
+                  class="widget-title-icon"
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                >
+                  <path d="M9 11l3 3L22 4"></path>
+                  <path
+                    d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
+                  ></path>
+                </svg>
+                Minhas Tarefas
+              </h4>
             </div>
             <ul id="todo-list" class="todo-list"></ul>
             <div class="todo-input-container">
@@ -129,7 +143,23 @@
         <!-- RSS Feed Widget (Fase 6) -->
         <div id="rss-widget" class="rss-widget">
           <div class="rss-header">
-            <h4 id="rss-title">📰 Feed RSS</h4>
+            <h4 class="widget-title">
+              <svg
+                class="widget-title-icon"
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+                stroke-linecap="round"
+                stroke-linejoin="round"
+              >
+                <path d="M4 11a9 9 0 0 1 9 9"></path>
+                <path d="M4 4a16 16 0 0 1 16 16"></path>
+                <circle cx="5" cy="19" r="1"></circle>
+              </svg>
+              <span id="rss-title">Feed RSS</span>
+            </h4>
           </div>
           <ul id="rss-list" class="rss-list">
             <div class="rss-loading">Carregando notícias...</div>
@@ -368,7 +398,24 @@
       <!-- POMODORO WIDGET -->
       <div id="pomodoro-widget" class="pomodoro-widget" style="display: none">
         <div class="pomodoro-header">
-          <span class="pomodoro-title">⏱️ Foco</span>
+          <span class="pomodoro-title">
+            <svg
+              class="widget-title-icon"
+              xmlns="http://www.w3.org/2000/svg"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <circle cx="12" cy="13" r="8"></circle>
+              <path d="M12 9v4l2 2"></path>
+              <path d="M5 3L2 6"></path>
+              <path d="M22 6l-3-3"></path>
+            </svg>
+            Foco
+          </span>
           <span id="pomodoro-mode-badge" class="badge">Trabalho</span>
         </div>
         <div class="pomodoro-timer">
@@ -394,16 +441,36 @@
               id="pomodoro-play-btn"
               class="pomo-btn play"
               title="Iniciar"
+              aria-label="Iniciar timer"
             >
-              ▶️
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="none"
+              >
+                <polygon points="6 3 20 12 6 21 6 3"></polygon>
+              </svg>
             </button>
             <button
               id="pomodoro-stop-btn"
               class="pomo-btn stop"
               title="Parar"
+              aria-label="Parar timer"
               style="display: none"
             >
-              ⏹️
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                stroke="none"
+              >
+                <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+              </svg>
             </button>
           </div>
         </div>
@@ -425,18 +492,22 @@
         <button
           id="next-wallpaper-btn"
           title="Próximo Wallpaper (Unsplash)"
-          style="
-            background: transparent;
-            border: none;
-            color: inherit;
-            font-size: 16px;
-            cursor: pointer;
-            margin-left: 10px;
-            opacity: 0.8;
-            transition: opacity 0.2s;
-          "
+          aria-label="Próximo wallpaper"
         >
-          🔁
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="14"
+            height="14"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="23 4 23 10 17 10"></polyline>
+            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+          </svg>
         </button>
       </div>
     </div>
@@ -720,26 +791,112 @@
       style="display: none"
     >
       <button class="context-menu-item" data-action="open-tab">
-        <span class="context-menu-icon">🔗</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
+            />
+            <polyline points="15 3 21 3 21 9" />
+            <line x1="10" y1="14" x2="21" y2="3" /></svg
+        ></span>
         <span class="context-menu-text">Abrir em Nova Guia</span>
       </button>
       <button class="context-menu-item" data-action="open-incognito">
-        <span class="context-menu-icon">🕵️</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
+            />
+            <path
+              d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
+            />
+            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+            <line x1="1" y1="1" x2="23" y2="23" /></svg
+        ></span>
         <span class="context-menu-text">Abrir em Guia Anônima</span>
       </button>
       <button class="context-menu-item" data-action="copy">
-        <span class="context-menu-icon">📋</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+            <path
+              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
+            /></svg
+        ></span>
         <span class="context-menu-text">Copiar Link</span>
       </button>
       <div class="context-menu-divider"></div>
       <button class="context-menu-item" data-action="edit">
-        <span class="context-menu-icon">✏️</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+            /></svg
+        ></span>
         <span class="context-menu-text">Editar Link</span>
       </button>
       <button class="context-menu-item" data-action="move">
-        <span class="context-menu-icon">📂</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
+            /></svg
+        ></span>
         <span class="context-menu-text">Mover para...</span>
-        <span class="context-menu-arrow">▶</span>
+        <span class="context-menu-arrow"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="12"
+            height="12"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="9 18 15 12 9 6" /></svg
+        ></span>
         <div
           id="context-menu-submenu"
           class="context-menu-submenu glass-effect"
@@ -749,7 +906,23 @@
       </button>
       <div class="context-menu-divider"></div>
       <button class="context-menu-item delete-item" data-action="delete">
-        <span class="context-menu-icon">🗑️</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" /></svg
+        ></span>
         <span class="context-menu-text">Excluir</span>
       </button>
     </div>
@@ -765,7 +938,7 @@
     >
       <div class="modal-content glass-effect shortcuts-modal-content">
         <div class="modal-header">
-          <h2 id="shortcuts-modal-title">⌨️ Atalhos de Teclado</h2>
+          <h2 id="shortcuts-modal-title">Atalhos de Teclado</h2>
           <button
             id="close-shortcuts-btn"
             class="close-btn"
@@ -870,12 +1043,7 @@
           <button
             id="delete-space-btn"
             class="modal-btn delete-btn"
-            style="
-              margin-right: auto;
-              background-color: var(--delete-color, #ef4444);
-              color: white;
-              display: none;
-            "
+            style="margin-right: auto; display: none"
           >
             Excluir
           </button>
@@ -896,12 +1064,41 @@
       style="display: none"
     >
       <button class="context-menu-item" id="space-menu-edit">
-        <span class="context-menu-icon">✏️</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <path
+              d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
+            /></svg
+        ></span>
         <span class="context-menu-text">Editar Espaço</span>
       </button>
       <div class="context-menu-divider"></div>
       <button class="context-menu-item delete-item" id="space-menu-delete">
-        <span class="context-menu-icon">🗑️</span>
+        <span class="context-menu-icon"
+          ><svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <polyline points="3 6 5 6 21 6" />
+            <path
+              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
+            />
+            <line x1="10" y1="11" x2="10" y2="17" />
+            <line x1="14" y1="11" x2="14" y2="17" /></svg
+        ></span>
         <span class="context-menu-text">Excluir Espaço</span>
       </button>
     </div>

@@ -13,12 +13,22 @@
     "notifications",
     "contextMenus"
   ],
-  "host_permissions": ["<all_urls>"],
+  "host_permissions": [
+    "https://api.track.toggl.com/*",
+    "https://api.unsplash.com/*",
+    "https://geocoding-api.open-meteo.com/*",
+    "https://api.open-meteo.com/*",
+    "https://hnrss.org/*"
+  ],
   "background": {
     "service_worker": "background.js"
   },
   "icons": {
     "48": "icons/icon48.png",
     "128": "icons/icon128.png"
-  }
+  },
+  "optional_host_permissions": [
+    "https://*/*",
+    "http://*/*"
+  ]
 }

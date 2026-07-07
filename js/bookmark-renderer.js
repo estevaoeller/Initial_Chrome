@@ -101,25 +101,13 @@ export function renderBookmarks(
     if (!headerDiv) {
       headerDiv = document.createElement('div');
       headerDiv.className = 'category-header';
-      headerDiv.style.display = 'flex';
-      headerDiv.style.justifyContent = 'space-between';
-      headerDiv.style.alignItems = 'center';
-      headerDiv.style.borderBottom =
-        '2px solid var(--section-line-color, var(--accent))';
-      headerDiv.style.paddingBottom = '10px';
-      headerDiv.style.marginBottom = '15px';
 
       titleContainer = document.createElement('div');
       titleContainer.className = 'title-container';
-      titleContainer.style.display = 'flex';
-      titleContainer.style.alignItems = 'center';
 
       dragHandle = document.createElement('span');
       dragHandle.className = 'group-drag-handle';
       dragHandle.innerHTML = '⋮⋮';
-      dragHandle.style.cursor = 'grab';
-      dragHandle.style.opacity = '0.3';
-      dragHandle.style.marginRight = '10px';
       dragHandle.title = 'Arrastar Grupo';
 
       toggleBtn = document.createElement('button');
@@ -132,12 +120,8 @@ export function renderBookmarks(
       );
 
       categoryTitle = document.createElement('h2');
+      categoryTitle.className = 'category-title';
       categoryTitle.title = 'Duplo clique para renomear este grupo';
-      categoryTitle.style.cursor = 'text';
-      categoryTitle.style.borderBottom = 'none';
-      categoryTitle.style.paddingBottom = '0';
-      categoryTitle.style.marginBottom = '0';
-      categoryTitle.style.marginTop = '0';
 
       titleContainer.appendChild(dragHandle);
       titleContainer.appendChild(toggleBtn);
@@ -152,19 +136,6 @@ export function renderBookmarks(
         input.type = 'text';
         input.value = currentName;
         input.className = 'group-name-edit';
-        input.style.fontSize = window.getComputedStyle(categoryTitle).fontSize;
-        input.style.fontWeight =
-          window.getComputedStyle(categoryTitle).fontWeight;
-        input.style.fontFamily =
-          window.getComputedStyle(categoryTitle).fontFamily;
-        input.style.color = window.getComputedStyle(categoryTitle).color;
-        input.style.background = 'transparent';
-        input.style.border = '1px solid var(--accent)';
-        input.style.borderRadius = '4px';
-        input.style.padding = '2px 5px';
-        input.style.margin = window.getComputedStyle(categoryTitle).margin;
-        input.style.outline = 'none';
-        input.style.width = '100%';
 
         headerDiv.insertBefore(input, titleContainer);
         titleContainer.style.display = 'none';
@@ -603,31 +574,11 @@ export function renderBookmarks(
   if (getBookmarks && setBookmarks && spaceId) {
     const newGroupContainer = document.createElement('div');
     newGroupContainer.className = 'new-group-container';
-    newGroupContainer.style.textAlign = 'center';
-    newGroupContainer.style.padding = '20px';
-    newGroupContainer.style.marginTop = '20px';
 
     const newGroupBtn = document.createElement('button');
     newGroupBtn.textContent = '+ Novo Grupo';
     newGroupBtn.className = 'new-group-btn';
-    newGroupBtn.style.padding = '10px 20px';
-    newGroupBtn.style.fontSize = '14px';
-    newGroupBtn.style.cursor = 'pointer';
-    newGroupBtn.style.background = 'var(--input-bg)';
-    newGroupBtn.style.color = 'var(--text)';
-    newGroupBtn.style.border = '1px dashed var(--settings-border)';
-    newGroupBtn.style.borderRadius = '8px';
-    newGroupBtn.style.transition = 'all 0.2s';
     newGroupBtn.setAttribute('aria-label', 'Criar um novo grupo de marcadores');
-
-    newGroupBtn.addEventListener('mouseenter', () => {
-      newGroupBtn.style.border = '1px solid var(--accent)';
-      newGroupBtn.style.color = 'var(--accent)';
-    });
-    newGroupBtn.addEventListener('mouseleave', () => {
-      newGroupBtn.style.border = '1px dashed var(--settings-border)';
-      newGroupBtn.style.color = 'var(--text)';
-    });
 
     newGroupBtn.addEventListener('click', () => {
       const groupName = prompt('Nome do novo grupo:');

@@ -202,16 +202,26 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pomodoro
     initPomodoro();
 
-    // Initialize To-Do List & Quotes (Fase 6)
+    // Widgets opcionais: só inicializa (e só gasta rede/DOM) o que está ativado
     const todoListManager = new TodoListManager();
-    todoListManager.init();
-
     const quotesManager = new QuotesManager();
-    quotesManager.init();
-
-    // Initialize RSS Feed (Fase 6)
     const rssManager = new RssManager();
-    rssManager.init();
+
+    const ensureOptionalWidgets = () => {
+      if (settingsState.todoEnabled !== false && !todoListManager._started) {
+        todoListManager._started = true;
+        todoListManager.init();
+      }
+      if (settingsState.quotesEnabled !== false && !quotesManager._started) {
+        quotesManager._started = true;
+        quotesManager.init();
+      }
+      if (settingsState.rssEnabled !== false && !rssManager._started) {
+        rssManager._started = true;
+        rssManager.init();
+      }
+    };
+    ensureOptionalWidgets();
 
     // Update widgets visibility
     updateWidgetVisibilities(settingsState);
@@ -227,13 +237,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Setup settings observer
-    setupSettingsObserver(widgets.tickClock, rssManager);
+    setupSettingsObserver(widgets.tickClock, rssManager, ensureOptionalWidgets);
 
     // Setup sidebar actions
     setupSidebarActions();
   }
 
-  function setupSettingsObserver(tickClock, rssManager) {
+  function setupSettingsObserver(tickClock, rssManager, ensureOptionalWidgets) {
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === 'sync' && changes.extensionSettings) {
         const newSettings = changes.extensionSettings.newValue || {};
@@ -533,6 +543,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.todoEnabled = newSettings.todoEnabled;
           updateWidgetVisibilities(settingsState);
+          if (ensureOptionalWidgets) ensureOptionalWidgets();
         }
 
         if (
@@ -541,6 +552,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.quotesEnabled = newSettings.quotesEnabled;
           updateWidgetVisibilities(settingsState);
+          if (ensureOptionalWidgets) ensureOptionalWidgets();
         }
 
         if (
@@ -549,6 +561,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.rssEnabled = newSettings.rssEnabled;
           updateWidgetVisibilities(settingsState);
+          if (ensureOptionalWidgets) ensureOptionalWidgets();
         }
 
         if (

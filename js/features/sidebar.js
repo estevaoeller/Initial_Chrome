@@ -133,7 +133,10 @@ export class SidebarManager {
 
     if (this.settingsState.sidebarCollapsed && this.sidebar) {
       this.sidebar.classList.add('collapsed');
-      if (this.sidebarToggle) this.sidebarToggle.textContent = '▶';
+      if (this.sidebarToggle) {
+        this.sidebarToggle.classList.add('collapsed');
+        this.sidebarToggle.setAttribute('aria-expanded', 'false');
+      }
     }
 
     // Initialize Sortable for Space list
@@ -363,7 +366,8 @@ export class SidebarManager {
     this.sidebar.classList.toggle('collapsed');
     const isCollapsed = this.sidebar.classList.contains('collapsed');
     if (this.sidebarToggle) {
-      this.sidebarToggle.textContent = isCollapsed ? '▶' : '◀';
+      this.sidebarToggle.classList.toggle('collapsed', isCollapsed);
+      this.sidebarToggle.setAttribute('aria-expanded', String(!isCollapsed));
     }
     // Save state
     chrome.storage.sync.get(['extensionSettings'], (result) => {

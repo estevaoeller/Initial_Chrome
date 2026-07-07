@@ -3,6 +3,11 @@ import { SettingsQuickLinksManager } from './features/settings-quick-links.js';
 import { SettingsDataManager } from './features/settings-data.js';
 import { ThemeBuilderManager } from './features/theme-builder.js';
 import { applyTheme } from './modules.js';
+import {
+  loadApiTokens,
+  saveApiTokens,
+  migrateTokensFromSync,
+} from './token-store.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // ---- CONSTANTES E ELEMENTOS DO DOM ----
@@ -258,8 +263,6 @@ document.addEventListener('DOMContentLoaded', () => {
         wallpaperSource.dispatchEvent(event);
       }
 
-      if (wallpaperApiKey)
-        wallpaperApiKey.value = settings.wallpaperApiKey || '';
 
       if (wallpaperTheme) {
         const savedTheme = settings.wallpaperTheme || 'nature';
@@ -292,7 +295,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (clockStyle) clockStyle.value = settings.clockStyle || 'analog';
       if (userName) userName.value = settings.userName || '';
       if (weatherCity) weatherCity.value = settings.weatherCity || '';
-      if (togglApiToken) togglApiToken.value = settings.togglApiToken || '';
+      // Tokens de API vêm do storage.local (ver token-store.js)
+      loadApiTokens((apiTokens) => {
+        if (wallpaperApiKey)
+          wallpaperApiKey.value = apiTokens.wallpaperApiKey || '';
+        if (togglApiToken) togglApiToken.value = apiTokens.togglApiToken || '';
+      });
       if (pomodoroEnabled)
         pomodoroEnabled.checked = settings.pomodoroEnabled !== false;
       if (pomodoroWork) pomodoroWork.value = settings.pomodoroWork || 25;
@@ -494,8 +502,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ? wallpaperThemeCustom.value.trim()
             : wallpaperTheme.value
           : 'nature',
-        wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : '',
-        togglApiToken: togglApiToken ? togglApiToken.value.trim() : '',
         pomodoroEnabled: pomodoroEnabled ? pomodoroEnabled.checked : false,
         pomodoroWork: pomodoroWork ? parseInt(pomodoroWork.value) : 25,
         pomodoroBreak: pomodoroBreak ? parseInt(pomodoroBreak.value) : 5,
@@ -504,6 +510,12 @@ document.addEventListener('DOMContentLoaded', () => {
         quotesEnabled: quotesEnabled ? quotesEnabled.checked : true,
         rssEnabled: rssEnabled ? rssEnabled.checked : true,
       };
+
+      // Tokens de API nunca vão para o sync nem para o export
+      saveApiTokens({
+        wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : '',
+        togglApiToken: togglApiToken ? togglApiToken.value.trim() : '',
+      });
 
       chrome.storage.sync.set({ extensionSettings: settings }, function () {
         if (saveStatus) {
@@ -807,6 +819,32 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettingsBtn.addEventListener('click', saveSettings);
   }
 
+  // Feed RSS customizado exige permissão de host (optional_host_permissions)
+  if (rssUrl) {
+    rssUrl.addEventListener('change', () => {
+      const value = rssUrl.value.trim();
+      if (!value) return;
+      try {
+        const parsed = new URL(value);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return;
+        if (parsed.hostname === 'hnrss.org') return; // já coberto pelo manifest
+        chrome.permissions.request(
+          { origins: [`${parsed.origin}/*`] },
+          (granted) => {
+            if (!granted) {
+              console.warn(
+                'Permissão para o feed RSS não concedida:',
+                parsed.origin,
+              );
+            }
+          },
+        );
+      } catch {
+        // URL inválida — ignora, validação visual fica a cargo do campo
+      }
+    });
+  }
+
   if (closeSettingsBtn) {
     closeSettingsBtn.addEventListener('click', function () {
       window.close();
@@ -814,5 +852,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initial load
-  loadSettings();
+  migrateTokensFromSync(() => loadSettings());
 });

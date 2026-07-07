@@ -34,6 +34,12 @@ export async function initPomodoro() {
     result.extensionSettings || {},
   );
 
+  // Tokens de API vivem em storage.local (ver token-store.js)
+  const tokenResult = await new Promise((resolve) =>
+    chrome.storage.local.get(['apiTokens'], resolve),
+  );
+  Object.assign(currentSettings, tokenResult.apiTokens || {});
+
   const toggleBtn = document.getElementById('toggl-toggle-btn');
 
   // Check if module is enabled
@@ -226,7 +232,7 @@ function restoreTimer(endTime, mode, entryId) {
   if (timerInterval) clearInterval(timerInterval);
 
   playBtn.style.display = 'none';
-  stopBtn.style.display = 'block';
+  stopBtn.style.display = 'flex';
   descInput.disabled = true;
   projectSelect.disabled = true;
 
@@ -276,7 +282,7 @@ async function onTimerComplete(mode, entryId) {
 function resetTimerUI(mode) {
   if (timerInterval) clearInterval(timerInterval);
 
-  playBtn.style.display = 'block';
+  playBtn.style.display = 'flex';
   stopBtn.style.display = 'none';
   descInput.disabled = false;
   projectSelect.disabled = false;

@@ -49,10 +49,18 @@ export class SettingsDataManager {
           }
         });
 
+        // Nunca exportar credenciais
+        const exportSettings = Object.assign(
+          {},
+          resultSync.extensionSettings || defaultSettings,
+        );
+        delete exportSettings.togglApiToken;
+        delete exportSettings.wallpaperApiKey;
+
         const exportData = {
           bookmarks: resultLocal.userBookmarks || [],
           customIcons: customIcons,
-          settings: resultSync.extensionSettings || defaultSettings,
+          settings: exportSettings,
           quickLinks: resultSync.quickLinks || [],
           exportDate: new Date().toISOString(),
         };
@@ -117,8 +125,12 @@ export class SettingsDataManager {
           }
 
           if (importData.settings) {
+            // Ignora credenciais vindas de arquivos importados
+            const importedSettings = Object.assign({}, importData.settings);
+            delete importedSettings.togglApiToken;
+            delete importedSettings.wallpaperApiKey;
             chrome.storage.sync.set(
-              { extensionSettings: importData.settings },
+              { extensionSettings: importedSettings },
               () => {
                 if (chrome.runtime.lastError) {
                   console.error(

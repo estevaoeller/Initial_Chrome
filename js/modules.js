@@ -690,11 +690,14 @@ export async function manageWallpaper(settingsState, forceNext = false) {
 
   if (settingsState.wallpaperSource === 'unsplash') {
     const theme = settingsState.wallpaperTheme || 'nature';
-    const apiKey = settingsState.wallpaperApiKey || '';
     const freqHours = settingsState.wallpaperFrequency || 1;
     const freqMs = freqHours * 60 * 60 * 1000;
 
-    chrome.storage.local.get(['cachedWallpaper'], async (result) => {
+    chrome.storage.local.get(['cachedWallpaper', 'apiTokens'], async (result) => {
+      const apiKey =
+        (result.apiTokens && result.apiTokens.wallpaperApiKey) ||
+        settingsState.wallpaperApiKey ||
+        '';
       const cache = result.cachedWallpaper;
       const now = Date.now();
 
