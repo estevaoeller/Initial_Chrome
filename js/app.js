@@ -571,6 +571,14 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (
+          newSettings.zenMode !== undefined &&
+          newSettings.zenMode !== settingsState.zenMode
+        ) {
+          settingsState.zenMode = newSettings.zenMode;
+          applyZenMode(settingsState.zenMode === true);
+        }
+
+        if (
           newSettings.solidSurfaces !== undefined &&
           newSettings.solidSurfaces !== settingsState.solidSurfaces
         ) {
@@ -628,7 +636,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function applyZenMode(enabled) {
+    document.body.classList.toggle('zen-mode', enabled === true);
+    // Cache local para aplicar sem flash na próxima aba (ver theme-cache.js)
+    localStorage.setItem('zenMode', enabled === true ? '1' : '0');
+    const zenBtn = document.getElementById('zen-mode-btn');
+    if (zenBtn) {
+      zenBtn.setAttribute('aria-pressed', String(enabled === true));
+      zenBtn.classList.toggle('active', enabled === true);
+    }
+  }
+
+  function toggleZenMode() {
+    const enabled = !document.body.classList.contains('zen-mode');
+    applyZenMode(enabled);
+    settingsState.zenMode = enabled;
+    chrome.storage.sync.get(['extensionSettings'], (res) => {
+      const s = res.extensionSettings || {};
+      s.zenMode = enabled;
+      chrome.storage.sync.set({ extensionSettings: s });
+    });
+  }
+
   function setupSidebarActions() {
+    // Zen Mode
+    const zenBtn = document.getElementById('zen-mode-btn');
+    if (zenBtn) {
+      zenBtn.addEventListener('click', toggleZenMode);
+    }
+    applyZenMode(settingsState.zenMode === true);
+    window.addEventListener('keydown', (e) => {
+      const activeEl = document.activeElement;
+      const isTyping =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.isContentEditable);
+      if (!isTyping && e.altKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        toggleZenMode();
+      }
+    });
+
     // Theme Toggle
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     if (themeToggleBtn) {

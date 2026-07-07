@@ -491,7 +491,7 @@ if (systemThemeQuery) {
   });
 }
 
-export function applyTheme(theme) {
+function doApplyTheme(theme) {
   document.body.classList.remove(...THEME_CLASSES);
 
   // Clear any previously injected custom theme variables from inline style
@@ -534,6 +534,20 @@ export function applyTheme(theme) {
         localStorage.setItem('themePreset', 'light');
       }
     });
+  }
+}
+
+export function applyTheme(theme) {
+  // Crossfade suave na troca de tema (View Transitions API, Chrome 111+),
+  // respeitando prefers-reduced-motion
+  const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (document.startViewTransition && !reduceMotion) {
+    document.startViewTransition(() => doApplyTheme(theme));
+  } else {
+    doApplyTheme(theme);
   }
 }
 

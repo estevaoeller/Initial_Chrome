@@ -524,22 +524,23 @@ body {
   font-size: 18px;
   /* Tamanho do 'X' - um pouco maior para facilitar o clique */
   font-weight: bold;
-  color: #aaa;
-  /* Cor cinza claro inicial */
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   cursor: pointer;
   padding: 2px 4px;
   /* Espaçamento interno para aumentar a área de clique */
   line-height: 1;
-  display: none;
-  /* Começa oculto */
+  opacity: 0;
+  pointer-events: none;
   user-select: none;
   /* Para não selecionar o 'X' como texto */
-  transition: color 0.2s ease;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .bookmark-item:hover .delete-bookmark-btn {
-  display: block;
-  /* Mostra o botão quando o mouse está sobre o bookmark-item */
+  opacity: 1;
+  pointer-events: auto;
   color: color-mix(in srgb, var(--danger) 70%, var(--text));
 }
 
@@ -554,17 +555,21 @@ body {
   right: 25px;
   /* Espaço para não encavalar no X */
   font-size: 14px;
-  color: #aaa;
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   cursor: pointer;
   padding: 2px 4px;
   line-height: 1;
-  display: none;
+  opacity: 0;
+  pointer-events: none;
   user-select: none;
-  transition: color 0.2s ease;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .bookmark-item:hover .edit-bookmark-btn {
-  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .edit-bookmark-btn:hover {
@@ -1356,7 +1361,7 @@ body.text-behavior-single .bookmark-name {
 
 .animate-cascade {
   opacity: 0;
-  animation: slideUpFadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slideUpFadeIn var(--dur-slow) var(--ease-out) forwards;
 }
 
 /* ========== SEARCH MODAL ========== */
@@ -2032,6 +2037,41 @@ textarea:focus-visible {
   z-index: 1;
 }
 .bookmark-item:hover::before {
+  opacity: 1;
+}
+
+/* ========== MODO ZEN (Alt+Z) ==========
+   Esconde tudo exceto wallpaper + relógio/saudação.
+   A action bar direita fica invisível mas reaparece no hover
+   (borda direita da tela) para sair do modo. */
+body.zen-mode #sidebar,
+body.zen-mode #sidebar-toggle,
+body.zen-mode .top-bar,
+body.zen-mode #top-widgets-container,
+body.zen-mode #rss-widget,
+body.zen-mode #content-area,
+body.zen-mode #unsplash-info {
+  display: none !important;
+}
+
+body.zen-mode #top-header {
+  min-height: calc(100vh - 80px);
+  align-items: center;
+}
+
+body.zen-mode #action-sidebar {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+body.zen-mode #action-sidebar:hover,
+body.zen-mode #action-sidebar:focus-within {
+  opacity: 1;
+}
+
+/* Botão zen destacado quando ativo */
+#zen-mode-btn.active {
+  color: var(--accent);
   opacity: 1;
 }
 

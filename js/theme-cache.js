@@ -11,4 +11,10 @@
         : 'light';
   }
   document.body.classList.add(`${cachedTheme}-theme`);
+
+  // Modo Zen cacheado: aplica antes do primeiro paint para evitar
+  // flash da UI completa ao abrir nova aba com zen ativo
+  if (localStorage.getItem('zenMode') === '1') {
+    document.body.classList.add('zen-mode');
+  }
 })();
