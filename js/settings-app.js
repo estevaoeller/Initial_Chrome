@@ -143,15 +143,22 @@ document.addEventListener('DOMContentLoaded', () => {
     'theme-preview-mockup',
   );
 
+  // Ícones de mostrar/ocultar campos sensíveis (olho aberto/fechado)
+  const EYE_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
   // Toggle Toggle Token visibility
   if (toggleTogglTokenBtn && togglApiToken) {
+    toggleTogglTokenBtn.innerHTML = EYE_SVG;
     toggleTogglTokenBtn.addEventListener('click', () => {
       if (togglApiToken.type === 'password') {
         togglApiToken.type = 'text';
-        toggleTogglTokenBtn.textContent = '🙈';
+        toggleTogglTokenBtn.innerHTML = EYE_OFF_SVG;
       } else {
         togglApiToken.type = 'password';
-        toggleTogglTokenBtn.textContent = '👁️';
+        toggleTogglTokenBtn.innerHTML = EYE_SVG;
       }
     });
   }
@@ -176,13 +183,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (toggleApiKeyBtn && wallpaperApiKey) {
+    toggleApiKeyBtn.innerHTML = EYE_SVG;
     toggleApiKeyBtn.addEventListener('click', () => {
       if (wallpaperApiKey.type === 'password') {
         wallpaperApiKey.type = 'text';
-        toggleApiKeyBtn.textContent = '🙈';
+        toggleApiKeyBtn.innerHTML = EYE_OFF_SVG;
       } else {
         wallpaperApiKey.type = 'password';
-        toggleApiKeyBtn.textContent = '👁️';
+        toggleApiKeyBtn.innerHTML = EYE_SVG;
       }
     });
   }
@@ -262,7 +270,6 @@ document.addEventListener('DOMContentLoaded', () => {
         const event = new Event('change');
         wallpaperSource.dispatchEvent(event);
       }
-
 
       if (wallpaperTheme) {
         const savedTheme = settings.wallpaperTheme || 'nature';

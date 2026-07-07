@@ -308,6 +308,9 @@ export class SidebarManager {
       }
       spaceItem.dataset.spaceId = space.id;
 
+      // Tooltip com o nome (útil no modo mini-rail, onde só o ícone aparece)
+      spaceItem.title = space.name;
+
       const spaceIconSpan = document.createElement('span');
       spaceIconSpan.className = 'space-icon';
       spaceIconSpan.textContent = space.icon;

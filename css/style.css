@@ -128,10 +128,42 @@ body {
   flex-shrink: 0;
 }
 
+/* Colapsada = mini-rail de ícones (em vez de sumir por completo) */
 #sidebar.collapsed {
-  width: 0;
-  min-width: 0;
+  width: 64px;
+  min-width: 64px;
   overflow: hidden;
+}
+
+#sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+#sidebar.collapsed .sidebar-header h3 {
+  display: none;
+}
+
+#sidebar.collapsed .space-name {
+  display: none;
+}
+
+#sidebar.collapsed .space-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  gap: 0;
+}
+
+#sidebar.collapsed .space-icon {
+  margin: 0;
+}
+
+/* Space sem emoji: mostra um ponto no lugar para o rail não ficar vazio */
+#sidebar.collapsed .space-icon:empty::before {
+  content: '•';
+  opacity: 0.6;
 }
 
 .sidebar-header {
@@ -259,9 +291,9 @@ body {
   background-color: var(--surface-hover);
 }
 
-/* When sidebar is collapsed, move toggle to left edge */
+/* When sidebar is collapsed (mini-rail), keep toggle at the rail edge */
 #sidebar.collapsed ~ #sidebar-toggle {
-  left: 0;
+  left: 64px;
 }
 
 /* ========== MAIN WRAPPER ========== */
@@ -872,10 +904,10 @@ body.text-behavior-single .bookmark-name {
   pointer-events: auto;
 }
 
-/* Fix for when sidebar is collapsed. */
+/* Fix for when sidebar is collapsed (mini-rail = 64px). */
 #sidebar.collapsed ~ #main-wrapper #quick-links-bar {
-  left: 0;
-  width: 100%;
+  left: 64px;
+  width: calc(100% - 64px);
 }
 
 .quick-link {
@@ -1934,11 +1966,11 @@ body.text-behavior-single .bookmark-name {
     left: 65px !important;
   }
   #sidebar.collapsed ~ #sidebar-toggle {
-    left: 0 !important;
+    left: 65px !important;
   }
   #sidebar.collapsed ~ #main-wrapper #quick-links-bar {
-    left: 0 !important;
-    width: 100% !important;
+    left: 65px !important;
+    width: calc(100% - 65px) !important;
   }
   #main-wrapper #quick-links-bar {
     left: 65px !important;
@@ -2316,7 +2348,9 @@ textarea:focus-visible {
   cursor: grab;
   opacity: 0.3;
   margin-right: 10px;
-  transition: opacity 0.2s ease;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  display: flex;
+  align-items: center;
 }
 
 .category-header:hover .group-drag-handle {

@@ -107,12 +107,14 @@ export function renderBookmarks(
 
       dragHandle = document.createElement('span');
       dragHandle.className = 'group-drag-handle';
-      dragHandle.innerHTML = '⋮⋮';
+      dragHandle.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
       dragHandle.title = 'Arrastar Grupo';
 
       toggleBtn = document.createElement('button');
       toggleBtn.className = 'group-toggle-btn';
-      toggleBtn.innerHTML = '▼';
+      toggleBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
       toggleBtn.title = 'Recolher / Expandir Grupo';
       toggleBtn.setAttribute(
         'aria-label',
@@ -323,7 +325,8 @@ export function renderBookmarks(
       // Edit Button
       const editBtn = document.createElement('span');
       editBtn.className = 'edit-bookmark-btn';
-      editBtn.innerHTML = '✎';
+      editBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>';
       editBtn.title = 'Editar Link';
       editBtn.setAttribute('role', 'button');
       editBtn.setAttribute('aria-label', `Editar link para ${link.name}`);
