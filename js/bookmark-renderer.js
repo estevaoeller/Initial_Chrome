@@ -32,6 +32,80 @@ document.addEventListener('dragend', () => {
   document.body.classList.remove('dragging-internal');
 });
 
+/**
+ * Transforma um botão em input inline ao clicar (substitui o prompt()
+ * nativo na criação de grupos). Enter cria, Esc/blur cancela.
+ */
+function attachNewGroupCreator(btn, contentArea, iconSize, stateHelpers) {
+  const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
+  btn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'group-name-edit new-group-input';
+    input.placeholder = 'Nome do novo grupo…';
+    input.setAttribute('aria-label', 'Nome do novo grupo');
+    btn.style.display = 'none';
+    btn.parentNode.insertBefore(input, btn);
+    input.focus();
+
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      input.remove();
+      btn.style.display = '';
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const name = input.value.trim();
+        cleanup();
+        if (!name) return;
+        createGroup(spaceId, name, (newGroup) => {
+          const current = getBookmarks() || [];
+          current.push(newGroup);
+          setBookmarks(current);
+          renderBookmarks(current, contentArea, iconSize, stateHelpers);
+        });
+      } else if (e.key === 'Escape') {
+        cleanup();
+      }
+    });
+    input.addEventListener('blur', cleanup);
+  });
+}
+
+/** Empty state para espaço sem nenhum grupo */
+function buildEmptySpaceState(contentArea, iconSize, stateHelpers) {
+  const wrap = document.createElement('div');
+  wrap.className = 'empty-state animate-cascade';
+
+  const icon = document.createElement('div');
+  icon.className = 'empty-state-icon';
+  icon.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>';
+
+  const title = document.createElement('h3');
+  title.className = 'empty-state-title';
+  title.textContent = 'Este espaço ainda está vazio';
+
+  const desc = document.createElement('p');
+  desc.className = 'empty-state-desc';
+  desc.textContent =
+    'Crie um grupo para organizar seus links — depois arraste URLs para cá ou use Alt+N.';
+
+  const btn = document.createElement('button');
+  btn.className = 'new-group-btn';
+  btn.textContent = '+ Criar primeiro grupo';
+  attachNewGroupCreator(btn, contentArea, iconSize, stateHelpers);
+
+  wrap.appendChild(icon);
+  wrap.appendChild(title);
+  wrap.appendChild(desc);
+  wrap.appendChild(btn);
+  return wrap;
+}
+
 export function renderBookmarks(
   bookmarks,
   contentArea,
@@ -49,7 +123,18 @@ export function renderBookmarks(
 
   if (!bookmarks || bookmarks.length === 0) {
     contentArea.innerHTML = '';
+    if (getBookmarks && setBookmarks && spaceId) {
+      contentArea.appendChild(
+        buildEmptySpaceState(contentArea, iconSize, stateHelpers),
+      );
+    }
     return;
+  }
+
+  // Remove empty state se existir (espaço deixou de estar vazio)
+  const existingEmptyState = contentArea.querySelector('.empty-state');
+  if (existingEmptyState) {
+    existingEmptyState.remove();
   }
 
   // Keep track of DOM categories to delete later if they are not in the new bookmarks list
@@ -582,23 +667,7 @@ export function renderBookmarks(
     newGroupBtn.textContent = '+ Novo Grupo';
     newGroupBtn.className = 'new-group-btn';
     newGroupBtn.setAttribute('aria-label', 'Criar um novo grupo de marcadores');
-
-    newGroupBtn.addEventListener('click', () => {
-      const groupName = prompt('Nome do novo grupo:');
-      if (groupName && groupName.trim()) {
-        createGroup(spaceId, groupName.trim(), (newGroup) => {
-          const currentBookmarks = getBookmarks();
-          currentBookmarks.push(newGroup);
-          setBookmarks(currentBookmarks);
-          renderBookmarks(
-            currentBookmarks,
-            contentArea,
-            iconSize,
-            stateHelpers,
-          );
-        });
-      }
-    });
+    attachNewGroupCreator(newGroupBtn, contentArea, iconSize, stateHelpers);
 
     newGroupContainer.appendChild(newGroupBtn);
     contentArea.appendChild(newGroupContainer);

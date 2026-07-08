@@ -746,6 +746,63 @@
       </div>
     </div>
 
+    <!-- Add Bookmark Modal (substitui os prompts do Alt+N) -->
+    <div
+      id="add-bookmark-modal"
+      class="modal-overlay"
+      style="display: none"
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="add-bookmark-title"
+    >
+      <div class="modal-content glass-effect" style="max-width: 420px">
+        <div class="modal-header">
+          <h2 id="add-bookmark-title">Novo Bookmark</h2>
+          <button
+            id="close-add-bookmark-btn"
+            class="close-btn"
+            aria-label="Fechar modal"
+          >
+            &times;
+          </button>
+        </div>
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="add-bookmark-url">URL</label>
+            <input
+              type="url"
+              id="add-bookmark-url"
+              class="modern-input"
+              placeholder="https://exemplo.com"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label for="add-bookmark-name">Nome</label>
+            <input
+              type="text"
+              id="add-bookmark-name"
+              class="modern-input"
+              placeholder="Preenchido automaticamente pela URL"
+              autocomplete="off"
+            />
+          </div>
+          <div class="form-group">
+            <label for="add-bookmark-group">Grupo</label>
+            <select id="add-bookmark-group" class="modern-input"></select>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button id="cancel-add-bookmark-btn" class="modal-btn secondary-btn">
+            Cancelar
+          </button>
+          <button id="save-add-bookmark-btn" class="modal-btn primary-btn">
+            Adicionar
+          </button>
+        </div>
+      </div>
+    </div>
+
     <!-- Search Bookmarks Modal -->
     <div
       id="search-modal"

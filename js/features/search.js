@@ -349,6 +349,26 @@ export class SearchManager {
     // Ações
     commands.push(
       {
+        icon: '➕',
+        name: 'Novo Bookmark',
+        hint: 'Alt+N',
+        keywords: 'novo bookmark adicionar link favorito criar new',
+        run: () => {
+          const shortcuts = this.appContext.shortcutsManager;
+          if (shortcuts) shortcuts.addBookmarkFlow();
+        },
+      },
+      {
+        icon: '📁',
+        name: 'Novo Grupo',
+        hint: 'Alt+G',
+        keywords: 'novo grupo categoria pasta criar new group',
+        run: () => {
+          const btn = document.querySelector('.new-group-btn');
+          if (btn) btn.click();
+        },
+      },
+      {
         icon: '🧘',
         name: 'Alternar Modo Zen',
         hint: 'Alt+Z',
@@ -488,7 +508,9 @@ export class SearchManager {
       item.appendChild(details);
 
       item.addEventListener('click', () => {
-        cmd.run();
+        // Roda o comando DEPOIS que o modal fechou e devolveu o foco —
+        // comandos que abrem input/modal próprios precisam ficar com o foco
+        setTimeout(() => cmd.run(), 60);
         // close() já é chamado pela delegação de clique do resultsList
       });
 

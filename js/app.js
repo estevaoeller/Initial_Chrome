@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Quick Links & Modal
     quickLinksManager.init();
     editModalManager.init();
-    searchManager.init({ sidebarManager });
+    searchManager.init({ sidebarManager, shortcutsManager });
     contextMenuManager.init();
     shortcutsManager.init();
 
