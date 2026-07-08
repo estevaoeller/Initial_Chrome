@@ -1478,6 +1478,23 @@ body.text-behavior-single .bookmark-name {
   flex-shrink: 0;
 }
 
+/* Itens de comando da palette (>) */
+.search-command-item {
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.search-command-icon {
+  width: 20px;
+  font-size: 16px;
+  text-align: center;
+  flex-shrink: 0;
+}
+
 .search-result-details {
   display: flex;
   flex-direction: column;

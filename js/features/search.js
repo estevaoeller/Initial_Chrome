@@ -17,9 +17,12 @@ export class SearchManager {
     this.selectedIndex = 0;
     this.activeSpaceFilter = 'all';
     this.isOpen = false;
+    this.isCommandMode = false;
+    this.appContext = {};
   }
 
-  init() {
+  init(appContext = {}) {
+    this.appContext = appContext;
     if (!this.modal || !this.input) {
       console.error('Search elements not found in DOM.');
       return;
@@ -291,8 +294,139 @@ export class SearchManager {
     this.input.focus();
   }
 
+  /* ===== COMMAND PALETTE (prefixo ">") ===== */
+
+  saveThemePreference(theme) {
+    // Persiste em sync; o storage listener do app.js aplica o tema
+    // (com crossfade) em todas as abas abertas
+    chrome.storage.sync.get(['extensionSettings'], (res) => {
+      const s = res.extensionSettings || {};
+      s.themePreset = theme;
+      chrome.storage.sync.set({ extensionSettings: s });
+    });
+  }
+
+  clickIfExists(elementId) {
+    const el = document.getElementById(elementId);
+    if (el) el.click();
+  }
+
+  buildCommands() {
+    const commands = [];
+
+    // Trocar de espaço
+    this.spaces.forEach((space) => {
+      commands.push({
+        icon: space.icon,
+        name: `Ir para espaço: ${space.name}`,
+        hint: 'Navegação',
+        keywords: `espaco espaço space ir ${space.name.toLowerCase()}`,
+        run: () => {
+          const sidebar = this.appContext.sidebarManager;
+          if (sidebar) sidebar.selectSpace(space.id);
+        },
+      });
+    });
+
+    // Temas
+    const themes = [
+      ['auto', 'Tema: Auto (segue o sistema)'],
+      ['light', 'Tema: Claro'],
+      ['dark', 'Tema: Escuro'],
+      ['solar', 'Tema: Solar'],
+      ['minimal', 'Tema: Minimal'],
+    ];
+    themes.forEach(([value, label]) => {
+      commands.push({
+        icon: '🎨',
+        name: label,
+        hint: 'Aparência',
+        keywords: `tema theme ${value} ${label.toLowerCase()}`,
+        run: () => this.saveThemePreference(value),
+      });
+    });
+
+    // Ações
+    commands.push(
+      {
+        icon: '🧘',
+        name: 'Alternar Modo Zen',
+        hint: 'Alt+Z',
+        keywords: 'zen foco focus modo distração',
+        run: () => this.clickIfExists('zen-mode-btn'),
+      },
+      {
+        icon: '⚙️',
+        name: 'Abrir Configurações',
+        hint: 'Alt+,',
+        keywords: 'configurações settings opções ajustes',
+        run: () => this.clickIfExists('settings-btn'),
+      },
+      {
+        icon: '🖼️',
+        name: 'Próximo Wallpaper',
+        hint: 'Unsplash',
+        keywords: 'wallpaper papel de parede fundo próximo trocar imagem',
+        run: () => this.clickIfExists('next-wallpaper-btn'),
+      },
+      {
+        icon: '⌨️',
+        name: 'Atalhos de Teclado',
+        hint: 'Alt+/',
+        keywords: 'atalhos teclado shortcuts ajuda help guia',
+        run: () => this.clickIfExists('shortcuts-btn'),
+      },
+      {
+        icon: '📑',
+        name: 'Bookmarks do Chrome',
+        hint: 'chrome://bookmarks',
+        keywords: 'bookmarks favoritos chrome gerenciador',
+        run: () => this.clickIfExists('chrome-bookmarks-btn'),
+      },
+      {
+        icon: '🕘',
+        name: 'Histórico do Chrome',
+        hint: 'chrome://history',
+        keywords: 'histórico history chrome',
+        run: () => this.clickIfExists('chrome-history-btn'),
+      },
+      {
+        icon: '⬇️',
+        name: 'Downloads do Chrome',
+        hint: 'chrome://downloads',
+        keywords: 'downloads chrome baixados',
+        run: () => this.clickIfExists('chrome-downloads-btn'),
+      },
+    );
+
+    return commands;
+  }
+
   performSearch() {
-    const query = this.input.value.trim().toLowerCase();
+    const rawValue = this.input.value;
+    const commandMode = rawValue.trimStart().startsWith('>');
+    this.isCommandMode = commandMode;
+
+    // Filtros de espaço não se aplicam a comandos
+    if (this.spaceFilters) {
+      this.spaceFilters.style.display = commandMode ? 'none' : '';
+    }
+
+    if (commandMode) {
+      const query = rawValue.trimStart().slice(1).trim().toLowerCase();
+      const commands = this.buildCommands();
+      this.filteredBookmarks = query
+        ? commands.filter(
+            (cmd) =>
+              cmd.name.toLowerCase().includes(query) ||
+              cmd.keywords.includes(query),
+          )
+        : commands;
+      this.renderCommandResults(query);
+      return;
+    }
+
+    const query = rawValue.trim().toLowerCase();
 
     // 1. Filter by Space
     let list = this.allBookmarks;
@@ -315,10 +449,65 @@ export class SearchManager {
     this.renderResults(query);
   }
 
+  renderCommandResults(query) {
+    this.resultsList.innerHTML = '';
+
+    if (this.filteredBookmarks.length === 0) {
+      this.noResults.textContent = 'Nenhum comando encontrado.';
+      this.noResults.style.display = 'block';
+      return;
+    }
+
+    this.noResults.style.display = 'none';
+
+    this.filteredBookmarks.forEach((cmd, index) => {
+      const item = document.createElement('button');
+      item.type = 'button';
+      item.className = `search-result-item search-command-item ${index === this.selectedIndex ? 'selected' : ''}`;
+      item.dataset.index = index;
+
+      const icon = document.createElement('span');
+      icon.className = 'search-command-icon';
+      icon.textContent = cmd.icon;
+
+      const details = document.createElement('div');
+      details.className = 'search-result-details';
+
+      const title = document.createElement('div');
+      title.className = 'search-result-title';
+      title.innerHTML = this.highlightText(cmd.name, query);
+
+      const path = document.createElement('div');
+      path.className = 'search-result-path';
+      path.textContent = cmd.hint || 'Comando';
+
+      details.appendChild(title);
+      details.appendChild(path);
+
+      item.appendChild(icon);
+      item.appendChild(details);
+
+      item.addEventListener('click', () => {
+        cmd.run();
+        // close() já é chamado pela delegação de clique do resultsList
+      });
+
+      item.addEventListener('mouseenter', () => {
+        this.selectedIndex = index;
+        this.updateSelectionVisuals();
+      });
+
+      this.resultsList.appendChild(item);
+    });
+
+    this.scrollToSelected();
+  }
+
   renderResults(query) {
     this.resultsList.innerHTML = '';
 
     if (this.filteredBookmarks.length === 0) {
+      this.noResults.textContent = 'Nenhum bookmark encontrado.';
       this.noResults.style.display = 'block';
       return;
     }
