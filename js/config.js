@@ -40,6 +40,7 @@ export const defaultSettings = {
   rssUrl: 'https://hnrss.org/frontpage',
   solidSurfaces: false,
   zenMode: false,
+  dynamicAccent: false,
   todoEnabled: true,
   quotesEnabled: true,
   rssEnabled: true,

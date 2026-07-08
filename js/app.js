@@ -590,6 +590,15 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (
+          newSettings.dynamicAccent !== undefined &&
+          newSettings.dynamicAccent !== settingsState.dynamicAccent
+        ) {
+          settingsState.dynamicAccent = newSettings.dynamicAccent;
+          // Reaplica (ou remove) o acento a partir do wallpaper em cache
+          manageWallpaper(settingsState);
+        }
+
+        if (
           (newSettings.wallpaperSource !== undefined &&
             newSettings.wallpaperSource !== settingsState.wallpaperSource) ||
           (newSettings.wallpaperTheme !== undefined &&
