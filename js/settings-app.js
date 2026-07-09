@@ -532,24 +532,34 @@ document.addEventListener('DOMContentLoaded', () => {
         togglApiToken: togglApiToken ? togglApiToken.value.trim() : '',
       });
 
-      chrome.storage.sync.set({ extensionSettings: settings }, function () {
-        if (saveStatus) {
-          saveStatus.style.opacity = '1';
-          saveStatus.style.transform = 'translateY(0)';
-          setTimeout(() => {
-            saveStatus.style.opacity = '0';
-            saveStatus.style.transform = 'translateY(-10px)';
-          }, 2000);
-        }
+      // MERGE em vez de substituir: extensionSettings também guarda estado
+      // gravado por outros fluxos (zenMode, sidebarCollapsed, lastActiveSpace).
+      // Substituir o objeto inteiro apagava essas chaves a cada ajuste.
+      chrome.storage.sync.get(['extensionSettings'], function (current) {
+        const merged = Object.assign(
+          {},
+          current.extensionSettings || {},
+          settings,
+        );
+        chrome.storage.sync.set({ extensionSettings: merged }, function () {
+          if (saveStatus) {
+            saveStatus.style.opacity = '1';
+            saveStatus.style.transform = 'translateY(0)';
+            setTimeout(() => {
+              saveStatus.style.opacity = '0';
+              saveStatus.style.transform = 'translateY(-10px)';
+            }, 2000);
+          }
 
-        if (chrome.runtime.lastError) {
-          console.error(
-            'Erro ao salvar configurações:',
-            chrome.runtime.lastError.message,
-          );
-        } else {
-          console.log('Configurações salvas com sucesso!');
-        }
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Erro ao salvar configurações:',
+              chrome.runtime.lastError.message,
+            );
+          } else {
+            console.log('Configurações salvas com sucesso!');
+          }
+        });
       });
     }, 300);
   }

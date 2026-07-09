@@ -25,7 +25,63 @@ chrome.runtime.onInstalled.addListener(() => {
       });
     }
   });
+  restoreSettingsIfMissing();
 });
+
+// --- Auto-backup de configurações ---
+// Mantém um snapshot local das configurações. Se após uma atualização ou
+// reinstalação o sync vier vazio, restaura automaticamente do snapshot.
+const BACKUP_KEYS = ['extensionSettings', 'quickLinks', 'customThemes'];
+
+function snapshotSettings() {
+  chrome.storage.sync.get(BACKUP_KEYS, (data) => {
+    if (chrome.runtime.lastError) return;
+    if (!data.extensionSettings) return; // nada para copiar
+    chrome.storage.local.set({
+      settingsBackup: {
+        data: data,
+        timestamp: Date.now(),
+      },
+    });
+  });
+}
+
+function restoreSettingsIfMissing() {
+  chrome.storage.sync.get(['extensionSettings'], (syncData) => {
+    if (syncData.extensionSettings) {
+      // Sync está saudável — só renova o snapshot
+      snapshotSettings();
+      return;
+    }
+    chrome.storage.local.get(['settingsBackup'], (localData) => {
+      const backup = localData.settingsBackup;
+      if (backup && backup.data && backup.data.extensionSettings) {
+        chrome.storage.sync.set(backup.data, () => {
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Erro ao restaurar backup de configurações:',
+              chrome.runtime.lastError.message,
+            );
+          } else {
+            console.log(
+              `Configurações restauradas do backup local de ${new Date(backup.timestamp).toLocaleString('pt-BR')}.`,
+            );
+          }
+        });
+      }
+    });
+  });
+}
+
+// Snapshot a cada mudança relevante no sync (com debounce simples via alarm)
+chrome.storage.onChanged.addListener((changes, namespace) => {
+  if (namespace !== 'sync') return;
+  const relevant = BACKUP_KEYS.some((key) => key in changes);
+  if (relevant) snapshotSettings();
+});
+
+// Também garante restauração ao iniciar o navegador
+chrome.runtime.onStartup.addListener(restoreSettingsIfMissing);
 
 // --- Pomodoro Timer Background Logic ---
 
