@@ -3,6 +3,11 @@ import { SettingsQuickLinksManager } from './features/settings-quick-links.js';
 import { SettingsDataManager } from './features/settings-data.js';
 import { ThemeBuilderManager } from './features/theme-builder.js';
 import { applyTheme } from './modules.js';
+import {
+  loadApiTokens,
+  saveApiTokens,
+  migrateTokensFromSync,
+} from './token-store.js';
 
 document.addEventListener('DOMContentLoaded', () => {
   // ---- CONSTANTES E ELEMENTOS DO DOM ----
@@ -101,6 +106,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const todoEnabled = document.getElementById('todo-enabled');
   const quotesEnabled = document.getElementById('quotes-enabled');
   const rssEnabled = document.getElementById('rss-enabled');
+  const solidSurfaces = document.getElementById('solid-surfaces');
+  const dynamicAccent = document.getElementById('dynamic-accent');
 
   // Productivity Settings
   const togglApiToken = document.getElementById('toggl-api-token');
@@ -138,15 +145,22 @@ document.addEventListener('DOMContentLoaded', () => {
     'theme-preview-mockup',
   );
 
+  // Ícones de mostrar/ocultar campos sensíveis (olho aberto/fechado)
+  const EYE_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>';
+  const EYE_OFF_SVG =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><path d="M14.12 14.12a3 3 0 1 1-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/></svg>';
+
   // Toggle Toggle Token visibility
   if (toggleTogglTokenBtn && togglApiToken) {
+    toggleTogglTokenBtn.innerHTML = EYE_SVG;
     toggleTogglTokenBtn.addEventListener('click', () => {
       if (togglApiToken.type === 'password') {
         togglApiToken.type = 'text';
-        toggleTogglTokenBtn.textContent = '🙈';
+        toggleTogglTokenBtn.innerHTML = EYE_OFF_SVG;
       } else {
         togglApiToken.type = 'password';
-        toggleTogglTokenBtn.textContent = '👁️';
+        toggleTogglTokenBtn.innerHTML = EYE_SVG;
       }
     });
   }
@@ -171,13 +185,14 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (toggleApiKeyBtn && wallpaperApiKey) {
+    toggleApiKeyBtn.innerHTML = EYE_SVG;
     toggleApiKeyBtn.addEventListener('click', () => {
       if (wallpaperApiKey.type === 'password') {
         wallpaperApiKey.type = 'text';
-        toggleApiKeyBtn.textContent = '🙈';
+        toggleApiKeyBtn.innerHTML = EYE_OFF_SVG;
       } else {
         wallpaperApiKey.type = 'password';
-        toggleApiKeyBtn.textContent = '👁️';
+        toggleApiKeyBtn.innerHTML = EYE_SVG;
       }
     });
   }
@@ -258,9 +273,6 @@ document.addEventListener('DOMContentLoaded', () => {
         wallpaperSource.dispatchEvent(event);
       }
 
-      if (wallpaperApiKey)
-        wallpaperApiKey.value = settings.wallpaperApiKey || '';
-
       if (wallpaperTheme) {
         const savedTheme = settings.wallpaperTheme || 'nature';
         const options = Array.from(wallpaperTheme.options).map(
@@ -292,7 +304,12 @@ document.addEventListener('DOMContentLoaded', () => {
       if (clockStyle) clockStyle.value = settings.clockStyle || 'analog';
       if (userName) userName.value = settings.userName || '';
       if (weatherCity) weatherCity.value = settings.weatherCity || '';
-      if (togglApiToken) togglApiToken.value = settings.togglApiToken || '';
+      // Tokens de API vêm do storage.local (ver token-store.js)
+      loadApiTokens((apiTokens) => {
+        if (wallpaperApiKey)
+          wallpaperApiKey.value = apiTokens.wallpaperApiKey || '';
+        if (togglApiToken) togglApiToken.value = apiTokens.togglApiToken || '';
+      });
       if (pomodoroEnabled)
         pomodoroEnabled.checked = settings.pomodoroEnabled !== false;
       if (pomodoroWork) pomodoroWork.value = settings.pomodoroWork || 25;
@@ -303,6 +320,10 @@ document.addEventListener('DOMContentLoaded', () => {
       if (quotesEnabled)
         quotesEnabled.checked = settings.quotesEnabled !== false;
       if (rssEnabled) rssEnabled.checked = settings.rssEnabled !== false;
+      if (solidSurfaces)
+        solidSurfaces.checked = settings.solidSurfaces === true;
+      if (dynamicAccent)
+        dynamicAccent.checked = settings.dynamicAccent === true;
 
       updateFrequencyDisplay(settings.wallpaperFrequency);
       if (filterColor) filterColor.value = ensureFullHex(settings.filterColor);
@@ -494,8 +515,6 @@ document.addEventListener('DOMContentLoaded', () => {
             ? wallpaperThemeCustom.value.trim()
             : wallpaperTheme.value
           : 'nature',
-        wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : '',
-        togglApiToken: togglApiToken ? togglApiToken.value.trim() : '',
         pomodoroEnabled: pomodoroEnabled ? pomodoroEnabled.checked : false,
         pomodoroWork: pomodoroWork ? parseInt(pomodoroWork.value) : 25,
         pomodoroBreak: pomodoroBreak ? parseInt(pomodoroBreak.value) : 5,
@@ -503,26 +522,44 @@ document.addEventListener('DOMContentLoaded', () => {
         todoEnabled: todoEnabled ? todoEnabled.checked : true,
         quotesEnabled: quotesEnabled ? quotesEnabled.checked : true,
         rssEnabled: rssEnabled ? rssEnabled.checked : true,
+        solidSurfaces: solidSurfaces ? solidSurfaces.checked : false,
+        dynamicAccent: dynamicAccent ? dynamicAccent.checked : false,
       };
 
-      chrome.storage.sync.set({ extensionSettings: settings }, function () {
-        if (saveStatus) {
-          saveStatus.style.opacity = '1';
-          saveStatus.style.transform = 'translateY(0)';
-          setTimeout(() => {
-            saveStatus.style.opacity = '0';
-            saveStatus.style.transform = 'translateY(-10px)';
-          }, 2000);
-        }
+      // Tokens de API nunca vão para o sync nem para o export
+      saveApiTokens({
+        wallpaperApiKey: wallpaperApiKey ? wallpaperApiKey.value.trim() : '',
+        togglApiToken: togglApiToken ? togglApiToken.value.trim() : '',
+      });
 
-        if (chrome.runtime.lastError) {
-          console.error(
-            'Erro ao salvar configurações:',
-            chrome.runtime.lastError.message,
-          );
-        } else {
-          console.log('Configurações salvas com sucesso!');
-        }
+      // MERGE em vez de substituir: extensionSettings também guarda estado
+      // gravado por outros fluxos (zenMode, sidebarCollapsed, lastActiveSpace).
+      // Substituir o objeto inteiro apagava essas chaves a cada ajuste.
+      chrome.storage.sync.get(['extensionSettings'], function (current) {
+        const merged = Object.assign(
+          {},
+          current.extensionSettings || {},
+          settings,
+        );
+        chrome.storage.sync.set({ extensionSettings: merged }, function () {
+          if (saveStatus) {
+            saveStatus.style.opacity = '1';
+            saveStatus.style.transform = 'translateY(0)';
+            setTimeout(() => {
+              saveStatus.style.opacity = '0';
+              saveStatus.style.transform = 'translateY(-10px)';
+            }, 2000);
+          }
+
+          if (chrome.runtime.lastError) {
+            console.error(
+              'Erro ao salvar configurações:',
+              chrome.runtime.lastError.message,
+            );
+          } else {
+            console.log('Configurações salvas com sucesso!');
+          }
+        });
       });
     }, 300);
   }
@@ -796,6 +833,8 @@ document.addEventListener('DOMContentLoaded', () => {
     todoEnabled,
     quotesEnabled,
     rssEnabled,
+    solidSurfaces,
+    dynamicAccent,
   ].forEach((element) => {
     if (element) {
       element.addEventListener('input', saveSettings);
@@ -807,6 +846,32 @@ document.addEventListener('DOMContentLoaded', () => {
     saveSettingsBtn.addEventListener('click', saveSettings);
   }
 
+  // Feed RSS customizado exige permissão de host (optional_host_permissions)
+  if (rssUrl) {
+    rssUrl.addEventListener('change', () => {
+      const value = rssUrl.value.trim();
+      if (!value) return;
+      try {
+        const parsed = new URL(value);
+        if (!['http:', 'https:'].includes(parsed.protocol)) return;
+        if (parsed.hostname === 'hnrss.org') return; // já coberto pelo manifest
+        chrome.permissions.request(
+          { origins: [`${parsed.origin}/*`] },
+          (granted) => {
+            if (!granted) {
+              console.warn(
+                'Permissão para o feed RSS não concedida:',
+                parsed.origin,
+              );
+            }
+          },
+        );
+      } catch {
+        // URL inválida — ignora, validação visual fica a cargo do campo
+      }
+    });
+  }
+
   if (closeSettingsBtn) {
     closeSettingsBtn.addEventListener('click', function () {
       window.close();
@@ -814,5 +879,5 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   // Initial load
-  loadSettings();
+  migrateTokensFromSync(() => loadSettings());
 });

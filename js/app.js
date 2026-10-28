@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Quick Links & Modal
     quickLinksManager.init();
     editModalManager.init();
-    searchManager.init();
+    searchManager.init({ sidebarManager, shortcutsManager });
     contextMenuManager.init();
     shortcutsManager.init();
 
@@ -245,20 +245,36 @@ document.addEventListener('DOMContentLoaded', () => {
     // Pomodoro
     initPomodoro();
 
-    // Initialize To-Do List & Quotes (Fase 6)
+    // Widgets opcionais: só inicializa (e só gasta rede/DOM) o que está ativado
     const todoListManager = new TodoListManager();
-    todoListManager.init();
-
     const quotesManager = new QuotesManager();
-    quotesManager.init();
-
-    // Initialize RSS Feed (Fase 6)
     const rssManager = new RssManager();
-    rssManager.init();
+
+    const ensureOptionalWidgets = () => {
+      if (settingsState.todoEnabled !== false && !todoListManager._started) {
+        todoListManager._started = true;
+        todoListManager.init();
+      }
+      if (settingsState.quotesEnabled !== false && !quotesManager._started) {
+        quotesManager._started = true;
+        quotesManager.init();
+      }
+      if (settingsState.rssEnabled !== false && !rssManager._started) {
+        rssManager._started = true;
+        rssManager.init();
+      }
+    };
+    ensureOptionalWidgets();
 
     // Update widgets visibility
     updateWidgetVisibilities(settingsState);
     initWidgetsDashboardToggle();
+
+    // Modo sólido: desliga o efeito glass (backdrop-filter) das superfícies
+    document.body.classList.toggle(
+      'solid-surfaces',
+      settingsState.solidSurfaces === true,
+    );
 
     // Wallpaper
     manageWallpaper(settingsState);
@@ -271,13 +287,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Setup settings observer
-    setupSettingsObserver(widgets.tickClock, rssManager);
+    setupSettingsObserver(widgets.tickClock, rssManager, ensureOptionalWidgets);
 
     // Setup sidebar actions
     setupSidebarActions();
   }
 
-  function setupSettingsObserver(tickClock, rssManager) {
+  function setupSettingsObserver(tickClock, rssManager, ensureOptionalWidgets) {
     chrome.storage.onChanged.addListener((changes, area) => {
       if (area === 'sync' && changes.extensionSettings) {
         const newSettings = changes.extensionSettings.newValue || {};
@@ -577,6 +593,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.todoEnabled = newSettings.todoEnabled;
           updateWidgetVisibilities(settingsState);
+          if (ensureOptionalWidgets) ensureOptionalWidgets();
         }
 
         if (
@@ -585,6 +602,7 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.quotesEnabled = newSettings.quotesEnabled;
           updateWidgetVisibilities(settingsState);
+          if (ensureOptionalWidgets) ensureOptionalWidgets();
         }
 
         if (
@@ -593,6 +611,35 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.rssEnabled = newSettings.rssEnabled;
           updateWidgetVisibilities(settingsState);
+          if (ensureOptionalWidgets) ensureOptionalWidgets();
+        }
+
+        if (
+          newSettings.zenMode !== undefined &&
+          newSettings.zenMode !== settingsState.zenMode
+        ) {
+          settingsState.zenMode = newSettings.zenMode;
+          applyZenMode(settingsState.zenMode === true);
+        }
+
+        if (
+          newSettings.solidSurfaces !== undefined &&
+          newSettings.solidSurfaces !== settingsState.solidSurfaces
+        ) {
+          settingsState.solidSurfaces = newSettings.solidSurfaces;
+          document.body.classList.toggle(
+            'solid-surfaces',
+            settingsState.solidSurfaces === true,
+          );
+        }
+
+        if (
+          newSettings.dynamicAccent !== undefined &&
+          newSettings.dynamicAccent !== settingsState.dynamicAccent
+        ) {
+          settingsState.dynamicAccent = newSettings.dynamicAccent;
+          // Reaplica (ou remove) o acento a partir do wallpaper em cache
+          manageWallpaper(settingsState);
         }
 
         if (
@@ -642,7 +689,48 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function applyZenMode(enabled) {
+    document.body.classList.toggle('zen-mode', enabled === true);
+    // Cache local para aplicar sem flash na próxima aba (ver theme-cache.js)
+    localStorage.setItem('zenMode', enabled === true ? '1' : '0');
+    const zenBtn = document.getElementById('zen-mode-btn');
+    if (zenBtn) {
+      zenBtn.setAttribute('aria-pressed', String(enabled === true));
+      zenBtn.classList.toggle('active', enabled === true);
+    }
+  }
+
+  function toggleZenMode() {
+    const enabled = !document.body.classList.contains('zen-mode');
+    applyZenMode(enabled);
+    settingsState.zenMode = enabled;
+    chrome.storage.sync.get(['extensionSettings'], (res) => {
+      const s = res.extensionSettings || {};
+      s.zenMode = enabled;
+      chrome.storage.sync.set({ extensionSettings: s });
+    });
+  }
+
   function setupSidebarActions() {
+    // Zen Mode
+    const zenBtn = document.getElementById('zen-mode-btn');
+    if (zenBtn) {
+      zenBtn.addEventListener('click', toggleZenMode);
+    }
+    applyZenMode(settingsState.zenMode === true);
+    window.addEventListener('keydown', (e) => {
+      const activeEl = document.activeElement;
+      const isTyping =
+        activeEl &&
+        (activeEl.tagName === 'INPUT' ||
+          activeEl.tagName === 'TEXTAREA' ||
+          activeEl.isContentEditable);
+      if (!isTyping && e.altKey && e.key.toLowerCase() === 'z') {
+        e.preventDefault();
+        toggleZenMode();
+      }
+    });
+
     // Theme Toggle
     const themeToggleBtn = document.getElementById('theme-toggle-btn');
     if (themeToggleBtn) {

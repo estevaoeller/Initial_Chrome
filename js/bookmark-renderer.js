@@ -37,6 +37,80 @@ if (typeof document !== 'undefined') {
   });
 }
 
+/**
+ * Transforma um botão em input inline ao clicar (substitui o prompt()
+ * nativo na criação de grupos). Enter cria, Esc/blur cancela.
+ */
+function attachNewGroupCreator(btn, contentArea, iconSize, stateHelpers) {
+  const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
+  btn.addEventListener('click', () => {
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'group-name-edit new-group-input';
+    input.placeholder = 'Nome do novo grupo…';
+    input.setAttribute('aria-label', 'Nome do novo grupo');
+    btn.style.display = 'none';
+    btn.parentNode.insertBefore(input, btn);
+    input.focus();
+
+    let done = false;
+    const cleanup = () => {
+      if (done) return;
+      done = true;
+      input.remove();
+      btn.style.display = '';
+    };
+
+    input.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        const name = input.value.trim();
+        cleanup();
+        if (!name) return;
+        createGroup(spaceId, name, (newGroup) => {
+          const current = getBookmarks() || [];
+          current.push(newGroup);
+          setBookmarks(current);
+          renderBookmarks(current, contentArea, iconSize, stateHelpers);
+        });
+      } else if (e.key === 'Escape') {
+        cleanup();
+      }
+    });
+    input.addEventListener('blur', cleanup);
+  });
+}
+
+/** Empty state para espaço sem nenhum grupo */
+function buildEmptySpaceState(contentArea, iconSize, stateHelpers) {
+  const wrap = document.createElement('div');
+  wrap.className = 'empty-state animate-cascade';
+
+  const icon = document.createElement('div');
+  icon.className = 'empty-state-icon';
+  icon.innerHTML =
+    '<svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/><line x1="12" y1="11" x2="12" y2="17"/><line x1="9" y1="14" x2="15" y2="14"/></svg>';
+
+  const title = document.createElement('h3');
+  title.className = 'empty-state-title';
+  title.textContent = 'Este espaço ainda está vazio';
+
+  const desc = document.createElement('p');
+  desc.className = 'empty-state-desc';
+  desc.textContent =
+    'Crie um grupo para organizar seus links — depois arraste URLs para cá ou use Alt+N.';
+
+  const btn = document.createElement('button');
+  btn.className = 'new-group-btn';
+  btn.textContent = '+ Criar primeiro grupo';
+  attachNewGroupCreator(btn, contentArea, iconSize, stateHelpers);
+
+  wrap.appendChild(icon);
+  wrap.appendChild(title);
+  wrap.appendChild(desc);
+  wrap.appendChild(btn);
+  return wrap;
+}
+
 export function renderBookmarks(
   bookmarks,
   contentArea,
@@ -52,57 +126,20 @@ export function renderBookmarks(
     loadingSkeletons.style.display = 'none';
   }
 
-function renderEmptySpace(contentArea, stateHelpers, iconSize) {
-  contentArea.innerHTML = '';
-
-  const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
-
-  const emptyContainer = document.createElement('div');
-  emptyContainer.className = 'empty-space-container glass-effect animate-cascade';
-
-  const iconEl = document.createElement('div');
-  iconEl.className = 'empty-space-icon';
-  iconEl.textContent = '📂';
-
-  const titleEl = document.createElement('h3');
-  titleEl.className = 'empty-space-title';
-  titleEl.textContent = 'Este Espaço ainda está vazio';
-
-  const descEl = document.createElement('p');
-  descEl.className = 'empty-space-desc';
-  descEl.textContent =
-    'Crie seu primeiro grupo de marcadores para começar a organizar seus links neste espaço.';
-
-  const actionBtn = document.createElement('button');
-  actionBtn.className = 'empty-space-btn';
-  actionBtn.innerHTML = '<span>+</span> Criar Primeiro Grupo';
-  actionBtn.setAttribute('aria-label', 'Criar primeiro grupo neste espaço');
-
-  actionBtn.addEventListener('click', () => {
-    const groupName = prompt(
-      'Nome do primeiro grupo (ex: Favoritos, Ferramentas, Notícias):',
-    );
-    if (groupName && groupName.trim() && spaceId) {
-      createGroup(spaceId, groupName.trim(), (newGroup) => {
-        const currentBookmarks = (getBookmarks && getBookmarks()) || [];
-        currentBookmarks.push(newGroup);
-        if (setBookmarks) setBookmarks(currentBookmarks);
-        renderBookmarks(currentBookmarks, contentArea, iconSize, stateHelpers);
-      });
-    }
-  });
-
-  emptyContainer.appendChild(iconEl);
-  emptyContainer.appendChild(titleEl);
-  emptyContainer.appendChild(descEl);
-  emptyContainer.appendChild(actionBtn);
-
-  contentArea.appendChild(emptyContainer);
-}
-
   if (!bookmarks || bookmarks.length === 0) {
-    renderEmptySpace(contentArea, stateHelpers, iconSize);
+    contentArea.innerHTML = '';
+    if (getBookmarks && setBookmarks && spaceId) {
+      contentArea.appendChild(
+        buildEmptySpaceState(contentArea, iconSize, stateHelpers),
+      );
+    }
     return;
+  }
+
+  // Remove empty state se existir (espaço deixou de estar vazio)
+  const existingEmptyState = contentArea.querySelector('.empty-state');
+  if (existingEmptyState) {
+    existingEmptyState.remove();
   }
 
   // Keep track of DOM categories to delete later if they are not in the new bookmarks list
@@ -154,30 +191,20 @@ function renderEmptySpace(contentArea, stateHelpers, iconSize) {
     if (!headerDiv) {
       headerDiv = document.createElement('div');
       headerDiv.className = 'category-header';
-      headerDiv.style.display = 'flex';
-      headerDiv.style.justifyContent = 'space-between';
-      headerDiv.style.alignItems = 'center';
-      headerDiv.style.borderBottom =
-        '2px solid var(--section-line-color, var(--accent))';
-      headerDiv.style.paddingBottom = '10px';
-      headerDiv.style.marginBottom = '15px';
 
       titleContainer = document.createElement('div');
       titleContainer.className = 'title-container';
-      titleContainer.style.display = 'flex';
-      titleContainer.style.alignItems = 'center';
 
       dragHandle = document.createElement('span');
       dragHandle.className = 'group-drag-handle';
-      dragHandle.innerHTML = '⋮⋮';
-      dragHandle.style.cursor = 'grab';
-      dragHandle.style.opacity = '0.3';
-      dragHandle.style.marginRight = '10px';
+      dragHandle.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="currentColor" stroke="none"><circle cx="9" cy="6" r="1.5"/><circle cx="15" cy="6" r="1.5"/><circle cx="9" cy="12" r="1.5"/><circle cx="15" cy="12" r="1.5"/><circle cx="9" cy="18" r="1.5"/><circle cx="15" cy="18" r="1.5"/></svg>';
       dragHandle.title = 'Arrastar Grupo';
 
       toggleBtn = document.createElement('button');
       toggleBtn.className = 'group-toggle-btn';
-      toggleBtn.innerHTML = '▼';
+      toggleBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
       toggleBtn.title = 'Recolher / Expandir Grupo';
       toggleBtn.setAttribute(
         'aria-label',
@@ -185,12 +212,8 @@ function renderEmptySpace(contentArea, stateHelpers, iconSize) {
       );
 
       categoryTitle = document.createElement('h2');
+      categoryTitle.className = 'category-title';
       categoryTitle.title = 'Duplo clique para renomear este grupo';
-      categoryTitle.style.cursor = 'text';
-      categoryTitle.style.borderBottom = 'none';
-      categoryTitle.style.paddingBottom = '0';
-      categoryTitle.style.marginBottom = '0';
-      categoryTitle.style.marginTop = '0';
 
       titleContainer.appendChild(dragHandle);
       titleContainer.appendChild(toggleBtn);
@@ -205,19 +228,6 @@ function renderEmptySpace(contentArea, stateHelpers, iconSize) {
         input.type = 'text';
         input.value = currentName;
         input.className = 'group-name-edit';
-        input.style.fontSize = window.getComputedStyle(categoryTitle).fontSize;
-        input.style.fontWeight =
-          window.getComputedStyle(categoryTitle).fontWeight;
-        input.style.fontFamily =
-          window.getComputedStyle(categoryTitle).fontFamily;
-        input.style.color = window.getComputedStyle(categoryTitle).color;
-        input.style.background = 'transparent';
-        input.style.border = '1px solid var(--accent)';
-        input.style.borderRadius = '4px';
-        input.style.padding = '2px 5px';
-        input.style.margin = window.getComputedStyle(categoryTitle).margin;
-        input.style.outline = 'none';
-        input.style.width = '100%';
 
         headerDiv.insertBefore(input, titleContainer);
         titleContainer.style.display = 'none';
@@ -405,7 +415,8 @@ function renderEmptySpace(contentArea, stateHelpers, iconSize) {
       // Edit Button
       const editBtn = document.createElement('span');
       editBtn.className = 'edit-bookmark-btn';
-      editBtn.innerHTML = '✎';
+      editBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"/></svg>';
       editBtn.title = 'Editar Link';
       editBtn.setAttribute('role', 'button');
       editBtn.setAttribute('aria-label', `Editar link para ${link.name}`);
@@ -656,48 +667,12 @@ function renderEmptySpace(contentArea, stateHelpers, iconSize) {
   if (getBookmarks && setBookmarks && spaceId) {
     const newGroupContainer = document.createElement('div');
     newGroupContainer.className = 'new-group-container';
-    newGroupContainer.style.textAlign = 'center';
-    newGroupContainer.style.padding = '20px';
-    newGroupContainer.style.marginTop = '20px';
 
     const newGroupBtn = document.createElement('button');
     newGroupBtn.textContent = '+ Novo Grupo';
     newGroupBtn.className = 'new-group-btn';
-    newGroupBtn.style.padding = '10px 20px';
-    newGroupBtn.style.fontSize = '14px';
-    newGroupBtn.style.cursor = 'pointer';
-    newGroupBtn.style.background = 'var(--input-bg)';
-    newGroupBtn.style.color = 'var(--text)';
-    newGroupBtn.style.border = '1px dashed var(--settings-border)';
-    newGroupBtn.style.borderRadius = '8px';
-    newGroupBtn.style.transition = 'all 0.2s';
     newGroupBtn.setAttribute('aria-label', 'Criar um novo grupo de marcadores');
-
-    newGroupBtn.addEventListener('mouseenter', () => {
-      newGroupBtn.style.border = '1px solid var(--accent)';
-      newGroupBtn.style.color = 'var(--accent)';
-    });
-    newGroupBtn.addEventListener('mouseleave', () => {
-      newGroupBtn.style.border = '1px dashed var(--settings-border)';
-      newGroupBtn.style.color = 'var(--text)';
-    });
-
-    newGroupBtn.addEventListener('click', () => {
-      const groupName = prompt('Nome do novo grupo:');
-      if (groupName && groupName.trim()) {
-        createGroup(spaceId, groupName.trim(), (newGroup) => {
-          const currentBookmarks = getBookmarks();
-          currentBookmarks.push(newGroup);
-          setBookmarks(currentBookmarks);
-          renderBookmarks(
-            currentBookmarks,
-            contentArea,
-            iconSize,
-            stateHelpers,
-          );
-        });
-      }
-    });
+    attachNewGroupCreator(newGroupBtn, contentArea, iconSize, stateHelpers);
 
     newGroupContainer.appendChild(newGroupBtn);
     contentArea.appendChild(newGroupContainer);

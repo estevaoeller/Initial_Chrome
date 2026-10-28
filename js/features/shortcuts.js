@@ -186,66 +186,120 @@ export class ShortcutsManager {
       return;
     }
 
-    let url = prompt('URL do novo bookmark:');
-    if (!url || !url.trim()) return;
+    this.openAddBookmarkModal(activeSpaceId, groups);
+  }
 
-    if (!/^https?:\/\//i.test(url)) {
-      url = 'https://' + url;
-    }
+  openAddBookmarkModal(activeSpaceId, groups) {
+    const modal = document.getElementById('add-bookmark-modal');
+    const urlInput = document.getElementById('add-bookmark-url');
+    const nameInput = document.getElementById('add-bookmark-name');
+    const groupSelect = document.getElementById('add-bookmark-group');
+    const saveBtn = document.getElementById('save-add-bookmark-btn');
+    const cancelBtn = document.getElementById('cancel-add-bookmark-btn');
+    const closeBtn = document.getElementById('close-add-bookmark-btn');
+    if (!modal || !urlInput || !nameInput || !groupSelect || !saveBtn) return;
 
-    let defaultName = '';
-    try {
-      defaultName = new URL(url).hostname.replace('www.', '');
-      defaultName = defaultName.charAt(0).toUpperCase() + defaultName.slice(1);
-    } catch (e) {
-      defaultName = url;
-    }
-
-    let name = prompt('Nome do bookmark:', defaultName);
-    if (!name || !name.trim()) return;
-
-    // Prompt to select group
-    const groupList = groups.map((g, i) => `${i + 1}. ${g.name}`).join('\n');
-    const groupChoice = prompt(
-      `Escolha o grupo pelo número (ou digite o nome do grupo):\n${groupList}`,
-      '1',
-    );
-    if (!groupChoice) return;
-
-    let selectedGroup = null;
-    const choiceIdx = parseInt(groupChoice, 10) - 1;
-    if (!isNaN(choiceIdx) && choiceIdx >= 0 && choiceIdx < groups.length) {
-      selectedGroup = groups[choiceIdx];
-    } else {
-      const trimmedChoice = groupChoice.trim().toLowerCase();
-      selectedGroup =
-        groups.find((g) => g.name.toLowerCase() === trimmedChoice) || groups[0];
-    }
-
-    import('../modules.js').then((m) => {
-      m.addBookmarkToChrome(
-        activeSpaceId,
-        selectedGroup.name,
-        { name, url },
-        (createdNode) => {
-          const newItem = { name, url };
-          if (createdNode) {
-            newItem.id = createdNode.id;
-            newItem.name = createdNode.title;
-          }
-          selectedGroup.links.push(newItem);
-          this.appContext.setBookmarks(groups);
-
-          import('../bookmark-renderer.js').then((r) => {
-            r.renderBookmarks(
-              groups,
-              this.appContext.contentArea,
-              this.appContext.settingsState.iconSize,
-              this.appContext.stateHelpers(),
-            );
-          });
-        },
-      );
+    // Popula o select de grupos
+    groupSelect.innerHTML = '';
+    groups.forEach((g, i) => {
+      const opt = document.createElement('option');
+      opt.value = String(i);
+      opt.textContent = g.name;
+      groupSelect.appendChild(opt);
     });
+
+    urlInput.value = '';
+    nameInput.value = '';
+    let nameTouched = false;
+
+    const previouslyFocused = document.activeElement;
+
+    const closeModal = () => {
+      modal.classList.remove('show');
+      setTimeout(() => {
+        modal.style.display = 'none';
+      }, 300);
+      if (previouslyFocused) previouslyFocused.focus();
+    };
+
+    // Autopreenche o nome a partir do hostname da URL
+    const suggestName = () => {
+      if (nameTouched) return;
+      try {
+        let url = urlInput.value.trim();
+        if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+        let host = new URL(url).hostname.replace('www.', '');
+        nameInput.value = host.charAt(0).toUpperCase() + host.slice(1);
+      } catch {
+        /* URL incompleta — ignora */
+      }
+    };
+    urlInput.oninput = suggestName;
+    nameInput.oninput = () => {
+      nameTouched = nameInput.value.trim() !== '';
+    };
+
+    const save = () => {
+      let url = urlInput.value.trim();
+      const name = nameInput.value.trim();
+      if (!url || !name) {
+        urlInput.focus();
+        return;
+      }
+      if (!/^https?:\/\//i.test(url)) url = 'https://' + url;
+
+      const selectedGroup =
+        groups[parseInt(groupSelect.value, 10)] || groups[0];
+
+      import('../modules.js').then((m) => {
+        m.addBookmarkToChrome(
+          activeSpaceId,
+          selectedGroup.name,
+          { name, url },
+          (createdNode) => {
+            const newItem = { name, url };
+            if (createdNode) {
+              newItem.id = createdNode.id;
+              newItem.name = createdNode.title;
+            }
+            selectedGroup.links.push(newItem);
+            this.appContext.setBookmarks(groups);
+
+            import('../bookmark-renderer.js').then((r) => {
+              r.renderBookmarks(
+                groups,
+                this.appContext.contentArea,
+                this.appContext.settingsState.iconSize,
+                this.appContext.stateHelpers(),
+              );
+            });
+          },
+        );
+      });
+      closeModal();
+    };
+
+    // Listeners "de sessão" do modal (onclick/onkeydown sobrescrevem os antigos)
+    if (cancelBtn) cancelBtn.onclick = closeModal;
+    if (closeBtn) closeBtn.onclick = closeModal;
+    modal.onclick = (e) => {
+      if (e.target === modal) closeModal();
+    };
+    modal.onkeydown = (e) => {
+      if (e.key === 'Escape') {
+        e.stopPropagation();
+        closeModal();
+      } else if (e.key === 'Enter' && e.target !== groupSelect) {
+        e.preventDefault();
+        save();
+      }
+    };
+    saveBtn.onclick = save;
+
+    modal.style.display = 'flex';
+    setTimeout(() => {
+      modal.classList.add('show');
+      urlInput.focus();
+    }, 10);
   }
 }

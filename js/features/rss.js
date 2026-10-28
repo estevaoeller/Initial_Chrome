@@ -17,8 +17,11 @@ export class RssManager {
     }
 
     // Load settings and cached items
-    chrome.storage.sync.get(['rssUrl'], (syncResult) => {
-      const rssUrl = syncResult.rssUrl || this.defaultFeed;
+    // (rssUrl fica dentro de extensionSettings — antes lia a chave errada)
+    chrome.storage.sync.get(['extensionSettings'], (syncResult) => {
+      const settings = syncResult.extensionSettings || {};
+      if (settings.rssEnabled === false) return; // desativado: não busca nada
+      const rssUrl = settings.rssUrl || this.defaultFeed;
 
       chrome.storage.local.get(['cachedRssData'], (localResult) => {
         const cache = localResult.cachedRssData;
@@ -31,8 +34,7 @@ export class RssManager {
           now - cache.timestamp < 15 * 60 * 1000
         ) {
           this.render(cache.items, cache.feedTitle);
-          // Also trigger background fetch to keep it warm, but don't block
-          this.fetchFeed(rssUrl, false);
+          // Cache fresco: evita requisição de rede a cada nova aba
         } else {
           // Cache missed or expired
           if (cache && cache.url === rssUrl) {
@@ -64,7 +66,9 @@ export class RssManager {
         .map((itemNode) => {
           return {
             title: itemNode.querySelector('title')?.textContent || 'Sem título',
-            link: itemNode.querySelector('link')?.textContent || '#',
+            link: this.sanitizeLink(
+              itemNode.querySelector('link')?.textContent,
+            ),
             date: itemNode.querySelector('pubDate')?.textContent || '',
           };
         });
@@ -90,9 +94,24 @@ export class RssManager {
     }
   }
 
+  // Aceita apenas http/https — bloqueia javascript: e afins vindos do feed
+  sanitizeLink(raw) {
+    if (raw) {
+      try {
+        const parsed = new URL(raw.trim());
+        if (parsed.protocol === 'http:' || parsed.protocol === 'https:') {
+          return parsed.href;
+        }
+      } catch {
+        // URL inválida
+      }
+    }
+    return '#';
+  }
+
   render(items, feedTitle) {
     if (this.titleEl) {
-      this.titleEl.textContent = `📰 Feed: ${feedTitle}`;
+      this.titleEl.textContent = `Feed: ${feedTitle}`;
     }
 
     this.listEl.innerHTML = '';

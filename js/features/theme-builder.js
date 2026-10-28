@@ -276,9 +276,14 @@ export class ThemeBuilderManager {
       for (let i = 0; i < selectEl.options.length; i++) {
         const opt = selectEl.options[i];
         if (
-          ['light', 'dark', 'solar', 'minimal', 'custom_builder'].includes(
-            opt.value,
-          )
+          [
+            'auto',
+            'light',
+            'dark',
+            'solar',
+            'minimal',
+            'custom_builder',
+          ].includes(opt.value)
         ) {
           builtInOptions.push({
             value: opt.value,

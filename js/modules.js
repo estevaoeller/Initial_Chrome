@@ -471,7 +471,27 @@ export function handleDeleteBookmark(
 const THEME_LIST = ['light', 'dark', 'solar', 'minimal'];
 const THEME_CLASSES = THEME_LIST.map((t) => `${t}-theme`);
 
-export function applyTheme(theme) {
+// Tema "auto": segue o prefers-color-scheme do sistema operacional
+const systemThemeQuery =
+  typeof window !== 'undefined' && window.matchMedia
+    ? window.matchMedia('(prefers-color-scheme: dark)')
+    : null;
+
+function resolveAutoTheme() {
+  return systemThemeQuery && systemThemeQuery.matches ? 'dark' : 'light';
+}
+
+if (systemThemeQuery) {
+  // Atualiza em tempo real se o SO trocar de tema enquanto "auto" está ativo
+  systemThemeQuery.addEventListener('change', () => {
+    if (localStorage.getItem('themePreset') === 'auto') {
+      document.body.classList.remove(...THEME_CLASSES);
+      document.body.classList.add(`${resolveAutoTheme()}-theme`);
+    }
+  });
+}
+
+function doApplyTheme(theme) {
   document.body.classList.remove(...THEME_CLASSES);
 
   // Clear any previously injected custom theme variables from inline style
@@ -491,9 +511,14 @@ export function applyTheme(theme) {
   ];
   variables.forEach((v) => document.body.style.removeProperty(v));
 
-  if (THEME_LIST.includes(theme)) {
+  if (theme === 'auto') {
+    document.body.classList.add(`${resolveAutoTheme()}-theme`);
+    localStorage.setItem('themePreset', 'auto');
+    reapplyDynamicAccent();
+  } else if (THEME_LIST.includes(theme)) {
     document.body.classList.add(`${theme}-theme`);
     localStorage.setItem('themePreset', theme);
+    reapplyDynamicAccent();
   } else {
     // Custom theme! Load variables from sync storage
     chrome.storage.sync.get(['customThemes'], (result) => {
@@ -511,6 +536,20 @@ export function applyTheme(theme) {
         localStorage.setItem('themePreset', 'light');
       }
     });
+  }
+}
+
+export function applyTheme(theme) {
+  // Crossfade suave na troca de tema (View Transitions API, Chrome 111+),
+  // respeitando prefers-reduced-motion
+  const reduceMotion =
+    typeof window !== 'undefined' &&
+    window.matchMedia &&
+    window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  if (document.startViewTransition && !reduceMotion) {
+    document.startViewTransition(() => doApplyTheme(theme));
+  } else {
+    doApplyTheme(theme);
   }
 }
 
@@ -698,6 +737,56 @@ export async function updateWeather(
   });
 }
 
+// ===== ACENTO DINÂMICO (Material You) =====
+// Deriva o --accent da cor média do wallpaper (data.color do Unsplash).
+let dynamicAccentHex = null;
+
+function hexToHsl(hex) {
+  const c = hex.replace('#', '');
+  const r = parseInt(c.substr(0, 2), 16) / 255;
+  const g = parseInt(c.substr(2, 2), 16) / 255;
+  const b = parseInt(c.substr(4, 2), 16) / 255;
+  const max = Math.max(r, g, b);
+  const min = Math.min(r, g, b);
+  const l = (max + min) / 2;
+  if (max === min) return { h: 0, s: 0, l };
+  const d = max - min;
+  const s = l > 0.5 ? d / (2 - max - min) : d / (max + min);
+  let h;
+  if (max === r) h = ((g - b) / d + (g < b ? 6 : 0)) / 6;
+  else if (max === g) h = ((b - r) / d + 2) / 6;
+  else h = ((r - g) / d + 4) / 6;
+  return { h, s, l };
+}
+
+export function applyDynamicAccent(hexColor, enabled) {
+  if (!enabled || !hexColor) {
+    // Só remove o inline se foi o próprio acento dinâmico que o definiu —
+    // temas customizados também usam --accent inline no body
+    if (dynamicAccentHex) {
+      dynamicAccentHex = null;
+      document.body.style.removeProperty('--accent');
+    }
+    return;
+  }
+  dynamicAccentHex = hexColor;
+  const { h, s } = hexToHsl(hexColor);
+  // Satura o suficiente para funcionar como acento e ajusta a luminosidade
+  // conforme o tema: claro no dark, escuro nos temas claros (contraste AA)
+  const isDark = document.body.classList.contains('dark-theme');
+  const sat = Math.round(Math.max(s, 0.45) * 100);
+  const light = isDark ? 62 : 38;
+  document.body.style.setProperty(
+    '--accent',
+    `hsl(${Math.round(h * 360)}, ${sat}%, ${light}%)`,
+  );
+}
+
+/** Reaplica o acento dinâmico (usado após troca de tema, que limpa o inline) */
+export function reapplyDynamicAccent() {
+  if (dynamicAccentHex) applyDynamicAccent(dynamicAccentHex, true);
+}
+
 export async function manageWallpaper(settingsState, forceNext = false) {
   const body = document.body;
   const unsplashInfoDiv = document.getElementById('unsplash-info');
@@ -746,117 +835,132 @@ export async function manageWallpaper(settingsState, forceNext = false) {
 
   if (settingsState.wallpaperSource === 'unsplash') {
     const theme = settingsState.wallpaperTheme || 'nature';
-    const apiKey = settingsState.wallpaperApiKey || '';
     const freqHours = settingsState.wallpaperFrequency || 1;
     const freqMs = freqHours * 60 * 60 * 1000;
 
-    chrome.storage.local.get(['cachedWallpaper'], async (result) => {
-      const cache = result.cachedWallpaper;
-      const now = Date.now();
+    chrome.storage.local.get(
+      ['cachedWallpaper', 'apiTokens'],
+      async (result) => {
+        const apiKey =
+          (result.apiTokens && result.apiTokens.wallpaperApiKey) ||
+          settingsState.wallpaperApiKey ||
+          '';
+        const cache = result.cachedWallpaper;
+        const now = Date.now();
 
-      // Check if we have a valid cache
-      if (
-        !forceNext &&
-        cache &&
-        cache.source === 'unsplash' &&
-        cache.theme === theme &&
-        cache.apiKey === apiKey
-      ) {
-        const age = now - cache.timestamp;
-        if (age < freqMs && cache.url) {
-          // Use cache
-          setBackground(cache.url);
-          if (cache.unsplashData) {
-            displayUnsplashInfo(cache.unsplashData);
-          } else {
-            hideUnsplashInfo();
+        // Check if we have a valid cache
+        if (
+          !forceNext &&
+          cache &&
+          cache.source === 'unsplash' &&
+          cache.theme === theme &&
+          cache.apiKey === apiKey
+        ) {
+          const age = now - cache.timestamp;
+          if (age < freqMs && cache.url) {
+            // Use cache
+            setBackground(cache.url);
+            if (cache.unsplashData) {
+              displayUnsplashInfo(cache.unsplashData);
+            } else {
+              hideUnsplashInfo();
+            }
+            applyDynamicAccent(
+              cache.unsplashData && cache.unsplashData.color,
+              settingsState.dynamicAccent === true,
+            );
+            return;
           }
-          return;
         }
-      }
 
-      // Cache missed or expired. Fetch new.
-      let newUrl = '';
-      let unsplashData = null;
+        // Cache missed or expired. Fetch new.
+        let newUrl = '';
+        let unsplashData = null;
 
-      let actualTheme = theme;
-      if (theme === 'random') {
-        const presetThemes = [
-          'nature',
-          'city',
-          'space',
-          'minimalist',
-          'abstract',
-          'architecture',
-          'technology',
-          'landscape',
-        ];
-        actualTheme =
-          presetThemes[Math.floor(Math.random() * presetThemes.length)];
-      }
+        let actualTheme = theme;
+        if (theme === 'random') {
+          const presetThemes = [
+            'nature',
+            'city',
+            'space',
+            'minimalist',
+            'abstract',
+            'architecture',
+            'technology',
+            'landscape',
+          ];
+          actualTheme =
+            presetThemes[Math.floor(Math.random() * presetThemes.length)];
+        }
 
-      if (!apiKey) {
-        console.warn('Unsplash API Key missing. Fallback for loremflickr.');
-        const seed = now.toString();
-        newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
-      } else {
-        try {
-          const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(actualTheme)}&orientation=landscape`;
-          const response = await fetch(apiUrl, {
-            headers: { Authorization: `Client-ID ${apiKey}` },
-          });
-
-          if (!response.ok)
-            throw new Error(`Unsplash API Error: ${response.status}`);
-
-          const data = await response.json();
-          if (data && data.urls && data.urls.regular) {
-            newUrl = data.urls.regular;
-
-            // Parse Unsplash Data
-            unsplashData = {
-              link:
-                data.links?.html || `https://unsplash.com/photos/${data.id}`,
-              location: data.location?.name,
-              date: data.created_at,
-              stats: data.views || data.downloads || data.likes || 0,
-              statsLabel: data.views
-                ? 'visualizações'
-                : data.downloads
-                  ? 'downloads'
-                  : 'curtidas',
-              user: data.user?.name,
-            };
-          } else {
-            throw new Error('Invalid Unsplash response format');
-          }
-        } catch (error) {
-          console.error('Falha ao buscar Unsplash Oficial:', error);
+        if (!apiKey) {
+          console.warn('Unsplash API Key missing. Fallback for loremflickr.');
           const seed = now.toString();
           newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
+        } else {
+          try {
+            const apiUrl = `https://api.unsplash.com/photos/random?query=${encodeURIComponent(actualTheme)}&orientation=landscape`;
+            const response = await fetch(apiUrl, {
+              headers: { Authorization: `Client-ID ${apiKey}` },
+            });
+
+            if (!response.ok)
+              throw new Error(`Unsplash API Error: ${response.status}`);
+
+            const data = await response.json();
+            if (data && data.urls && data.urls.regular) {
+              newUrl = data.urls.regular;
+
+              // Parse Unsplash Data
+              unsplashData = {
+                link:
+                  data.links?.html || `https://unsplash.com/photos/${data.id}`,
+                location: data.location?.name,
+                color: data.color,
+                date: data.created_at,
+                stats: data.views || data.downloads || data.likes || 0,
+                statsLabel: data.views
+                  ? 'visualizações'
+                  : data.downloads
+                    ? 'downloads'
+                    : 'curtidas',
+                user: data.user?.name,
+              };
+            } else {
+              throw new Error('Invalid Unsplash response format');
+            }
+          } catch (error) {
+            console.error('Falha ao buscar Unsplash Oficial:', error);
+            const seed = now.toString();
+            newUrl = `https://loremflickr.com/1920/1080/${encodeURIComponent(actualTheme)}?random=${encodeURIComponent(seed)}`;
+          }
         }
-      }
 
-      // Apply to UI
-      setBackground(newUrl);
-      if (unsplashData) {
-        displayUnsplashInfo(unsplashData);
-      } else {
-        hideUnsplashInfo();
-      }
+        // Apply to UI
+        setBackground(newUrl);
+        if (unsplashData) {
+          displayUnsplashInfo(unsplashData);
+        } else {
+          hideUnsplashInfo();
+        }
+        applyDynamicAccent(
+          unsplashData && unsplashData.color,
+          settingsState.dynamicAccent === true,
+        );
 
-      // Save new cache
-      chrome.storage.local.set({
-        cachedWallpaper: {
-          source: 'unsplash',
-          theme: theme,
-          apiKey: apiKey,
-          url: newUrl,
-          timestamp: now,
-          unsplashData: unsplashData,
-        },
-      });
-    });
+        // Save new cache
+        chrome.storage.local.set({
+          cachedWallpaper: {
+            source: 'unsplash',
+            theme: theme,
+            apiKey: apiKey,
+            url: newUrl,
+            timestamp: now,
+            unsplashData: unsplashData,
+          },
+        });
+      },
+    );
     return;
   }
 

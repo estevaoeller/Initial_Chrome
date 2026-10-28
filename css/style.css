@@ -1,7 +1,9 @@
-/* css/style.css */
+/* css/style.css
+   Tokens de design (espaçamento, radius, sombras, movimento, superfícies)
+   vivem em css/tokens.css — carregado antes deste arquivo. */
 :root {
   --icon-size: 32px;
-  --icon-border-radius: 6px;
+  --icon-border-radius: 10px;
   --icon-border-color: #ddd;
   --icon-bg-color: #fff;
   --icon-spacing: 8px;
@@ -11,20 +13,20 @@
   --bookmark-font-color: #333;
   --bookmark-min-width: 100px;
   --sidebar-width: 200px;
-  /* Theme variables (default to light) */
-  --bg: #f5f5f5;
-  --card: #ffffff;
-  --text: #333333;
-  --accent: #007bff;
+  /* Theme variables — dark é o tema de referência (dark-first) */
+  --bg: #0f172a;
+  --card: #1e293b;
+  --text: #e2e8f0;
+  --accent: #38bdf8;
 }
 
 body.light-theme {
-  --bg: #f5f5f5;
+  --bg: #f4f4f5;
   --card: #ffffff;
-  --text: #333333;
-  --accent: #007bff;
+  --text: #27272a;
+  --accent: #5558e3; /* 5.4:1 sobre branco (WCAG AA) */
   --icon-bg-color: #ffffff;
-  --icon-border-color: #dddddd;
+  --icon-border-color: #e4e4e7;
 }
 
 body.dark-theme {
@@ -40,45 +42,68 @@ body.dark-theme {
   /* Lighter Slate for Icons */
   --icon-border-color: #475569;
   /* Subtle Border */
+  --on-accent: #0f172a; /* texto escuro sobre o cyan: 8.3:1 (branco dava 2.1) */
 }
 
 body.solar-theme {
   --bg: #fdf6e3;
   --card: #eee8d5;
-  --text: #657b83;
+  --text: #52676e; /* 4.9:1 sobre o card (antes 4.4 — reprovava AA) */
   --accent: #268bd2;
   --icon-bg-color: #eee8d5;
   --icon-border-color: #d0c5b5;
+  --on-accent: #002b36;
 }
 
 body.minimal-theme {
   --bg: #fafafa;
   --card: #ffffff;
   --text: #111111;
-  --accent: #ff4081;
+  --accent: #d81b60; /* 4.95:1 nos dois sentidos (antes #ff4081 = 3.3) */
   --icon-bg-color: #ffffff;
-  --icon-border-color: #dddddd;
+  --icon-border-color: #e5e5e5;
 }
 
 body {
-  font-family:
-    system-ui,
-    -apple-system,
-    BlinkMacSystemFont,
-    'Segoe UI',
-    Roboto,
-    Oxygen,
-    Ubuntu,
-    Cantarell,
-    'Open Sans',
-    'Helvetica Neue',
-    sans-serif;
+  font-family: var(--font-ui);
   margin: 0;
   padding: 0;
   background-color: var(--bg);
   color: var(--text);
   overflow: hidden;
   height: 100vh;
+}
+
+/* Título padrão dos widgets (To-Do, RSS, etc.) */
+.widget-title {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.widget-title-icon {
+  width: 14px;
+  height: 14px;
+  flex-shrink: 0;
+  opacity: 0.8;
+}
+
+/* Barra superior (quick links à esquerda, Toggl à direita) */
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: var(--space-5);
+  font-size: var(--quick-links-size, 13px);
+}
+
+#top-right-bar {
+  display: flex;
+  gap: var(--space-4);
+}
+
+#toggl-toggle-btn {
+  text-decoration: none;
 }
 
 /* ========== APP CONTAINER (Flexbox Layout) ========== */
@@ -92,30 +117,63 @@ body {
 #sidebar {
   width: var(--sidebar-width);
   min-width: var(--sidebar-width);
-  background-color: var(--card);
-  border-right: 1px solid var(--icon-border-color);
+  background-color: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  border-right: 1px solid var(--surface-border);
   display: flex;
   flex-direction: column;
   transition:
-    width 0.3s ease,
-    min-width 0.3s ease;
+    width var(--dur-slow) var(--ease-out),
+    min-width var(--dur-slow) var(--ease-out);
   position: relative;
   z-index: 100;
   flex-shrink: 0;
 }
 
+/* Colapsada = mini-rail de ícones (em vez de sumir por completo) */
 #sidebar.collapsed {
-  width: 0;
-  min-width: 0;
+  width: 64px;
+  min-width: 64px;
   overflow: hidden;
+}
+
+#sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+#sidebar.collapsed .sidebar-header h3 {
+  display: none;
+}
+
+#sidebar.collapsed .space-name {
+  display: none;
+}
+
+#sidebar.collapsed .space-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  gap: 0;
+}
+
+#sidebar.collapsed .space-icon {
+  margin: 0;
+}
+
+/* Space sem emoji: mostra um ponto no lugar para o rail não ficar vazio */
+#sidebar.collapsed .space-icon:empty::before {
+  content: '•';
+  opacity: 0.6;
 }
 
 .sidebar-header {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  padding: 16px 20px;
-  border-bottom: 1px solid var(--icon-border-color);
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--surface-border);
 }
 
 .sidebar-header h3 {
@@ -140,39 +198,48 @@ body {
 }
 
 #add-space-btn:hover {
-  background-color: var(--bg);
+  background-color: var(--surface-hover);
 }
 
 #spaces-list {
   flex: 1;
   overflow-y: auto;
-  padding: 8px 0;
+  padding: var(--space-2) var(--space-2);
 }
 
 .space-item {
   display: flex;
   align-items: center;
-  gap: 12px;
-  padding: 10px 20px;
+  gap: var(--space-3);
+  padding: 10px 12px;
   cursor: pointer;
-  transition: background-color 0.15s ease;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
   color: var(--text);
   text-decoration: none;
   border: none;
   background: none;
   width: 100%;
   text-align: left;
-  font-size: 14px;
+  font-size: var(--text-base);
+  border-radius: var(--radius-md);
+  box-sizing: border-box;
+  margin-bottom: 2px;
 }
 
 .space-item:hover {
-  background-color: var(--bg);
+  background-color: var(--surface-hover);
+}
+
+.space-item:active {
+  transform: scale(0.98);
 }
 
 .space-item.active {
-  background-color: color-mix(in srgb, var(--accent) 15%, var(--card));
-  border-left: 3px solid var(--accent);
-  padding-left: 17px;
+  background-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: color-mix(in srgb, var(--accent) 60%, var(--text));
+  font-weight: 600;
 }
 
 .space-icon {
@@ -195,32 +262,40 @@ body {
   transform: translateY(-50%);
   width: 24px;
   height: 48px;
-  background-color: var(--card);
-  border: 1px solid var(--icon-border-color);
+  background-color: var(--surface-strong);
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
   border-left: none;
-  border-radius: 0 8px 8px 0;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 12px;
   color: var(--text);
   opacity: 0.7;
   transition:
-    opacity 0.2s ease,
-    background-color 0.2s ease,
-    left 0.3s ease;
+    opacity var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    left var(--dur-slow) var(--ease-out);
   z-index: 101;
+}
+
+#sidebar-toggle svg {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+#sidebar-toggle.collapsed svg {
+  transform: rotate(180deg);
 }
 
 #sidebar-toggle:hover {
   opacity: 1;
-  background-color: var(--bg);
+  background-color: var(--surface-hover);
 }
 
-/* When sidebar is collapsed, move toggle to left edge */
+/* When sidebar is collapsed (mini-rail), keep toggle at the rail edge */
 #sidebar.collapsed ~ #sidebar-toggle {
-  left: 0;
+  left: 64px;
 }
 
 /* ========== MAIN WRAPPER ========== */
@@ -238,18 +313,62 @@ body {
   width: 100%;
   height: 100%;
   background-color: rgba(0, 0, 0, 0.3);
-  /* Filtro escuro semi-transparente - ajuste depois */
+  /* Filtro escuro semi-transparente — cor/opacidade controladas nas settings */
   z-index: -1;
   /* Para ficar atrás do conteúdo */
-  /* A imagem de fundo será adicionada aqui depois */
+}
+
+/* Profundidade: escurecimento progressivo sutil no topo e na base do
+   wallpaper (melhora contraste do relógio e do rodapé sem chapar a foto) */
+#background-filter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    to bottom,
+    rgba(0, 0, 0, 0.18) 0%,
+    transparent 22%,
+    transparent 78%,
+    rgba(0, 0, 0, 0.22) 100%
+  );
+  pointer-events: none;
+}
+
+/* ===== Scrollbars finas e discretas ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text) 25%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text) 40%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
 }
 
 /* ========== ACTION SIDEBAR (Right) ========== */
 #action-sidebar {
   width: 40px;
   /* Reduced width */
-  background-color: var(--card);
-  border-left: 1px solid var(--icon-border-color);
+  background-color: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  border-left: 1px solid var(--surface-border);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -290,7 +409,7 @@ body {
 }
 
 .action-btn:hover {
-  background-color: var(--bg);
+  background-color: var(--surface-hover);
   opacity: 1;
   transform: scale(1.1);
   color: var(--accent);
@@ -314,10 +433,15 @@ body {
 }
 
 .clock-time {
-  font-size: 6rem;
+  font-size: var(--text-display);
   font-weight: 200;
   line-height: 1;
   letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.digital-time {
+  font-variant-numeric: tabular-nums;
 }
 
 .clock-date {
@@ -382,20 +506,25 @@ body {
    o usuário pode querer configurar isso, ou podemos usar min-height no header */
 
 .bookmark-category {
-  background-color: var(--section-bg-color, var(--card));
+  /* A cor customizada pelo usuário (settings) atua como "tinta" do glass;
+     sem customização, cai na superfície padrão do tema */
+  background-color: var(--section-bg-color, var(--surface));
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
   color: var(--text);
   padding: var(--section-padding, 15px);
   margin-bottom: var(--category-gap, 20px);
   /* Use variable for category gap */
-  border-radius: 8px;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-sm);
 }
 
 .bookmark-category h2 {
   margin-top: 0;
-  border-bottom: 2px solid var(--section-line-color, var(--accent));
   padding-bottom: 10px;
-  font-weight: 500;
+  font-weight: 600;
+  font-size: 1.1rem;
+  letter-spacing: 0.2px;
   color: var(--text);
 }
 
@@ -440,29 +569,28 @@ body {
   font-size: 18px;
   /* Tamanho do 'X' - um pouco maior para facilitar o clique */
   font-weight: bold;
-  color: #aaa;
-  /* Cor cinza claro inicial */
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   cursor: pointer;
   padding: 2px 4px;
   /* Espaçamento interno para aumentar a área de clique */
   line-height: 1;
-  display: none;
-  /* Começa oculto */
+  opacity: 0;
+  pointer-events: none;
   user-select: none;
   /* Para não selecionar o 'X' como texto */
-  transition: color 0.2s ease;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .bookmark-item:hover .delete-bookmark-btn {
-  display: block;
-  /* Mostra o botão quando o mouse está sobre o bookmark-item */
-  color: #f35454;
-  /* Cor vermelha mais suave ao mostrar */
+  opacity: 1;
+  pointer-events: auto;
+  color: color-mix(in srgb, var(--danger) 70%, var(--text));
 }
 
 .delete-bookmark-btn:hover {
-  color: #cc0000;
-  /* Vermelho mais escuro quando o mouse está sobre o X especificamente */
+  color: var(--danger-strong);
 }
 
 /* EDIT BUTTON */
@@ -472,17 +600,21 @@ body {
   right: 25px;
   /* Espaço para não encavalar no X */
   font-size: 14px;
-  color: #aaa;
+  color: color-mix(in srgb, var(--text) 50%, transparent);
   cursor: pointer;
   padding: 2px 4px;
   line-height: 1;
-  display: none;
+  opacity: 0;
+  pointer-events: none;
   user-select: none;
-  transition: color 0.2s ease;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    color var(--dur-fast) var(--ease-out);
 }
 
 .bookmark-item:hover .edit-bookmark-btn {
-  display: block;
+  opacity: 1;
+  pointer-events: auto;
 }
 
 .edit-bookmark-btn:hover {
@@ -622,16 +754,24 @@ body.name-display-hover .bookmark-item:hover .bookmark-name {
   /* Removed min-height to allow very small boxes */
   word-break: break-word;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    padding 0.3s ease;
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out),
+    padding var(--dur-base) var(--ease-out);
 }
 
 .bookmark-item:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+  transform: translateY(-2px) scale(1.01);
+  box-shadow: var(--shadow-md);
+  border-color: color-mix(in srgb, var(--accent) 35%, var(--icon-border-color));
   z-index: 10;
   /* Garante que fique sobre outros se houver overlap */
+}
+
+.bookmark-item:active {
+  transform: translateY(0) scale(0.97);
+  box-shadow: var(--shadow-sm);
+  transition-duration: 80ms;
 }
 
 /* Modificador para Layout Vertical (Texto Abaixo) */
@@ -814,10 +954,10 @@ body.text-behavior-single .bookmark-name {
   pointer-events: auto;
 }
 
-/* Fix for when sidebar is collapsed. */
+/* Fix for when sidebar is collapsed (mini-rail = 64px). */
 #sidebar.collapsed ~ #main-wrapper #quick-links-bar {
-  left: 0;
-  width: 100%;
+  left: 64px;
+  width: calc(100% - 64px);
 }
 
 .quick-link {
@@ -835,35 +975,7 @@ body.text-behavior-single .bookmark-name {
   transform: translateY(-1px);
 }
 
-/* Unsplash Info Widget */
-#unsplash-info {
-  position: fixed;
-  bottom: 20px;
-  right: 60px;
-  /* To avoid overlapping with the action sidebar */
-  background: rgba(0, 0, 0, 0.5);
-  padding: 8px 12px;
-  border-radius: 8px;
-  font-size: 10px;
-  z-index: 0;
-  transition: background 0.2s ease;
-  backdrop-filter: blur(4px);
-}
-
-#unsplash-info:hover {
-  background: rgba(0, 0, 0, 0.8);
-}
-
-#unsplash-link {
-  color: #ffffff;
-  text-decoration: none;
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  flex-wrap: wrap;
-  gap: 12px;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.8);
-}
+/* Unsplash Info Widget — estilos consolidados em .unsplash-info (abaixo) */
 
 #unsplash-link span {
   display: flex;
@@ -901,16 +1013,16 @@ body.text-behavior-single .bookmark-name {
 }
 
 .modal-content.glass-effect {
-  background: color-mix(in srgb, var(--card) 85%, transparent);
-  backdrop-filter: blur(10px);
-  border: 1px solid var(--icon-border-color);
-  border-radius: 12px;
+  background: var(--surface-strong);
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
   width: 90%;
   max-width: 400px;
-  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+  box-shadow: var(--shadow-lg);
   overflow: hidden;
   transform: translateY(20px);
-  transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+  transition: transform var(--dur-base) var(--ease-spring);
 }
 
 .modal-overlay.show .modal-content {
@@ -1073,7 +1185,7 @@ body.text-behavior-single .bookmark-name {
 
 .primary-btn {
   background-color: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   box-shadow: 0 2px 4px color-mix(in srgb, var(--accent) 40%, transparent);
 }
 
@@ -1123,11 +1235,23 @@ body.text-behavior-single .bookmark-name {
 }
 
 #next-wallpaper-btn {
+  background: transparent;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  margin-left: 10px;
+  padding: 2px;
+  display: flex;
+  align-items: center;
   opacity: 0.8;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    transform var(--dur-base) var(--ease-out);
 }
 
 #next-wallpaper-btn:hover {
-  opacity: 1 !important;
+  opacity: 1;
+  transform: rotate(180deg);
 }
 
 /* Pomodoro Widget */
@@ -1136,17 +1260,17 @@ body.text-behavior-single .bookmark-name {
   top: 20px;
   right: 80px; /* Offset from action sidebar */
   width: 280px;
-  background: var(--card);
-  border: 1px solid var(--icon-border-color);
-  border-radius: 16px;
+  background: var(--surface-strong);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
   padding: 20px;
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-lg);
+  backdrop-filter: blur(var(--surface-blur));
   z-index: 1000;
   display: flex;
   flex-direction: column;
   gap: 15px;
-  animation: fadeInDown 0.3s ease;
+  animation: fadeInDown var(--dur-base) var(--ease-out);
 }
 
 @keyframes fadeInDown {
@@ -1170,11 +1294,19 @@ body.text-behavior-single .bookmark-name {
   font-size: 1.1rem;
   font-weight: 600;
   color: var(--text);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.pomodoro-title .widget-title-icon {
+  width: 16px;
+  height: 16px;
 }
 
 .pomodoro-header .badge {
   background-color: var(--accent);
-  color: white;
+  color: var(--on-accent);
   font-size: 0.75rem;
   font-weight: bold;
   padding: 3px 8px;
@@ -1182,14 +1314,15 @@ body.text-behavior-single .bookmark-name {
 }
 
 .pomodoro-header .badge.break {
-  background-color: #10b981; /* Green for break */
+  background-color: var(--success); /* Green for break */
 }
 
 .pomodoro-timer {
   text-align: center;
   font-size: 4rem;
   font-weight: 800;
-  font-family: monospace, system-ui;
+  font-family: var(--font-ui);
+  font-variant-numeric: tabular-nums;
   color: var(--text);
   line-height: 1;
   margin: 10px 0;
@@ -1246,12 +1379,12 @@ body.text-behavior-single .bookmark-name {
 
 .pomo-btn.play {
   background-color: color-mix(in srgb, var(--accent) 90%, transparent);
-  color: white;
+  color: var(--on-accent);
 }
 
 .pomo-btn.stop {
-  background-color: rgba(239, 68, 68, 0.2);
-  color: #ef4444;
+  background-color: color-mix(in srgb, var(--danger) 20%, transparent);
+  color: var(--danger);
 }
 
 .pomo-btn:hover {
@@ -1273,14 +1406,14 @@ body.text-behavior-single .bookmark-name {
 
 .animate-cascade {
   opacity: 0;
-  animation: slideUpFadeIn 0.35s cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+  animation: slideUpFadeIn var(--dur-slow) var(--ease-out) forwards;
 }
 
 /* ========== SEARCH MODAL ========== */
 .search-modal-content {
   max-width: 600px !important;
-  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
-  border-radius: 16px !important;
+  background: var(--surface-strong) !important;
+  border-radius: var(--radius-lg) !important;
   display: flex;
   flex-direction: column;
 }
@@ -1346,7 +1479,7 @@ body.text-behavior-single .bookmark-name {
 
 .search-filter-btn.active {
   background: var(--accent);
-  color: #ffffff;
+  color: var(--on-accent);
   border-color: var(--accent);
 }
 
@@ -1387,6 +1520,23 @@ body.text-behavior-single .bookmark-name {
   width: 20px;
   height: 20px;
   object-fit: contain;
+  flex-shrink: 0;
+}
+
+/* Itens de comando da palette (>) */
+.search-command-item {
+  background: transparent;
+  border: none;
+  width: 100%;
+  text-align: left;
+  font-family: inherit;
+  font-size: inherit;
+}
+
+.search-command-icon {
+  width: 20px;
+  font-size: 16px;
+  text-align: center;
   flex-shrink: 0;
 }
 
@@ -1456,15 +1606,15 @@ body.text-behavior-single .bookmark-name {
 }
 
 .skeleton-category {
-  background-color: var(--card);
-  border-radius: 8px;
+  background-color: var(--surface);
+  border-radius: var(--radius-lg);
   padding: 15px;
   margin-bottom: var(--category-gap, 20px);
-  border: 1px solid var(--icon-border-color);
+  border: 1px solid var(--surface-border);
 }
 
 .skeleton-header {
-  border-bottom: 2px solid var(--icon-border-color);
+  border-bottom: 1px solid var(--surface-border);
   padding-bottom: 10px;
   margin-bottom: 15px;
 }
@@ -1527,11 +1677,11 @@ body.text-behavior-single .bookmark-name {
   position: fixed;
   z-index: 3000;
   min-width: 180px;
-  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--icon-border-color);
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: var(--surface-strong) !important;
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   padding: 6px 0;
   display: flex;
   flex-direction: column;
@@ -1573,9 +1723,21 @@ body.text-behavior-single .bookmark-name {
 }
 
 .context-menu-icon {
-  font-size: 14px;
   width: 16px;
-  text-align: center;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  opacity: 0.85;
+}
+
+.context-menu-icon svg {
+  width: 14px;
+  height: 14px;
+}
+
+.context-menu-arrow svg {
+  display: block;
 }
 
 .context-menu-text {
@@ -1595,8 +1757,8 @@ body.text-behavior-single .bookmark-name {
 
 /* Delete item hover warning */
 .context-menu-item.delete-item:hover {
-  background-color: rgba(239, 68, 68, 0.15);
-  color: #ef4444;
+  background-color: color-mix(in srgb, var(--danger) 15%, transparent);
+  color: var(--danger);
 }
 
 /* Submenu layout */
@@ -1605,11 +1767,11 @@ body.text-behavior-single .bookmark-name {
   left: 100%;
   top: -6px;
   min-width: 160px;
-  background: color-mix(in srgb, var(--card) 90%, transparent) !important;
-  backdrop-filter: blur(12px);
-  border: 1px solid var(--icon-border-color);
-  border-radius: 8px;
-  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.25);
+  background: var(--surface-strong) !important;
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-md);
+  box-shadow: var(--shadow-lg);
   padding: 6px 0;
   display: none;
   flex-direction: column;
@@ -1654,9 +1816,9 @@ body.text-behavior-single .bookmark-name {
 /* ========== SHORTCUTS CHEATSHEET MODAL ========== */
 .shortcuts-modal-content {
   max-width: 450px !important;
-  border-radius: 16px !important;
-  background: color-mix(in srgb, var(--card) 85%, transparent) !important;
-  backdrop-filter: blur(12px);
+  border-radius: var(--radius-lg) !important;
+  background: var(--surface-strong) !important;
+  backdrop-filter: blur(var(--surface-blur));
 }
 
 .shortcuts-list {
@@ -1736,21 +1898,22 @@ body.text-behavior-single .bookmark-name {
 
 /* Delete Button in Modal */
 .modal-btn.delete-btn {
-  background-color: #ef4444;
-  color: #ffffff;
+  background-color: var(--danger);
+  color: var(--on-danger);
   border: none;
-  transition: background-color 0.2s;
+  transition: background-color var(--dur-fast) var(--ease-out);
 }
 
 .modal-btn.delete-btn:hover {
-  background-color: #dc2626;
+  background-color: var(--danger-strong);
 }
 
 /* Space items sorting ghost / styling */
 .space-item.sortable-ghost {
   opacity: 0.4;
   background-color: color-mix(in srgb, var(--accent) 10%, transparent);
-  border-left: 3px dashed var(--accent);
+  outline: 2px dashed var(--accent);
+  outline-offset: -2px;
 }
 
 .space-item.sortable-chosen {
@@ -1870,11 +2033,11 @@ body.text-behavior-single .bookmark-name {
     left: 65px !important;
   }
   #sidebar.collapsed ~ #sidebar-toggle {
-    left: 0 !important;
+    left: 65px !important;
   }
   #sidebar.collapsed ~ #main-wrapper #quick-links-bar {
-    left: 0 !important;
-    width: 100% !important;
+    left: 65px !important;
+    width: calc(100% - 65px) !important;
   }
   #main-wrapper #quick-links-bar {
     left: 65px !important;
@@ -1936,6 +2099,41 @@ textarea:focus-visible {
   z-index: 1;
 }
 .bookmark-item:hover::before {
+  opacity: 1;
+}
+
+/* ========== MODO ZEN (Alt+Z) ==========
+   Esconde tudo exceto wallpaper + relógio/saudação.
+   A action bar direita fica invisível mas reaparece no hover
+   (borda direita da tela) para sair do modo. */
+body.zen-mode #sidebar,
+body.zen-mode #sidebar-toggle,
+body.zen-mode .top-bar,
+body.zen-mode #top-widgets-container,
+body.zen-mode #rss-widget,
+body.zen-mode #content-area,
+body.zen-mode #unsplash-info {
+  display: none !important;
+}
+
+body.zen-mode #top-header {
+  min-height: calc(100vh - 80px);
+  align-items: center;
+}
+
+body.zen-mode #action-sidebar {
+  opacity: 0;
+  transition: opacity var(--dur-base) var(--ease-out);
+}
+
+body.zen-mode #action-sidebar:hover,
+body.zen-mode #action-sidebar:focus-within {
+  opacity: 1;
+}
+
+/* Botão zen destacado quando ativo */
+#zen-mode-btn.active {
+  color: var(--accent);
   opacity: 1;
 }
 
@@ -2015,18 +2213,17 @@ textarea:focus-visible {
 /* Quote Widget */
 .quote-widget {
   flex: 1;
-  background-color: var(--section-bg-color, var(--card));
-  opacity: var(--section-bg-opacity, 0.95);
-  border-radius: 12px;
+  background-color: var(--section-bg-color, var(--surface));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
   padding: 15px 20px;
-  border-top: 3px solid var(--section-line-color, var(--accent));
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(var(--surface-blur));
   cursor: pointer;
   transition:
-    transform 0.2s ease,
-    box-shadow 0.2s ease,
-    opacity 0.3s ease;
+    transform var(--dur-fast) var(--ease-out),
+    box-shadow var(--dur-fast) var(--ease-out),
+    opacity var(--dur-base) var(--ease-out);
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -2035,7 +2232,7 @@ textarea:focus-visible {
 }
 .quote-widget:hover {
   transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.15);
+  box-shadow: var(--shadow-md);
 }
 .quote-text {
   font-style: italic;
@@ -2065,13 +2262,12 @@ textarea:focus-visible {
 /* To-Do List Widget */
 .todo-widget {
   flex: 1;
-  background-color: var(--section-bg-color, var(--card));
-  opacity: var(--section-bg-opacity, 0.95);
-  border-radius: 12px;
+  background-color: var(--section-bg-color, var(--surface));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
   padding: 15px 20px;
-  border-top: 3px solid var(--section-line-color, var(--accent));
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(var(--surface-blur));
   display: flex;
   flex-direction: column;
   min-height: 120px;
@@ -2175,7 +2371,7 @@ textarea:focus-visible {
 .todo-delete-btn {
   background: transparent;
   border: none;
-  color: #ef4444;
+  color: var(--danger);
   cursor: pointer;
   font-size: 1.1rem;
   line-height: 1;
@@ -2221,13 +2417,13 @@ textarea:focus-visible {
 
 /* RSS Feed Widget (Fase 6) */
 .rss-widget {
-  background-color: var(--section-bg-color, var(--card));
-  opacity: var(--section-bg-opacity, 0.95);
-  border-radius: 12px;
+  background-color: var(--section-bg-color, var(--surface));
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
   padding: 15px 20px;
   border-top: 3px solid var(--section-line-color, var(--accent));
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  backdrop-filter: blur(10px);
+  box-shadow: var(--shadow-sm);
+  backdrop-filter: blur(var(--surface-blur));
   margin: 0;
   width: 100%;
   box-sizing: border-box;
@@ -2305,73 +2501,159 @@ textarea:focus-visible {
   color: var(--text);
 }
 .rss-error {
-  color: #ef4444;
+  color: var(--danger);
   opacity: 0.9;
 }
 
-/* Empty Space State */
+/* ===== Cabeçalho e grupos de bookmarks =====
+   (antes eram estilos inline aplicados pelo bookmark-renderer.js) */
+.category-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px solid
+    color-mix(
+      in srgb,
+      var(--section-line-color, var(--accent)) 40%,
+      transparent
+    );
+  padding-bottom: 10px;
+  margin-bottom: 15px;
+}
+
+.category-header .title-container {
+  display: flex;
+  align-items: center;
+}
+
+.group-drag-handle {
+  cursor: grab;
+  opacity: 0.3;
+  margin-right: 10px;
+  transition: opacity var(--dur-fast) var(--ease-out);
+  display: flex;
+  align-items: center;
+}
+
+.category-header:hover .group-drag-handle {
+  opacity: 0.7;
+}
+
+.bookmark-category .category-title {
+  cursor: text;
+  border-bottom: none;
+  padding-bottom: 0;
+  margin: 0;
+}
+
+.group-name-edit {
+  font-size: 1.5em;
+  font-weight: 500;
+  font-family: inherit;
+  color: var(--text);
+  background: transparent;
+  border: 1px solid var(--accent);
+  border-radius: 4px;
+  padding: 2px 5px;
+  margin: 0;
+  outline: none;
+  width: 100%;
+}
+
+.new-group-container {
+  text-align: center;
+  padding: 20px;
+  margin-top: 20px;
+}
+
+.new-group-input {
+  max-width: 260px;
+  text-align: center;
+  padding: 10px 16px;
+  font-size: var(--text-base);
+  border-radius: var(--radius-sm);
+  background: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+}
+
+/* ===== EMPTY STATES ===== */
+.empty-state,
 .empty-space-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: var(--space-3);
+  padding: var(--space-8) var(--space-6);
+  margin: 10vh auto 0;
+  max-width: 380px;
   text-align: center;
-  margin: 60px auto;
-  max-width: 480px;
-  padding: 40px 30px;
-  background-color: var(--section-bg-color, var(--card));
-  opacity: var(--section-bg-opacity, 0.95);
-  border-radius: 16px;
-  border: 1px dashed var(--icon-border-color);
-  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.08);
-  backdrop-filter: blur(12px);
-  animation: fadeIn 0.3s ease;
+  background: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px dashed var(--surface-border);
+  border-radius: var(--radius-xl);
+  color: var(--text);
 }
 
+.empty-state-icon,
 .empty-space-icon {
-  font-size: 3rem;
-  margin-bottom: 16px;
-  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.15));
+  opacity: 0.4;
 }
 
+.empty-state-title,
 .empty-space-title {
-  font-size: 1.25rem;
+  margin: 0;
+  font-size: var(--text-lg);
   font-weight: 600;
-  color: var(--text);
-  margin: 0 0 8px 0;
 }
 
+.empty-state-desc,
 .empty-space-desc {
-  font-size: 0.9rem;
-  color: var(--text);
+  margin: 0 0 var(--space-2);
+  font-size: var(--text-sm);
   opacity: 0.7;
-  margin: 0 0 24px 0;
   line-height: 1.5;
 }
 
-.empty-space-btn {
-  display: inline-flex;
+/* Grupo sem nenhum link: dica + área de drop visível */
+.bookmarks-grid:empty {
+  min-height: 52px;
+  border: 1px dashed var(--surface-border);
+  border-radius: var(--radius-sm);
+}
+
+.bookmarks-grid:empty::after {
+  content: 'Grupo vazio — arraste um link para cá ou use Alt+N';
+  grid-column: 1 / -1;
+  display: flex;
   align-items: center;
-  gap: 8px;
-  padding: 10px 24px;
-  font-size: 0.95rem;
-  font-weight: 500;
-  color: #ffffff;
-  background-color: var(--accent);
-  border: none;
-  border-radius: 8px;
+  justify-content: center;
+  min-height: 52px;
+  font-size: var(--text-xs);
+  opacity: 0.5;
+  padding: 0 var(--space-3);
+}
+
+.new-group-btn,
+.empty-space-btn {
+  padding: 10px 20px;
+  font-size: 14px;
   cursor: pointer;
-  box-shadow: 0 4px 12px rgba(0, 123, 255, 0.25);
-  transition: all 0.2s ease;
+  background: var(--input-bg);
+  color: var(--text);
+  border: 1px dashed var(--settings-border);
+  border-radius: 8px;
+  transition: all 0.2s;
 }
 
+.new-group-btn:hover,
 .empty-space-btn:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 6px 16px rgba(0, 123, 255, 0.35);
-  filter: brightness(1.1);
+  border: 1px solid var(--accent);
+  color: var(--accent);
 }
 
-.empty-space-btn:active {
-  transform: translateY(0);
+@media (prefers-reduced-motion: reduce) {
+  .animate-cascade {
+    animation: none;
+  }
 }
-
