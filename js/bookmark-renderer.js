@@ -7,30 +7,35 @@ import {
 } from './modules.js';
 
 // Setup lazy loading IntersectionObserver globally
-const faviconObserver = new IntersectionObserver(
-  (entries, observer) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const img = entry.target;
-        if (img.dataset.src) {
-          img.src = img.dataset.src;
-          img.removeAttribute('data-src');
-        }
-        observer.unobserve(img);
-      }
-    });
-  },
-  { rootMargin: '100px' },
-);
+const faviconObserver =
+  typeof IntersectionObserver !== 'undefined'
+    ? new IntersectionObserver(
+        (entries, observer) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              const img = entry.target;
+              if (img.dataset.src) {
+                img.src = img.dataset.src;
+                img.removeAttribute('data-src');
+              }
+              observer.unobserve(img);
+            }
+          });
+        },
+        { rootMargin: '100px' },
+      )
+    : null;
 
 // Track internal drag state globally
-document.addEventListener('dragstart', () => {
-  document.body.classList.add('dragging-internal');
-});
+if (typeof document !== 'undefined') {
+  document.addEventListener('dragstart', () => {
+    if (document.body) document.body.classList.add('dragging-internal');
+  });
 
-document.addEventListener('dragend', () => {
-  document.body.classList.remove('dragging-internal');
-});
+  document.addEventListener('dragend', () => {
+    if (document.body) document.body.classList.remove('dragging-internal');
+  });
+}
 
 export function renderBookmarks(
   bookmarks,
@@ -47,8 +52,56 @@ export function renderBookmarks(
     loadingSkeletons.style.display = 'none';
   }
 
+function renderEmptySpace(contentArea, stateHelpers, iconSize) {
+  contentArea.innerHTML = '';
+
+  const { getBookmarks, setBookmarks, spaceId } = stateHelpers || {};
+
+  const emptyContainer = document.createElement('div');
+  emptyContainer.className = 'empty-space-container glass-effect animate-cascade';
+
+  const iconEl = document.createElement('div');
+  iconEl.className = 'empty-space-icon';
+  iconEl.textContent = '📂';
+
+  const titleEl = document.createElement('h3');
+  titleEl.className = 'empty-space-title';
+  titleEl.textContent = 'Este Espaço ainda está vazio';
+
+  const descEl = document.createElement('p');
+  descEl.className = 'empty-space-desc';
+  descEl.textContent =
+    'Crie seu primeiro grupo de marcadores para começar a organizar seus links neste espaço.';
+
+  const actionBtn = document.createElement('button');
+  actionBtn.className = 'empty-space-btn';
+  actionBtn.innerHTML = '<span>+</span> Criar Primeiro Grupo';
+  actionBtn.setAttribute('aria-label', 'Criar primeiro grupo neste espaço');
+
+  actionBtn.addEventListener('click', () => {
+    const groupName = prompt(
+      'Nome do primeiro grupo (ex: Favoritos, Ferramentas, Notícias):',
+    );
+    if (groupName && groupName.trim() && spaceId) {
+      createGroup(spaceId, groupName.trim(), (newGroup) => {
+        const currentBookmarks = (getBookmarks && getBookmarks()) || [];
+        currentBookmarks.push(newGroup);
+        if (setBookmarks) setBookmarks(currentBookmarks);
+        renderBookmarks(currentBookmarks, contentArea, iconSize, stateHelpers);
+      });
+    }
+  });
+
+  emptyContainer.appendChild(iconEl);
+  emptyContainer.appendChild(titleEl);
+  emptyContainer.appendChild(descEl);
+  emptyContainer.appendChild(actionBtn);
+
+  contentArea.appendChild(emptyContainer);
+}
+
   if (!bookmarks || bookmarks.length === 0) {
-    contentArea.innerHTML = '';
+    renderEmptySpace(contentArea, stateHelpers, iconSize);
     return;
   }
 

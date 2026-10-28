@@ -96,44 +96,71 @@
           </div>
         </header>
 
-        <div id="top-widgets-container" class="top-widgets-container">
-          <!-- Quote Widget -->
-          <div
-            id="quote-widget"
-            class="quote-widget"
-            title="Clique para ver outra citação"
-            role="button"
-            tabindex="0"
-          >
-            <p id="quote-text" class="quote-text">Carregando citação...</p>
-            <p id="quote-author" class="quote-author"></p>
+        <div id="widgets-dashboard-wrapper" class="widgets-dashboard-wrapper">
+          <div class="widgets-dashboard-controls">
+            <button
+              id="toggle-widgets-btn"
+              class="toggle-widgets-btn"
+              title="Alternar painel de widgets"
+              aria-label="Alternar painel de widgets"
+              aria-expanded="true"
+            >
+              <span id="toggle-widgets-icon">▾</span>
+              <span id="toggle-widgets-text">Painel de Widgets</span>
+            </button>
           </div>
 
-          <!-- To-Do List Widget -->
-          <div id="todo-widget" class="todo-widget">
-            <div class="todo-header">
-              <h4>📋 Minhas Tarefas</h4>
+          <div id="top-widgets-container" class="top-widgets-container">
+            <!-- Quote Widget -->
+            <div
+              id="quote-widget"
+              class="quote-widget"
+              title="Clique para ver outra citação"
+              role="button"
+              tabindex="0"
+            >
+              <p id="quote-text" class="quote-text">Carregando citação...</p>
+              <p id="quote-author" class="quote-author"></p>
             </div>
-            <ul id="todo-list" class="todo-list"></ul>
-            <div class="todo-input-container">
-              <input
-                type="text"
-                id="todo-input"
-                placeholder="Nova tarefa..."
-                autocomplete="off"
-              />
-            </div>
-          </div>
-        </div>
 
-        <!-- RSS Feed Widget (Fase 6) -->
-        <div id="rss-widget" class="rss-widget">
-          <div class="rss-header">
-            <h4 id="rss-title">📰 Feed RSS</h4>
+            <!-- To-Do List Widget -->
+            <div id="todo-widget" class="todo-widget">
+              <div class="todo-header">
+                <div class="todo-header-left">
+                  <h4>📋 Minhas Tarefas</h4>
+                  <span id="todo-counter" class="todo-counter"></span>
+                </div>
+                <button
+                  id="todo-clear-completed"
+                  class="todo-header-btn"
+                  title="Limpar tarefas concluídas"
+                  aria-label="Limpar tarefas concluídas"
+                  style="display: none"
+                >
+                  Limpar concluídas
+                </button>
+              </div>
+              <ul id="todo-list" class="todo-list"></ul>
+              <div class="todo-input-container">
+                <input
+                  type="text"
+                  id="todo-input"
+                  placeholder="Nova tarefa..."
+                  autocomplete="off"
+                />
+              </div>
+            </div>
+
+            <!-- RSS Feed Widget -->
+            <div id="rss-widget" class="rss-widget">
+              <div class="rss-header">
+                <h4 id="rss-title">📰 Feed RSS</h4>
+              </div>
+              <ul id="rss-list" class="rss-list">
+                <div class="rss-loading">Carregando notícias...</div>
+              </ul>
+            </div>
           </div>
-          <ul id="rss-list" class="rss-list">
-            <div class="rss-loading">Carregando notícias...</div>
-          </ul>
         </div>
 
         <main id="content-area">

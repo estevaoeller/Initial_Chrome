@@ -2,12 +2,16 @@ export class TodoListManager {
   constructor() {
     this.inputEl = null;
     this.listEl = null;
+    this.counterEl = null;
+    this.clearCompletedBtn = null;
     this.tasks = [];
   }
 
   init() {
     this.inputEl = document.getElementById('todo-input');
     this.listEl = document.getElementById('todo-list');
+    this.counterEl = document.getElementById('todo-counter');
+    this.clearCompletedBtn = document.getElementById('todo-clear-completed');
 
     if (!this.inputEl || !this.listEl) {
       console.warn('Elementos do To-Do List não encontrados no DOM.');
@@ -20,6 +24,12 @@ export class TodoListManager {
         this.addTask();
       }
     });
+
+    if (this.clearCompletedBtn) {
+      this.clearCompletedBtn.addEventListener('click', () => {
+        this.clearCompletedTasks();
+      });
+    }
 
     // Load existing tasks
     chrome.storage.sync.get(['todoList'], (result) => {
@@ -56,14 +66,49 @@ export class TodoListManager {
     this.saveAndRender();
   }
 
+  clearCompletedTasks() {
+    const initialCount = this.tasks.length;
+    this.tasks = this.tasks.filter((t) => !t.completed);
+    if (this.tasks.length !== initialCount) {
+      this.saveAndRender();
+    }
+  }
+
   saveAndRender() {
     chrome.storage.sync.set({ todoList: this.tasks }, () => {
+      if (chrome.runtime.lastError) {
+        console.error(
+          'Erro ao salvar tarefas no Chrome Sync:',
+          chrome.runtime.lastError.message,
+        );
+        alert(
+          'Atenção: Limite de armazenamento do Chrome Sync atingido. Limpe tarefas concluídas para liberar espaço.',
+        );
+      }
       this.render();
     });
   }
 
   render() {
     this.listEl.innerHTML = '';
+
+    const pendingCount = this.tasks.filter((t) => !t.completed).length;
+    const completedCount = this.tasks.length - pendingCount;
+
+    // Atualizar contador
+    if (this.counterEl) {
+      if (this.tasks.length > 0) {
+        this.counterEl.textContent = `(${pendingCount} pendente${pendingCount === 1 ? '' : 's'})`;
+      } else {
+        this.counterEl.textContent = '';
+      }
+    }
+
+    // Exibir/ocultar botão de limpar concluídas
+    if (this.clearCompletedBtn) {
+      this.clearCompletedBtn.style.display =
+        completedCount > 0 ? 'inline-flex' : 'none';
+    }
 
     if (this.tasks.length === 0) {
       const emptyEl = document.createElement('div');

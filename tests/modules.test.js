@@ -7,6 +7,7 @@ import {
   saveCustomIconProps,
   removeCustomIconProps,
   applyTheme,
+  updateWeather,
 } from '../js/modules.js';
 
 describe('Chrome bookmark functions', () => {
@@ -280,5 +281,46 @@ describe('Chrome bookmark functions', () => {
       delete globalThis.localStorage;
       done();
     }, 50);
+  });
+
+  test('updateWeather uses cached data without network fetch when fresh', (done) => {
+    const weatherWidget = { style: { display: 'none' }, title: '' };
+    const weatherIcon = { textContent: '' };
+    const weatherTemp = { textContent: '' };
+
+    const cachedData = {
+      city: 'São Paulo',
+      cityNormalized: 'são paulo',
+      locationName: 'São Paulo',
+      latitude: -23.55,
+      longitude: -46.63,
+      temp: 23,
+      weathercode: 0,
+      icon: '☀️',
+      timestamp: Date.now() - 5 * 60 * 1000, // 5 minutos atrás (dentro do TTL de 45m)
+    };
+
+    chrome.storage.local.get.mockImplementation((keys, cb) => {
+      expect(keys).toEqual(['cachedWeatherData']);
+      cb({ cachedWeatherData: cachedData });
+    });
+
+    const originalFetch = globalThis.fetch;
+    const fetchMock = jest.fn();
+    globalThis.fetch = fetchMock;
+
+    updateWeather(weatherWidget, weatherIcon, weatherTemp, 'São Paulo');
+
+    setTimeout(() => {
+      expect(weatherIcon.textContent).toBe('☀️');
+      expect(weatherTemp.textContent).toBe('23°C');
+      expect(weatherWidget.style.display).toBe('flex');
+      expect(weatherWidget.title).toBe('São Paulo: 23°C');
+      // Não deve chamar fetch pois o cache é fresco!
+      expect(fetchMock).not.toHaveBeenCalled();
+
+      globalThis.fetch = originalFetch;
+      done();
+    }, 20);
   });
 });

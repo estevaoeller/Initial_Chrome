@@ -142,6 +142,9 @@ document.addEventListener('DOMContentLoaded', () => {
       'top-widgets-container',
     );
     const rssWidget = document.getElementById('rss-widget');
+    const widgetsDashboardWrapper = document.getElementById(
+      'widgets-dashboard-wrapper',
+    );
 
     const todoVal = settings.todoEnabled !== false;
     const quotesVal = settings.quotesEnabled !== false;
@@ -153,12 +156,52 @@ document.addEventListener('DOMContentLoaded', () => {
     if (quoteWidget) {
       quoteWidget.style.display = quotesVal ? '' : 'none';
     }
-    if (topWidgetsContainer) {
-      topWidgetsContainer.style.display = todoVal || quotesVal ? '' : 'none';
-    }
     if (rssWidget) {
       rssWidget.style.display = rssVal ? '' : 'none';
     }
+
+    const hasAnyWidget = todoVal || quotesVal || rssVal;
+    if (topWidgetsContainer) {
+      topWidgetsContainer.style.display = hasAnyWidget ? '' : 'none';
+    }
+    if (widgetsDashboardWrapper) {
+      widgetsDashboardWrapper.style.display = hasAnyWidget ? '' : 'none';
+    }
+  }
+
+  function initWidgetsDashboardToggle() {
+    const toggleBtn = document.getElementById('toggle-widgets-btn');
+    const topWidgetsContainer = document.getElementById('top-widgets-container');
+    const toggleIcon = document.getElementById('toggle-widgets-icon');
+    const toggleText = document.getElementById('toggle-widgets-text');
+
+    if (!toggleBtn || !topWidgetsContainer) return;
+
+    chrome.storage.local.get(['widgetsCollapsed'], (res) => {
+      const isCollapsed = res.widgetsCollapsed === true;
+      if (isCollapsed) {
+        topWidgetsContainer.classList.add('collapsed');
+        if (toggleIcon) toggleIcon.textContent = '▸';
+        if (toggleText) toggleText.textContent = 'Mostrar Widgets';
+        toggleBtn.setAttribute('aria-expanded', 'false');
+      } else {
+        topWidgetsContainer.classList.remove('collapsed');
+        if (toggleIcon) toggleIcon.textContent = '▾';
+        if (toggleText) toggleText.textContent = 'Ocultar Widgets';
+        toggleBtn.setAttribute('aria-expanded', 'true');
+      }
+    });
+
+    toggleBtn.addEventListener('click', () => {
+      const isCurrentlyCollapsed = topWidgetsContainer.classList.toggle('collapsed');
+      const isCollapsed = isCurrentlyCollapsed;
+
+      if (toggleIcon) toggleIcon.textContent = isCollapsed ? '▸' : '▾';
+      if (toggleText) toggleText.textContent = isCollapsed ? 'Mostrar Widgets' : 'Ocultar Widgets';
+      toggleBtn.setAttribute('aria-expanded', isCollapsed ? 'false' : 'true');
+
+      chrome.storage.local.set({ widgetsCollapsed: isCollapsed });
+    });
   }
 
   function initialize() {
@@ -215,6 +258,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Update widgets visibility
     updateWidgetVisibilities(settingsState);
+    initWidgetsDashboardToggle();
 
     // Wallpaper
     manageWallpaper(settingsState);

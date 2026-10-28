@@ -598,6 +598,22 @@ export function updateGreeting(greetingPlaceholder, userName) {
     : greeting;
 }
 
+function getWeatherIcon(weathercode) {
+  if (weathercode === 0) return '☀️';
+  if (weathercode >= 1 && weathercode <= 3) return '⛅';
+  if (weathercode >= 61 && weathercode <= 69) return '🌧️';
+  if (weathercode >= 71 && weathercode <= 79) return '❄️';
+  if (weathercode >= 95) return '⛈️';
+  return '☁️';
+}
+
+function applyWeatherToUI(weatherWidget, weatherIcon, weatherTemp, data) {
+  if (weatherIcon) weatherIcon.textContent = data.icon;
+  if (weatherTemp) weatherTemp.textContent = `${data.temp}°C`;
+  weatherWidget.style.display = 'flex';
+  weatherWidget.title = `${data.locationName}: ${data.temp}°C`;
+}
+
 export async function updateWeather(
   weatherWidget,
   weatherIcon,
@@ -605,15 +621,49 @@ export async function updateWeather(
   city,
 ) {
   if (!weatherWidget || !city) return;
-  try {
-    // Simple geocoding using Open-Meteo
-    const geoRes = await fetch(
-      `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`,
-    );
-    const geoData = await geoRes.json();
 
-    if (geoData.results && geoData.results.length > 0) {
-      const { latitude, longitude } = geoData.results[0];
+  const cityNormalized = city.trim().toLowerCase();
+  const TTL_MS = 45 * 60 * 1000; // 45 minutos de TTL
+  const now = Date.now();
+
+  // 1. Verificar cache local no storage
+  chrome.storage.local.get(['cachedWeatherData'], async (storageResult) => {
+    const cache = storageResult.cachedWeatherData;
+
+    // Se temos cache para a mesma cidade
+    if (cache && cache.cityNormalized === cityNormalized) {
+      // Atualiza a UI imediatamente a partir do cache (<5ms)
+      applyWeatherToUI(weatherWidget, weatherIcon, weatherTemp, cache);
+
+      // Se o cache ainda estiver fresco, não gasta requisições de rede
+      if (now - cache.timestamp < TTL_MS) {
+        return;
+      }
+    }
+
+    // 2. Buscar dados da rede (Stale-While-Revalidate ou primeira busca)
+    try {
+      let latitude = cache?.cityNormalized === cityNormalized ? cache.latitude : null;
+      let longitude = cache?.cityNormalized === cityNormalized ? cache.longitude : null;
+      let locationName = cache?.cityNormalized === cityNormalized ? cache.locationName : city;
+
+      // Se não temos coordenadas salvas para esta cidade, fazer geocoding
+      if (!latitude || !longitude) {
+        const geoRes = await fetch(
+          `https://geocoding-api.open-meteo.com/v1/search?name=${encodeURIComponent(city)}&count=1&language=pt&format=json`,
+        );
+        const geoData = await geoRes.json();
+
+        if (geoData.results && geoData.results.length > 0) {
+          latitude = geoData.results[0].latitude;
+          longitude = geoData.results[0].longitude;
+          locationName = geoData.results[0].name || city;
+        } else {
+          return; // Cidade não encontrada
+        }
+      }
+
+      // Buscar previsão
       const weatherRes = await fetch(
         `https://api.open-meteo.com/v1/forecast?latitude=${latitude}&longitude=${longitude}&current_weather=true`,
       );
@@ -622,24 +672,30 @@ export async function updateWeather(
       if (weatherData.current_weather) {
         const temp = weatherData.current_weather.temperature;
         const weathercode = weatherData.current_weather.weathercode;
+        const icon = getWeatherIcon(weathercode);
 
-        // Keep it simple for weather codes
-        let icon = '☁️';
-        if (weathercode === 0) icon = '☀️';
-        else if (weathercode >= 1 && weathercode <= 3) icon = '⛅';
-        else if (weathercode >= 61 && weathercode <= 69) icon = '🌧️';
-        else if (weathercode >= 71 && weathercode <= 79) icon = '❄️';
-        else if (weathercode >= 95) icon = '⛈️';
+        const newWeatherData = {
+          city: city,
+          cityNormalized: cityNormalized,
+          locationName: locationName,
+          latitude: latitude,
+          longitude: longitude,
+          temp: temp,
+          weathercode: weathercode,
+          icon: icon,
+          timestamp: Date.now(),
+        };
 
-        if (weatherIcon) weatherIcon.textContent = icon;
-        if (weatherTemp) weatherTemp.textContent = `${temp}°C`;
-        weatherWidget.style.display = 'flex';
-        weatherWidget.title = `${geoData.results[0].name}: ${temp}°C`;
+        // Salvar em cache no storage local
+        chrome.storage.local.set({ cachedWeatherData: newWeatherData });
+
+        // Atualizar interface
+        applyWeatherToUI(weatherWidget, weatherIcon, weatherTemp, newWeatherData);
       }
+    } catch (error) {
+      console.warn('Falha ao atualizar clima da rede (mantendo cache se disponível):', error);
     }
-  } catch (error) {
-    console.error('Falha ao buscar clima:', error);
-  }
+  });
 }
 
 export async function manageWallpaper(settingsState, forceNext = false) {
