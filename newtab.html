@@ -643,11 +643,18 @@
               </button>
             </div>
 
-            <!-- Tab: Auto (Favicon) -->
+            <!-- Tab: Auto (Smart Resolution) -->
             <div id="tab-auto" class="icon-tab-content active">
               <p class="tab-desc">
-                Busca o favicon oficial usando o serviço do Google.
+                Detecta automaticamente o melhor ícone no
+                <strong>DashboardIcons</strong> (com fallback para o Favicon
+                oficial caso não exista).
               </p>
+              <div
+                id="auto-detected-badge"
+                class="auto-detected-badge"
+                style="display: none"
+              ></div>
             </div>
 
             <!-- Tab: Unified Gallery -->
@@ -663,14 +670,14 @@
                   class="modern-input"
                   style="padding: 8px"
                 >
+                  <option value="dashboardicons">
+                    DashboardIcons (Apps, Serviços e Self-Hosted — Recomendado)
+                  </option>
                   <option value="simpleicons">
-                    SimpleIcons (Logos Coloridos / Flat)
+                    SimpleIcons (Logos Monocromáticos / Flat)
                   </option>
                   <option value="techicons">
-                    TechIcons (Linguagens e Ferramentas)
-                  </option>
-                  <option value="dashboardicons">
-                    DashboardIcons (Self-Hosted Apps)
+                    TechIcons (Linguagens e Ferramentas Dev)
                   </option>
                 </select>
               </div>
@@ -679,8 +686,16 @@
                 type="text"
                 id="gallery-search"
                 class="modern-input"
-                placeholder="Buscar... (Ex: github, docker, plex)"
+                placeholder="Digite para filtrar ou clique em um ícone abaixo..."
+                autocomplete="off"
               />
+
+              <!-- Visual Catalog Grid -->
+              <div
+                id="icon-suggestions-grid"
+                class="icon-suggestions-grid"
+                aria-label="Sugestões visuais de ícones"
+              ></div>
 
               <!-- Dynamic settings inside Gallery -->
               <div id="gallery-settings" style="margin-top: 15px">

@@ -18,6 +18,7 @@ export const defaultSettings = {
   nameDisplay: 'always',
   textBehavior: 'truncate',
   iconLayout: 'row',
+  defaultIconSource: 'dashboardicons',
   themePreset: 'dark',
   layoutMode: 'list',
   columnCount: 3,

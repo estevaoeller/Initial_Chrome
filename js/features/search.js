@@ -1,4 +1,5 @@
 import { getRootFolder, loadCustomIcons } from '../modules.js';
+import { resolveIconUrls, attachIconCascade } from '../icon-resolver.js';
 
 export class SearchManager {
   constructor() {
@@ -546,11 +547,16 @@ export class SearchManager {
       // Favicon image element
       const favicon = document.createElement('img');
       favicon.className = 'search-result-favicon';
-      favicon.src = this.getFaviconUrl(bm);
       favicon.alt = '';
-      favicon.onerror = () => {
-        favicon.src = 'icons/icon48.png'; // Fallback to extension icon
-      };
+      const customIcon = this.customIcons[bm.url] || this.customIcons[bm.id];
+      const defaultSource =
+        this.appContext?.settingsState?.defaultIconSource || 'dashboardicons';
+      const candidateUrls = resolveIconUrls(bm, customIcon, defaultSource, 32);
+      attachIconCascade(favicon, candidateUrls, null, {
+        url: bm.url,
+        source: defaultSource,
+        isCustom: Boolean(customIcon),
+      });
 
       // Details container
       const details = document.createElement('div');

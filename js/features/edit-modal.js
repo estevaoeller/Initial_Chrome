@@ -4,6 +4,14 @@ import {
   updateBookmarkFull,
 } from '../modules.js';
 import { renderBookmarks } from '../bookmark-renderer.js';
+import {
+  inferIconSlugs,
+  resolveIconUrls,
+  attachIconCascade,
+  searchIconCatalog,
+  buildPreviewUrlForSource,
+  clearLockedIconUrl,
+} from '../icon-resolver.js';
 
 export class EditModalManager {
   constructor(settingsState) {
@@ -21,9 +29,11 @@ export class EditModalManager {
 
     this.previewFavicon = document.getElementById('preview-favicon');
     this.previewName = document.getElementById('preview-name');
+    this.autoDetectedBadge = document.getElementById('auto-detected-badge');
 
     this.gallerySource = document.getElementById('gallery-source');
     this.gallerySearch = document.getElementById('gallery-search');
+    this.suggestionsGrid = document.getElementById('icon-suggestions-grid');
 
     this.gallerySimpleiconsSettings = document.getElementById(
       'gallery-simpleicons-settings',
@@ -59,25 +69,46 @@ export class EditModalManager {
         this.currentActiveTab = btn.dataset.tab;
         document.getElementById(`tab-${this.currentActiveTab}`).style.display =
           'block';
+        if (this.currentActiveTab === 'gallery') {
+          this.renderSuggestions();
+        }
         this.updatePreview();
       });
     });
 
-    this.gallerySource.addEventListener('change', () =>
-      this.updateGallerySettingsVisibility(),
-    );
+    this.gallerySource.addEventListener('change', () => {
+      this.updateGallerySettingsVisibility();
+      this.renderSuggestions();
+    });
 
-    this.inputName.addEventListener('input', () => this.updatePreview());
-    this.inputUrl.addEventListener('input', () => this.updatePreview());
-    this.gallerySearch.addEventListener('input', () => this.updatePreview());
+    this.inputName.addEventListener('input', () => {
+      this.updatePreview();
+      if (this.currentActiveTab === 'gallery' && !this.gallerySearch.value) {
+        this.renderSuggestions();
+      }
+    });
+    this.inputUrl.addEventListener('input', () => {
+      this.updatePreview();
+      if (this.currentActiveTab === 'gallery' && !this.gallerySearch.value) {
+        this.renderSuggestions();
+      }
+    });
+    this.gallerySearch.addEventListener('input', () => {
+      this.updatePreview();
+      this.renderSuggestions();
+    });
     this.customUrl.addEventListener('input', () => this.updatePreview());
-    this.techColored.addEventListener('change', () => this.updatePreview());
+    this.techColored.addEventListener('change', () => {
+      this.updatePreview();
+      this.renderSuggestions();
+    });
 
     if (this.simpleColor) {
       this.simpleColor.addEventListener('input', (e) => {
         if (this.simpleColorHex)
           this.simpleColorHex.textContent = e.target.value;
         this.updatePreview();
+        this.renderSuggestions();
       });
     }
 
@@ -94,7 +125,7 @@ export class EditModalManager {
 
       // Load custom icon if exists
       const customIcons = stateHelpers.customIcons || {};
-      const iconData = customIcons[link.url];
+      const iconData = customIcons[link.url] || customIcons[link.id];
 
       if (iconData) {
         if (
@@ -118,10 +149,9 @@ export class EditModalManager {
         }
       } else {
         this.currentActiveTab = 'auto';
-        this.gallerySource.value = 'simpleicons';
-        this.gallerySearch.value = link.name
-          ? link.name.toLowerCase().replace(/\s+/g, '')
-          : '';
+        this.gallerySource.value = 'dashboardicons';
+        const inferred = inferIconSlugs(link.url, link.name);
+        this.gallerySearch.value = inferred[0] || '';
         this.simpleColor.value = '#ffffff';
         if (this.simpleColorHex) this.simpleColorHex.textContent = '#ffffff';
         this.techColored.checked = true;
@@ -129,6 +159,7 @@ export class EditModalManager {
       }
 
       this.updateGallerySettingsVisibility();
+      this.renderSuggestions();
 
       // Sync Tabs UI
       this.tabBtns.forEach((b) => {
@@ -194,21 +225,89 @@ export class EditModalManager {
     });
   }
 
+  async renderSuggestions() {
+    if (!this.suggestionsGrid || !this.currentEditingLink) return;
+
+    const source = this.gallerySource ? this.gallerySource.value : 'dashboardicons';
+    const query = this.gallerySearch ? this.gallerySearch.value.trim() : '';
+    const linkContext = {
+      name: this.inputName.value || this.currentEditingLink.name,
+      url: this.inputUrl.value || this.currentEditingLink.url,
+    };
+
+    const items = await searchIconCatalog(source, query, linkContext, 20);
+    this.suggestionsGrid.innerHTML = '';
+
+    const currentSlug = query.toLowerCase().replace(/\s+/g, '');
+
+    items.forEach(({ slug }) => {
+      const url = buildPreviewUrlForSource(source, slug, {
+        simpleColor: this.simpleColor ? this.simpleColor.value : '#ffffff',
+        techColored: this.techColored ? this.techColored.checked : true,
+      });
+
+      const btn = document.createElement('button');
+      btn.type = 'button';
+      btn.className = `icon-suggestion-card ${slug === currentSlug ? 'selected' : ''}`;
+      btn.title = `Selecionar ícone "${slug}"`;
+
+      const img = document.createElement('img');
+      img.src = url;
+      img.alt = slug;
+      img.loading = 'lazy';
+      img.onerror = () => {
+        btn.style.display = 'none';
+      };
+
+      const label = document.createElement('span');
+      label.textContent = slug;
+
+      btn.appendChild(img);
+      btn.appendChild(label);
+
+      btn.addEventListener('click', () => {
+        this.gallerySearch.value = slug;
+        this.suggestionsGrid
+          .querySelectorAll('.icon-suggestion-card')
+          .forEach((c) => c.classList.remove('selected'));
+        btn.classList.add('selected');
+        this.updatePreview();
+      });
+
+      this.suggestionsGrid.appendChild(btn);
+    });
+  }
+
   updatePreview() {
     if (!this.currentEditingLink) return;
     const size = this.currentStateHelpers
       ? this.currentStateHelpers.iconSize || this.settingsState.iconSize
       : 32;
-    this.previewName.textContent = this.inputName.value || 'Nome do Link';
+    const nameVal = this.inputName.value || 'Nome do Link';
+    const urlVal = this.inputUrl.value || this.currentEditingLink.url;
+    this.previewName.textContent = nameVal;
 
     if (this.currentActiveTab === 'auto') {
-      const url = this.inputUrl.value || this.currentEditingLink.url;
-      try {
-        const parsed = new URL(url);
-        this.previewFavicon.src = `https://www.google.com/s2/favicons?domain=${parsed.hostname}&sz=${size}`;
-      } catch (e) {
-        this.previewFavicon.src = '';
+      const defaultSource =
+        this.settingsState.defaultIconSource || 'dashboardicons';
+      const inferred = inferIconSlugs(urlVal, nameVal);
+      if (this.autoDetectedBadge) {
+        if (defaultSource !== 'favicon' && inferred.length > 0) {
+          this.autoDetectedBadge.style.display = 'flex';
+          this.autoDetectedBadge.innerHTML = `✨ Detectado automaticamente: <code>${inferred[0]}</code>`;
+        } else {
+          this.autoDetectedBadge.style.display = 'none';
+        }
       }
+
+      const candidateUrls = resolveIconUrls(
+        { name: nameVal, url: urlVal },
+        null,
+        defaultSource,
+        size,
+        true, // ignoreLock no preview para permitir re-detecção ao editar nome/URL
+      );
+      attachIconCascade(this.previewFavicon, candidateUrls);
     } else if (this.currentActiveTab === 'gallery') {
       const val = this.gallerySearch.value
         .trim()
@@ -216,19 +315,16 @@ export class EditModalManager {
         .replace(/\s+/g, '');
       const source = this.gallerySource.value;
       if (val) {
-        if (source === 'simpleicons') {
-          const color = this.simpleColor.value.replace('#', '');
-          this.previewFavicon.src = `https://cdn.simpleicons.org/${val}/${color}`;
-        } else if (source === 'techicons') {
-          const suffix = this.techColored.checked ? 'original' : 'plain';
-          this.previewFavicon.src = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${val}/${val}-${suffix}.svg`;
-        } else if (source === 'dashboardicons') {
-          this.previewFavicon.src = `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/${val}.svg`;
-        }
+        this.previewFavicon.onerror = null;
+        this.previewFavicon.src = buildPreviewUrlForSource(source, val, {
+          simpleColor: this.simpleColor ? this.simpleColor.value : '#ffffff',
+          techColored: this.techColored ? this.techColored.checked : true,
+        });
       } else {
         this.previewFavicon.src = '';
       }
     } else if (this.currentActiveTab === 'custom') {
+      this.previewFavicon.onerror = null;
       this.previewFavicon.src = this.customUrl.value || '';
     }
   }
@@ -305,13 +401,21 @@ export class EditModalManager {
       };
     }
 
-    const idKey = this.currentEditingLink.url;
+    const oldUrlKey = this.currentEditingLink.url;
+    const idKey = newUrl;
 
     const finishSave = () => {
+      // Limpa o travamento de ícone deste link para que seu novo ajuste/re-detecção valha imediatamente
+      clearLockedIconUrl(oldUrlKey);
+      clearLockedIconUrl(idKey);
+
       this.currentEditingLink.name = newName;
       this.currentEditingLink.url = newUrl;
 
       if (this.currentStateHelpers) {
+        if (oldUrlKey !== idKey) {
+          delete this.currentStateHelpers.customIcons[oldUrlKey];
+        }
         if (iconData) {
           this.currentStateHelpers.customIcons[idKey] = iconData;
         } else {
@@ -321,6 +425,14 @@ export class EditModalManager {
           this.currentStateHelpers.setBookmarks(
             this.currentStateHelpers.getBookmarks(),
           );
+        }
+
+        // Force update of the bookmark card DOM so the new icon renders immediately
+        const existingCard = document.querySelector(
+          `.bookmark-item[data-id="${this.currentEditingLink.id}"]`,
+        );
+        if (existingCard) {
+          existingCard.remove();
         }
 
         renderBookmarks(
@@ -347,7 +459,7 @@ export class EditModalManager {
         }
       });
     } else {
-      removeCustomIconProps(idKey, () => {
+      removeCustomIconProps(oldUrlKey, () => {
         const proceed = () => {
           if (this.currentEditingLink.id) {
             updateBookmarkFull(

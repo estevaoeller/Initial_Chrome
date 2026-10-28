@@ -2,6 +2,7 @@
 import { defaultCustomIcons } from './config.js';
 
 export const ROOT_FOLDER_NAME = 'Pagina Inicial';
+export const BACKUP_BOOKMARK_TITLE = '[InitialChrome_Config_Backup]';
 
 export function saveBookmarks(bookmarksToSave) {
   chrome.storage.local.set({ userBookmarks: bookmarksToSave }, function () {
@@ -272,6 +273,10 @@ export function checkAndMigrateToSpaces(callback) {
 
       const checkPromises = children.map((child) => {
         return new Promise((resolve) => {
+          if (child.title === BACKUP_BOOKMARK_TITLE) {
+            resolve();
+            return;
+          }
           if (child.url) {
             hasDirectBookmarks = true;
             resolve();
@@ -980,7 +985,10 @@ export function saveCustomIconProps(bookmarkId, iconData, callback) {
     }
     chrome.storage.sync.set(
       { [key]: iconData, customIconsKeys: keys },
-      callback,
+      () => {
+        syncBackupToChromeBookmarks();
+        if (callback) callback();
+      },
     );
   });
 }
@@ -991,8 +999,261 @@ export function removeCustomIconProps(bookmarkId, callback) {
     let keys = result.customIconsKeys || [];
     keys = keys.filter((k) => k !== key);
     chrome.storage.sync.remove(key, () => {
-      chrome.storage.sync.set({ customIconsKeys: keys }, callback);
+      chrome.storage.sync.set({ customIconsKeys: keys }, () => {
+        syncBackupToChromeBookmarks();
+        if (callback) callback();
+      });
     });
+  });
+}
+
+// ========== PERSISTÊNCIA IMORTAL NOS FAVORITOS DO CHROME ==========
+let backupBookmarkDebounce = null;
+
+/**
+ * Codifica UTF-8 para Base64 de forma segura
+ */
+function utf8ToBase64(str) {
+  const bytes = new TextEncoder().encode(str);
+  let binary = '';
+  for (let i = 0; i < bytes.byteLength; i++) {
+    binary += String.fromCharCode(bytes[i]);
+  }
+  return btoa(binary);
+}
+
+/**
+ * Decodifica Base64 para UTF-8 de forma segura
+ */
+function base64ToUtf8(b64) {
+  const binary = atob(b64);
+  const bytes = new Uint8Array(binary.length);
+  for (let i = 0; i < binary.length; i++) {
+    bytes[i] = binary.charCodeAt(i);
+  }
+  return new TextDecoder().decode(bytes);
+}
+
+/**
+ * Espelha automaticamente configurações, ícones customizados, temas e quickLinks
+ * em um marcador oculto dentro da pasta "Pagina Inicial" do Chrome Bookmarks.
+ * Isso garante que, ao reinstalar a extensão, os ícones e preferências sobrevivam!
+ */
+export function syncBackupToChromeBookmarks(callback) {
+  if (typeof chrome === 'undefined' || !chrome.bookmarks || !chrome.storage) {
+    if (callback) callback(false);
+    return;
+  }
+
+  if (backupBookmarkDebounce) clearTimeout(backupBookmarkDebounce);
+  backupBookmarkDebounce = setTimeout(() => {
+    chrome.storage.sync.get(null, (syncData) => {
+      if (chrome.runtime.lastError || !syncData) {
+        if (callback) callback(false);
+        return;
+      }
+
+      const customIcons = {};
+      Object.keys(syncData).forEach((k) => {
+        if (k.startsWith('icon:')) {
+          customIcons[k.slice(5)] = syncData[k];
+        }
+      });
+
+      const cleanSettings = Object.assign({}, syncData.extensionSettings || {});
+      delete cleanSettings.togglApiToken;
+      delete cleanSettings.wallpaperApiKey;
+
+      const payload = {
+        v: 1,
+        updatedAt: Date.now(),
+        settings: cleanSettings,
+        customIcons: customIcons,
+        quickLinks: syncData.quickLinks || [],
+        customThemes: syncData.customThemes || {},
+      };
+
+      // Só grava se houver configurações ou ícones relevantes
+      if (
+        Object.keys(cleanSettings).length === 0 &&
+        Object.keys(customIcons).length === 0
+      ) {
+        if (callback) callback(false);
+        return;
+      }
+
+      try {
+        const encoded = utf8ToBase64(JSON.stringify(payload));
+        const backupUrl = `https://initial-chrome.local/backup#${encoded}`;
+
+        getRootFolder((root) => {
+          if (!root) {
+            if (callback) callback(false);
+            return;
+          }
+          chrome.bookmarks.getChildren(root.id, (children) => {
+            const existing = (children || []).find(
+              (c) => c.url && c.title === BACKUP_BOOKMARK_TITLE,
+            );
+            if (existing) {
+              chrome.bookmarks.update(
+                existing.id,
+                { title: BACKUP_BOOKMARK_TITLE, url: backupUrl },
+                () => {
+                  if (callback) callback(true);
+                },
+              );
+            } else {
+              chrome.bookmarks.create(
+                {
+                  parentId: root.id,
+                  title: BACKUP_BOOKMARK_TITLE,
+                  url: backupUrl,
+                },
+                () => {
+                  if (callback) callback(true);
+                },
+              );
+            }
+          });
+        });
+      } catch (err) {
+        console.warn('Erro ao serializar backup nos favoritos:', err);
+        if (callback) callback(false);
+      }
+    });
+  }, 400);
+}
+
+/**
+ * Tenta restaurar configurações e ícones a partir do marcador oculto nos Favoritos do Chrome
+ * ou do arquivo user-defaults.json na pasta do projeto caso o storage esteja vazio.
+ */
+export function restoreFromPersistentSourcesIfNeeded(callback) {
+  if (typeof chrome === 'undefined' || !chrome.storage || !chrome.bookmarks) {
+    if (callback) callback(false);
+    return;
+  }
+
+  chrome.storage.sync.get(
+    ['extensionSettings', 'customIconsKeys'],
+    (syncResult) => {
+      const hasSettings =
+        syncResult.extensionSettings &&
+        Object.keys(syncResult.extensionSettings).length > 0;
+      const hasIcons =
+        Array.isArray(syncResult.customIconsKeys) &&
+        syncResult.customIconsKeys.length > 0;
+
+      if (hasSettings && hasIcons) {
+        if (callback) callback(false);
+        return;
+      }
+
+      // 1. Tentar ler do marcador [InitialChrome_Config_Backup] na pasta "Pagina Inicial"
+      getRootFolder((root) => {
+        const tryProjectFileFallback = () => {
+          if (typeof fetch === 'undefined' || !chrome.runtime?.getURL) {
+            if (callback) callback(false);
+            return;
+          }
+          fetch(chrome.runtime.getURL('user-defaults.json'))
+            .then((r) => (r.ok ? r.json() : null))
+            .then((fileData) => {
+              if (!fileData) {
+                if (callback) callback(false);
+                return;
+              }
+              applyRestoredPayload(fileData, hasSettings, hasIcons, callback);
+            })
+            .catch(() => {
+              if (callback) callback(false);
+            });
+        };
+
+        if (!root) {
+          tryProjectFileFallback();
+          return;
+        }
+
+        chrome.bookmarks.getChildren(root.id, (children) => {
+          const backupNode = (children || []).find(
+            (c) => c.url && c.title === BACKUP_BOOKMARK_TITLE,
+          );
+          if (backupNode && backupNode.url.includes('#')) {
+            try {
+              const hash = backupNode.url.split('#')[1];
+              const decoded = JSON.parse(base64ToUtf8(hash));
+              if (decoded && (decoded.settings || decoded.customIcons)) {
+                applyRestoredPayload(decoded, hasSettings, hasIcons, callback);
+                return;
+              }
+            } catch (e) {
+              console.warn('Falha ao decodificar backup dos favoritos:', e);
+            }
+          }
+          tryProjectFileFallback();
+        });
+      });
+    },
+  );
+}
+
+function applyRestoredPayload(payload, hasSettings, hasIcons, callback) {
+  const toSave = {};
+  let changed = false;
+
+  if (
+    !hasSettings &&
+    payload.settings &&
+    Object.keys(payload.settings).length > 1
+  ) {
+    const clean = Object.assign({}, payload.settings);
+    delete clean.togglApiToken;
+    delete clean.wallpaperApiKey;
+    toSave.extensionSettings = clean;
+    changed = true;
+  }
+
+  if (
+    !hasIcons &&
+    payload.customIcons &&
+    Object.keys(payload.customIcons).length > 0
+  ) {
+    const keys = [];
+    Object.entries(payload.customIcons).forEach(([idOrUrl, iconVal]) => {
+      const k = `icon:${idOrUrl}`;
+      keys.push(k);
+      toSave[k] = iconVal;
+    });
+    toSave.customIconsKeys = keys;
+    toSave.customIconsInitialized = true;
+    changed = true;
+  }
+
+  if (Array.isArray(payload.quickLinks) && payload.quickLinks.length > 0) {
+    toSave.quickLinks = payload.quickLinks;
+    changed = true;
+  }
+
+  if (
+    payload.customThemes &&
+    Object.keys(payload.customThemes).length > 0
+  ) {
+    toSave.customThemes = payload.customThemes;
+    changed = true;
+  }
+
+  if (!changed) {
+    if (callback) callback(false);
+    return;
+  }
+
+  chrome.storage.sync.set(toSave, () => {
+    console.log(
+      'Ícones e configurações restaurados automaticamente da fonte persistente!',
+    );
+    if (callback) callback(true);
   });
 }
 

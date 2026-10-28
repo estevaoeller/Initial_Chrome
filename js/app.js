@@ -6,6 +6,7 @@ import {
   loadCustomIcons,
   updateGreeting,
   updateWeather,
+  restoreFromPersistentSourcesIfNeeded,
 } from './modules.js';
 import {
   loadSettings,
@@ -62,6 +63,7 @@ document.addEventListener('DOMContentLoaded', () => {
     filterColor: '#000000',
     filterOpacity: 0.3,
     iconLayout: 'row',
+    defaultIconSource: 'dashboardicons',
     nameDisplay: 'always',
     textBehavior: 'truncate',
     themePreset: 'dark',
@@ -94,6 +96,8 @@ document.addEventListener('DOMContentLoaded', () => {
               currentBookmarks = newVal;
             },
             customIcons: customIcons,
+            defaultIconSource:
+              settingsState.defaultIconSource || 'dashboardicons',
             iconSize: settingsState.iconSize,
             collapsedGroups: collapsedGroups,
           };
@@ -129,6 +133,8 @@ document.addEventListener('DOMContentLoaded', () => {
           currentBookmarks = newVal;
         },
         customIcons: settingsState.customIcons || {},
+        defaultIconSource:
+          settingsState.defaultIconSource || 'dashboardicons',
         iconSize: settingsState.iconSize,
         collapsedGroups: settingsState.collapsedGroups || [],
       };
@@ -219,7 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
     // Initialize Quick Links & Modal
     quickLinksManager.init();
     editModalManager.init();
-    searchManager.init({ sidebarManager, shortcutsManager });
+    searchManager.init({ sidebarManager, shortcutsManager, settingsState });
     contextMenuManager.init();
     shortcutsManager.init();
 
@@ -413,6 +419,17 @@ document.addEventListener('DOMContentLoaded', () => {
         ) {
           settingsState.iconLayout = newSettings.iconLayout;
           applyIconLayoutSetting(settingsState.iconLayout);
+        }
+
+        if (
+          newSettings.defaultIconSource &&
+          newSettings.defaultIconSource !== settingsState.defaultIconSource
+        ) {
+          settingsState.defaultIconSource = newSettings.defaultIconSource;
+          if (sidebarManager.activeSpaceId) {
+            contentArea.innerHTML = '';
+            onSpaceSelected(sidebarManager.activeSpaceId);
+          }
         }
 
         if (
@@ -793,6 +810,8 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
-  // Load initial settings and run initialize
-  loadSettings(settingsState, initialize);
+  // Restaura automaticamente do backup nos Bookmarks ou user-defaults.json caso o storage esteja limpo
+  restoreFromPersistentSourcesIfNeeded(() => {
+    loadSettings(settingsState, initialize);
+  });
 });

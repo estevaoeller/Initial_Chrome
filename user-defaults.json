@@ -1,0 +1,11 @@
+{
+  "version": "0.2.0",
+  "description": "Arquivo de semente de configurações e ícones da pasta do projeto. Substitua este arquivo na pasta da extensão pelo seu download para restaurar tudo automaticamente ao reinstalar.",
+  "settings": {
+    "defaultIconSource": "dashboardicons"
+  },
+  "customIcons": {},
+  "quickLinks": [],
+  "customThemes": {}
+}
+

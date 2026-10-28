@@ -7,6 +7,7 @@ Não crie categorias antecipadamente. Acrescente links quando páginas reais for
 ## Páginas disponíveis
 
 - [Oportunidades de Melhoria da Página Inicial](oportunidades-melhoria.md) — Diagnóstico técnico e catálogo de melhorias de performance, UX, produtividade e código (`AI_PROPOSED`).
+- [Plano: Ícones Inteligentes e Persistência Definitiva de Dados](plano-icones-e-persistencia.md) — Arquitetura e implementação do resolvedor automático de DashboardIcons com catálogo visual e backup automático em `chrome.bookmarks` + `user-defaults.json` (`AI_PROPOSED`).
 
 ## Regra de organização
 

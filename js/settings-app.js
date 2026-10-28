@@ -2,7 +2,7 @@ import { defaultSettings } from './config.js';
 import { SettingsQuickLinksManager } from './features/settings-quick-links.js';
 import { SettingsDataManager } from './features/settings-data.js';
 import { ThemeBuilderManager } from './features/theme-builder.js';
-import { applyTheme } from './modules.js';
+import { applyTheme, syncBackupToChromeBookmarks } from './modules.js';
 import {
   loadApiTokens,
   saveApiTokens,
@@ -73,6 +73,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const nameDisplay = document.getElementById('name-display');
   const textBehavior = document.getElementById('text-behavior');
   const iconLayout = document.getElementById('icon-layout');
+  const defaultIconSource = document.getElementById('default-icon-source');
   const layoutMode = document.getElementById('layout-mode');
   const columnCountContainer = document.getElementById(
     'column-count-container',
@@ -421,6 +422,9 @@ document.addEventListener('DOMContentLoaded', () => {
       if (textBehavior)
         textBehavior.value = settings.textBehavior || 'truncate';
       if (iconLayout) iconLayout.value = settings.iconLayout || 'row';
+      if (defaultIconSource)
+        defaultIconSource.value =
+          settings.defaultIconSource || 'dashboardicons';
       if (layoutMode) {
         layoutMode.value = settings.layoutMode || 'list';
         toggleColumnCountDisplay(layoutMode.value);
@@ -489,6 +493,9 @@ document.addEventListener('DOMContentLoaded', () => {
         nameDisplay: nameDisplay ? nameDisplay.value : 'always',
         textBehavior: textBehavior ? textBehavior.value : 'truncate',
         iconLayout: iconLayout ? iconLayout.value : 'row',
+        defaultIconSource: defaultIconSource
+          ? defaultIconSource.value
+          : 'dashboardicons',
         themePreset: themePreset ? themePreset.value : 'dark',
         layoutMode: layoutMode ? layoutMode.value : 'list',
         columnCount: columnCount ? parseInt(columnCount.value) : 3,
@@ -557,6 +564,7 @@ document.addEventListener('DOMContentLoaded', () => {
               chrome.runtime.lastError.message,
             );
           } else {
+            syncBackupToChromeBookmarks();
             console.log('Configurações salvas com sucesso!');
           }
         });
@@ -784,6 +792,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   if (iconLayout) {
     iconLayout.addEventListener('change', saveSettings);
+  }
+  if (defaultIconSource) {
+    defaultIconSource.addEventListener('change', saveSettings);
   }
 
   if (columnCount) {

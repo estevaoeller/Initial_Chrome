@@ -1256,6 +1256,35 @@
             </div>
 
             <div class="settings-group">
+              <div class="group-title">Fonte Automática de Ícones</div>
+              <div class="controls-grid">
+                <div class="control-item full-width">
+                  <label for="default-icon-source"
+                    >Provedor Padrão para Links sem Ícone Manual</label
+                  >
+                  <select id="default-icon-source">
+                    <option value="dashboardicons">
+                      ✨ DashboardIcons Inteligente + Fallback Favicon (Recomendado)
+                    </option>
+                    <option value="simpleicons">
+                      🎨 SimpleIcons (Flat SVG) + Fallback Favicon
+                    </option>
+                    <option value="favicon">
+                      🌐 Apenas Favicon Oficial do Site (Google)
+                    </option>
+                  </select>
+                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
+                    No modo <strong>DashboardIcons Inteligente</strong>, a
+                    extensão identifica automaticamente o serviço pelo nome ou
+                    URL (ex: GitHub, Gmail, YouTube, Proxmox, Plex, Notion) e
+                    aplica o ícone vetorial em alta definição sem precisar
+                    configurar manualmente.
+                  </p>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
               <div class="group-title">Texto e Exibição</div>
               <div class="controls-grid">
                 <div class="control-item">
@@ -1699,7 +1728,42 @@
             </div>
 
             <div class="settings-group">
-              <div class="group-title">Backup e Restauração</div>
+              <div class="group-title">
+                🛡️ Proteção Contra Reinstalação (Auto-Persistência)
+              </div>
+              <p
+                style="
+                  margin-bottom: 15px;
+                  font-size: 0.9rem;
+                  color: var(--settings-text);
+                  opacity: 0.85;
+                  line-height: 1.5;
+                "
+              >
+                Suas configurações e <strong>todos os seus ícones personalizados</strong> são salvos automaticamente dentro da pasta <code>Pagina Inicial</code> dos Favoritos do Chrome (que nunca é apagada ao remover a extensão). Além disso, você pode salvar o arquivo <code>user-defaults.json</code> diretamente na pasta do projeto para tê-lo versionado no seu OneDrive.
+              </p>
+              <div class="controls-grid">
+                <div class="control-item">
+                  <button
+                    id="save-project-defaults-btn"
+                    class="btn btn-primary"
+                  >
+                    📌 Baixar user-defaults.json (Para Pasta do Projeto)
+                  </button>
+                </div>
+                <div class="control-item">
+                  <button
+                    id="force-bookmark-sync-btn"
+                    class="btn btn-secondary"
+                  >
+                    🔄 Sincronizar Agora nos Favoritos do Chrome
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div class="settings-group">
+              <div class="group-title">Backup e Restauração Manual</div>
               <p
                 style="
                   margin-bottom: 15px;

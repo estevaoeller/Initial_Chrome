@@ -1,5 +1,9 @@
 import { defaultSettings } from '../config.js';
-import { getRootFolder } from '../modules.js';
+import {
+  getRootFolder,
+  syncBackupToChromeBookmarks,
+  BACKUP_BOOKMARK_TITLE,
+} from '../modules.js';
 
 /** Serializa a árvore real de bookmarks (Spaces → Grupos → Links) */
 function serializeSpacesTree(callback) {
@@ -60,11 +64,38 @@ export class SettingsDataManager {
     this.importDataBtn = document.getElementById('import-data-btn');
     this.importFileInput = document.getElementById('import-file-input');
     this.resetSettingsBtn = document.getElementById('reset-settings-btn');
+    this.saveProjectDefaultsBtn = document.getElementById(
+      'save-project-defaults-btn',
+    );
+    this.forceBookmarkSyncBtn = document.getElementById(
+      'force-bookmark-sync-btn',
+    );
   }
 
   init(onQuickLinksImported) {
     if (this.exportDataBtn) {
       this.exportDataBtn.addEventListener('click', () => this.exportData());
+    }
+
+    if (this.saveProjectDefaultsBtn) {
+      this.saveProjectDefaultsBtn.addEventListener('click', () =>
+        this.exportData('user-defaults.json', this.saveProjectDefaultsBtn),
+      );
+    }
+
+    if (this.forceBookmarkSyncBtn) {
+      this.forceBookmarkSyncBtn.addEventListener('click', () => {
+        const orig = this.forceBookmarkSyncBtn.innerHTML;
+        this.forceBookmarkSyncBtn.innerHTML = '⏳ Sincronizando...';
+        syncBackupToChromeBookmarks((ok) => {
+          this.forceBookmarkSyncBtn.innerHTML = ok
+            ? '✔️ Salvo nos Favoritos!'
+            : '⚠️ Pasta Pagina Inicial vazia';
+          setTimeout(() => {
+            this.forceBookmarkSyncBtn.innerHTML = orig;
+          }, 2200);
+        });
+      });
     }
 
     if (this.importDataBtn && this.importFileInput) {
@@ -84,12 +115,13 @@ export class SettingsDataManager {
     }
   }
 
-  exportData() {
-    if (!this.exportDataBtn) return;
-    const originalText = this.exportDataBtn.innerHTML;
-    this.exportDataBtn.innerHTML = '✔️ Exportado!';
+  exportData(customFilename = null, targetBtn = null) {
+    const btn = targetBtn || this.exportDataBtn;
+    if (!btn) return;
+    const originalText = btn.innerHTML;
+    btn.innerHTML = '✔️ Baixado!';
     setTimeout(() => {
-      this.exportDataBtn.innerHTML = originalText;
+      btn.innerHTML = originalText;
     }, 2000);
 
     chrome.storage.sync.get(null, (resultSync) => {
@@ -132,7 +164,9 @@ export class SettingsDataManager {
 
           const link = document.createElement('a');
           link.href = url;
-          link.download = `pagina-inicial-backup-${new Date().toISOString().split('T')[0]}.json`;
+          link.download =
+            customFilename ||
+            `pagina-inicial-backup-${new Date().toISOString().split('T')[0]}.json`;
           link.click();
 
           URL.revokeObjectURL(url);
@@ -224,6 +258,9 @@ export class SettingsDataManager {
             }
           }
         }
+
+        // Sincroniza o estado importado imediatamente no bookmark oculto da pasta Pagina Inicial
+        await new Promise((resolve) => syncBackupToChromeBookmarks(resolve));
 
         console.log('Dados importados com sucesso!');
         window.location.reload();

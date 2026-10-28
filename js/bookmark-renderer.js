@@ -5,6 +5,7 @@ import {
   addBookmarkToChrome,
   loadSortable,
 } from './modules.js';
+import { resolveIconUrls, attachIconCascade } from './icon-resolver.js';
 
 // Setup lazy loading IntersectionObserver globally
 const faviconObserver =
@@ -385,28 +386,21 @@ export function renderBookmarks(
           ? stateHelpers.customIcons[link.url] ||
             stateHelpers.customIcons[link.id]
           : null;
+      const defaultIconSource =
+        (stateHelpers && stateHelpers.defaultIconSource) || 'dashboardicons';
       favicon.setAttribute('data-is-custom', customIcon ? 'true' : 'false');
 
-      let srcUrl = '';
-      if (customIcon && customIcon.type === 'simpleicons') {
-        let colorHex = customIcon.color
-          ? customIcon.color.replace('#', '')
-          : 'default';
-        srcUrl = `https://cdn.simpleicons.org/${customIcon.value}/${colorHex}`;
-      } else if (customIcon && customIcon.type === 'techicons') {
-        const suffix = customIcon.color === 'original' ? 'original' : 'plain';
-        srcUrl = `https://cdn.jsdelivr.net/gh/devicons/devicon@latest/icons/${customIcon.value}/${customIcon.value}-${suffix}.svg`;
-      } else if (customIcon && customIcon.type === 'dashboardicons') {
-        srcUrl = `https://cdn.jsdelivr.net/gh/homarr-labs/dashboard-icons/svg/${customIcon.value}.svg`;
-      } else if (customIcon && customIcon.type === 'custom') {
-        srcUrl = customIcon.value;
-      } else {
-        srcUrl = `https://www.google.com/s2/favicons?domain=${link.url}&sz=${iconSize}`;
-      }
-
-      // Lazy Load using IntersectionObserver
-      favicon.dataset.src = srcUrl;
-      faviconObserver.observe(favicon);
+      const candidateUrls = resolveIconUrls(
+        link,
+        customIcon,
+        defaultIconSource,
+        iconSize,
+      );
+      attachIconCascade(favicon, candidateUrls, faviconObserver, {
+        url: link.url,
+        source: defaultIconSource,
+        isCustom: Boolean(customIcon),
+      });
 
       const bookmarkName = document.createElement('span');
       bookmarkName.className = 'bookmark-name';

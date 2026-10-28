@@ -1146,6 +1146,79 @@ body.text-behavior-single .bookmark-name {
   padding: 12px;
 }
 
+.auto-detected-badge {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  background-color: color-mix(in srgb, var(--accent) 14%, transparent);
+  border: 1px solid color-mix(in srgb, var(--accent) 35%, transparent);
+  color: var(--text);
+}
+
+.auto-detected-badge code {
+  font-family: monospace;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.icon-suggestions-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(66px, 1fr));
+  gap: 8px;
+  max-height: 170px;
+  overflow-y: auto;
+  margin-top: 10px;
+  padding: 4px 2px;
+}
+
+.icon-suggestion-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 5px;
+  padding: 8px 4px;
+  border-radius: 6px;
+  border: 1px solid var(--icon-border-color);
+  background-color: color-mix(in srgb, var(--bg) 60%, transparent);
+  color: var(--text);
+  cursor: pointer;
+  transition:
+    transform 0.15s ease,
+    border-color 0.15s ease,
+    background-color 0.15s ease;
+}
+
+.icon-suggestion-card:hover {
+  transform: translateY(-2px);
+  border-color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.icon-suggestion-card.selected {
+  border-color: var(--accent);
+  background-color: color-mix(in srgb, var(--accent) 22%, transparent);
+  box-shadow: 0 0 0 1px var(--accent);
+}
+
+.icon-suggestion-card img {
+  width: 26px;
+  height: 26px;
+  object-fit: contain;
+}
+
+.icon-suggestion-card span {
+  font-size: 10px;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  opacity: 0.85;
+}
+
 /* Modal Footer */
 .modal-footer {
   display: flex;
