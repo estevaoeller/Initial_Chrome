@@ -20,7 +20,7 @@ Realizar um diagnóstico completo da tela de Configurações (`settings.html` e 
 - `js/settings-handlers.js`: Adicionado `applyQuickLinksSizeSetting`; atualizado `applyIconAppearance`, `applyBookmarkFontSettings` e `applySectionAppearance` para preservar as cores nativas dos temas quando `useCustomColors` for `false`.
 - `js/modules.js`: Implementado suporte real a imagens locais (`customWallpaperData` via `FileReader`) e URL direta (`customWallpaperUrl`) em `manageWallpaper`, além de `extractDominantColorFromUrl` via `<canvas>` para o Acento Dinâmico.
 - `js/pomodoro.js`: Tornado `initPomodoro()` idempotente (`pomodoroListenersBound`) para suportar ativação/desativação em tempo real.
-- `newtab.html`, `js/app.js`, `css/style.css`: Expandido `#quick-appearance-popover` para 3 micro-abas (`Aparência`, `Grade`, `Widgets`) e adicionada reatividade completa em `setupSettingsObserver`.
+- `newtab.html`, `js/app.js`, `css/style.css`, `css/tokens.css`: Expandido `#quick-appearance-popover` para 3 micro-abas (`Aparência`, `Grade`, `Widgets`), corrigida a herança de `--bookmark-font-color` e `--surface` em `body.<theme>-theme` para garantir alto contraste de fonte em todos os 9 temas, e adicionada reatividade completa em `setupSettingsObserver`.
 - `settings.html`, `js/settings-app.js`: Substituído o seletor quebrado de pasta local por Upload de Imagem do PC + URL Direta, adicionado switch `#use-custom-colors` e ampliado o slider `#bookmark-min-width` (`80..260px`).
 
 ## Resultado e Próximos Passos

@@ -58,8 +58,8 @@
      Derivadas do tema ativo via color-mix. */
   --surface: color-mix(in srgb, var(--card) 72%, transparent);
   --surface-strong: color-mix(in srgb, var(--card) 88%, transparent);
-  --surface-border: color-mix(in srgb, var(--text) 12%, transparent);
-  --surface-hover: color-mix(in srgb, var(--text) 6%, transparent);
+  --surface-border: color-mix(in srgb, var(--text) 14%, transparent);
+  --surface-hover: color-mix(in srgb, var(--text) 8%, transparent);
   --surface-blur: 16px;
 
   /* ===== Cores semânticas (podem ser sobrescritas por tema) ===== */
@@ -69,6 +69,15 @@
   --warning: #f59e0b;
   --on-accent: #ffffff;
   --on-danger: #ffffff;
+}
+
+/* Recomputa as superfícies derivadas no escopo do body onde as classes de tema vivem */
+body,
+body[class*='-theme'] {
+  --surface: color-mix(in srgb, var(--card) 75%, transparent);
+  --surface-strong: color-mix(in srgb, var(--card) 92%, transparent);
+  --surface-border: color-mix(in srgb, var(--text) 14%, transparent);
+  --surface-hover: color-mix(in srgb, var(--text) 8%, transparent);
 }
 
 /* ===== Modo Sólido =====
