@@ -914,6 +914,47 @@ export function reapplyDynamicAccent() {
   if (dynamicAccentHex) applyDynamicAccent(dynamicAccentHex, true);
 }
 
+/** Extrai cor média de uma imagem (DataURL ou URL com CORS) para Acento Dinâmico */
+function extractDominantColorFromUrl(url, callback) {
+  if (!url || typeof Image === 'undefined') {
+    callback(null);
+    return;
+  }
+  const img = new Image();
+  img.crossOrigin = 'Anonymous';
+  img.onload = () => {
+    try {
+      const canvas = document.createElement('canvas');
+      canvas.width = 16;
+      canvas.height = 16;
+      const ctx = canvas.getContext('2d');
+      ctx.drawImage(img, 0, 0, 16, 16);
+      const data = ctx.getImageData(0, 0, 16, 16).data;
+      let r = 0,
+        g = 0,
+        b = 0,
+        count = 0;
+      for (let i = 0; i < data.length; i += 4) {
+        if (data[i + 3] < 128) continue;
+        r += data[i];
+        g += data[i + 1];
+        b += data[i + 2];
+        count++;
+      }
+      if (!count) {
+        callback(null);
+        return;
+      }
+      const toHex = (n) => Math.round(n / count).toString(16).padStart(2, '0');
+      callback(`#${toHex(r)}${toHex(g)}${toHex(b)}`);
+    } catch {
+      callback(null);
+    }
+  };
+  img.onerror = () => callback(null);
+  img.src = url;
+}
+
 export async function manageWallpaper(settingsState, forceNext = false) {
   const body = document.body;
   const unsplashInfoDiv = document.getElementById('unsplash-info');
@@ -925,6 +966,7 @@ export async function manageWallpaper(settingsState, forceNext = false) {
   if (settingsState.wallpaperSource === 'none') {
     body.style.backgroundImage = 'none';
     hideUnsplashInfo();
+    applyDynamicAccent(null, false);
     return;
   }
 
@@ -934,6 +976,34 @@ export async function manageWallpaper(settingsState, forceNext = false) {
     body.style.backgroundPosition = 'center';
     body.style.backgroundRepeat = 'no-repeat';
   };
+
+  if (
+    settingsState.wallpaperSource === 'custom' ||
+    settingsState.wallpaperSource === 'local'
+  ) {
+    hideUnsplashInfo();
+    chrome.storage.local.get(['customWallpaperData'], (res) => {
+      const customUrl =
+        (settingsState.customWallpaperUrl &&
+          settingsState.customWallpaperUrl.trim()) ||
+        res.customWallpaperData ||
+        '';
+      if (customUrl) {
+        setBackground(customUrl);
+        if (settingsState.dynamicAccent === true) {
+          extractDominantColorFromUrl(customUrl, (hex) => {
+            applyDynamicAccent(hex, true);
+          });
+        } else {
+          applyDynamicAccent(null, false);
+        }
+      } else {
+        body.style.backgroundImage = 'none';
+        applyDynamicAccent(null, false);
+      }
+    });
+    return;
+  }
 
   const displayUnsplashInfo = (data) => {
     if (!unsplashInfoDiv || !data) return;

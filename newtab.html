@@ -1,611 +1,361 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Nova Aba Personalizada</title>
-    <link rel="stylesheet" href="css/tokens.css" />
-    <link rel="stylesheet" href="css/style.css" />
-  </head>
 
-  <body>
-    <script src="js/theme-cache.js"></script>
-    <div id="background-filter"></div>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Nova Aba Personalizada</title>
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/style.css" />
+</head>
 
-    <div id="app-container">
-      <!-- SIDEBAR -->
-      <aside id="sidebar">
-        <div class="sidebar-header">
-          <h3>Spaces</h3>
-          <button
-            id="add-space-btn"
-            title="Novo Espaço"
-            aria-label="Novo Espaço"
-            aria-haspopup="dialog"
-          >
-            +
+<body>
+  <script src="js/theme-cache.js"></script>
+  <div id="background-filter"></div>
+
+  <div id="app-container">
+    <!-- SIDEBAR -->
+    <aside id="sidebar">
+      <div class="sidebar-header">
+        <h3>Spaces</h3>
+        <button id="add-space-btn" title="Novo Espaço" aria-label="Novo Espaço" aria-haspopup="dialog">
+          +
+        </button>
+      </div>
+      <nav id="spaces-list" aria-label="Lista de Espaços">
+        <!-- Populado dinamicamente pelo script.js -->
+      </nav>
+    </aside>
+
+    <!-- Toggle button outside sidebar so it's always visible -->
+    <button id="sidebar-toggle" title="Esconder/Mostrar" aria-label="Alternar barra lateral" aria-expanded="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+    </button>
+
+    <!-- MAIN CONTENT -->
+    <div id="main-wrapper">
+      <div class="top-bar">
+        <nav id="quick-links-bar"></nav>
+        <div id="top-right-bar">
+          <a href="#" id="toggl-toggle-btn" class="quick-link" style="display: none">Toggl</a>
+        </div>
+      </div>
+      <header id="top-header">
+        <div id="weather-widget" class="weather-widget" style="display: none" title="Previsão do tempo">
+          <span id="weather-icon">--</span>
+          <span id="weather-temp">--°C</span>
+        </div>
+
+        <div id="clock-area" class="modern-clock">
+          <div id="greeting-placeholder" class="greeting-text"></div>
+          <div id="analog-clock-placeholder" class="clock-time"></div>
+          <div id="digital-clock-placeholder" class="digital-time" style="display: none"></div>
+          <div id="date-container">
+            <div id="date-placeholder" class="clock-date"></div>
+            <div id="calendar-placeholder" class="mini-calendar"></div>
+          </div>
+        </div>
+      </header>
+
+      <div id="widgets-dashboard-wrapper" class="widgets-dashboard-wrapper">
+        <div class="widgets-dashboard-controls">
+          <button id="toggle-widgets-btn" class="toggle-widgets-btn" title="Alternar painel de widgets"
+            aria-label="Alternar painel de widgets" aria-expanded="true">
+            <span id="toggle-widgets-icon">▾</span>
+            <span id="toggle-widgets-text">Painel de Widgets</span>
           </button>
         </div>
-        <nav id="spaces-list" aria-label="Lista de Espaços">
-          <!-- Populado dinamicamente pelo script.js -->
-        </nav>
-      </aside>
 
-      <!-- Toggle button outside sidebar so it's always visible -->
-      <button
-        id="sidebar-toggle"
-        title="Esconder/Mostrar"
-        aria-label="Alternar barra lateral"
-        aria-expanded="true"
-      >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="14"
-          height="14"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <polyline points="15 18 9 12 15 6"></polyline>
-        </svg>
-      </button>
-
-      <!-- MAIN CONTENT -->
-      <div id="main-wrapper">
-        <div class="top-bar">
-          <nav id="quick-links-bar"></nav>
-          <div id="top-right-bar">
-            <a
-              href="#"
-              id="toggl-toggle-btn"
-              class="quick-link"
-              style="display: none"
-              >Toggl</a
-            >
-          </div>
-        </div>
-        <header id="top-header">
-          <div
-            id="weather-widget"
-            class="weather-widget"
-            style="display: none"
-            title="Previsão do tempo"
-          >
-            <span id="weather-icon">--</span>
-            <span id="weather-temp">--°C</span>
+        <div id="top-widgets-container" class="top-widgets-container">
+          <!-- Quote Widget -->
+          <div id="quote-widget" class="quote-widget" title="Clique para ver outra citação" role="button" tabindex="0">
+            <p id="quote-text" class="quote-text">Carregando citação...</p>
+            <p id="quote-author" class="quote-author"></p>
           </div>
 
-          <div id="clock-area" class="modern-clock">
-            <div id="greeting-placeholder" class="greeting-text"></div>
-            <div id="analog-clock-placeholder" class="clock-time"></div>
-            <div
-              id="digital-clock-placeholder"
-              class="digital-time"
-              style="display: none"
-            ></div>
-            <div id="date-container">
-              <div id="date-placeholder" class="clock-date"></div>
-              <div id="calendar-placeholder" class="mini-calendar"></div>
-            </div>
-          </div>
-        </header>
-
-        <div id="widgets-dashboard-wrapper" class="widgets-dashboard-wrapper">
-          <div class="widgets-dashboard-controls">
-            <button
-              id="toggle-widgets-btn"
-              class="toggle-widgets-btn"
-              title="Alternar painel de widgets"
-              aria-label="Alternar painel de widgets"
-              aria-expanded="true"
-            >
-              <span id="toggle-widgets-icon">▾</span>
-              <span id="toggle-widgets-text">Painel de Widgets</span>
-            </button>
-          </div>
-
-          <div id="top-widgets-container" class="top-widgets-container">
-            <!-- Quote Widget -->
-            <div
-              id="quote-widget"
-              class="quote-widget"
-              title="Clique para ver outra citação"
-              role="button"
-              tabindex="0"
-            >
-              <p id="quote-text" class="quote-text">Carregando citação...</p>
-              <p id="quote-author" class="quote-author"></p>
-            </div>
-
-            <!-- To-Do List Widget -->
-            <div id="todo-widget" class="todo-widget">
-              <div class="todo-header">
-                <div class="todo-header-left">
-                  <h4 class="widget-title">
-                    <svg
-                      class="widget-title-icon"
-                      xmlns="http://www.w3.org/2000/svg"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      stroke-width="2"
-                      stroke-linecap="round"
-                      stroke-linejoin="round"
-                    >
-                      <path d="M9 11l3 3L22 4"></path>
-                      <path
-                        d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"
-                      ></path>
-                    </svg>
-                    Minhas Tarefas
-                  </h4>
-                  <span id="todo-counter" class="todo-counter"></span>
-                </div>
-                <button
-                  id="todo-clear-completed"
-                  class="todo-header-btn"
-                  title="Limpar tarefas concluídas"
-                  aria-label="Limpar tarefas concluídas"
-                  style="display: none"
-                >
-                  Limpar concluídas
-                </button>
-              </div>
-              <ul id="todo-list" class="todo-list"></ul>
-              <div class="todo-input-container">
-                <input
-                  type="text"
-                  id="todo-input"
-                  placeholder="Nova tarefa..."
-                  autocomplete="off"
-                />
-              </div>
-            </div>
-
-            <!-- RSS Feed Widget -->
-            <div id="rss-widget" class="rss-widget">
-              <div class="rss-header">
+          <!-- To-Do List Widget -->
+          <div id="todo-widget" class="todo-widget">
+            <div class="todo-header">
+              <div class="todo-header-left">
                 <h4 class="widget-title">
-                  <svg
-                    class="widget-title-icon"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke="currentColor"
-                    stroke-width="2"
-                    stroke-linecap="round"
-                    stroke-linejoin="round"
-                  >
-                    <path d="M4 11a9 9 0 0 1 9 9"></path>
-                    <path d="M4 4a16 16 0 0 1 16 16"></path>
-                    <circle cx="5" cy="19" r="1"></circle>
+                  <svg class="widget-title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M9 11l3 3L22 4"></path>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
                   </svg>
-                  <span id="rss-title">Feed RSS</span>
+                  Minhas Tarefas
                 </h4>
+                <span id="todo-counter" class="todo-counter"></span>
               </div>
-              <ul id="rss-list" class="rss-list">
-                <div class="rss-loading">Carregando notícias...</div>
-              </ul>
+              <button id="todo-clear-completed" class="todo-header-btn" title="Limpar tarefas concluídas"
+                aria-label="Limpar tarefas concluídas" style="display: none">
+                Limpar concluídas
+              </button>
+            </div>
+            <ul id="todo-list" class="todo-list"></ul>
+            <div class="todo-input-container">
+              <input type="text" id="todo-input" placeholder="Nova tarefa..." autocomplete="off" />
             </div>
           </div>
-        </div>
 
-        <main id="content-area">
-          <!-- SKELETON LOADERS (Hidden automatically when bookmarks are rendered) -->
-          <div id="loading-skeletons" class="loading-skeletons">
-            <div class="skeleton-category">
-              <div class="skeleton-header">
-                <div class="skeleton-title"></div>
-              </div>
-              <div class="skeleton-grid">
-                <div class="skeleton-item">
-                  <div class="skeleton-icon"></div>
-                  <div class="skeleton-name"></div>
-                </div>
-                <div class="skeleton-item">
-                  <div class="skeleton-icon"></div>
-                  <div class="skeleton-name"></div>
-                </div>
-                <div class="skeleton-item">
-                  <div class="skeleton-icon"></div>
-                  <div class="skeleton-name"></div>
-                </div>
-                <div class="skeleton-item">
-                  <div class="skeleton-icon"></div>
-                  <div class="skeleton-name"></div>
-                </div>
-              </div>
+          <!-- RSS Feed Widget -->
+          <div id="rss-widget" class="rss-widget">
+            <div class="rss-header">
+              <h4 class="widget-title">
+                <svg class="widget-title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                  <path d="M4 11a9 9 0 0 1 9 9"></path>
+                  <path d="M4 4a16 16 0 0 1 16 16"></path>
+                  <circle cx="5" cy="19" r="1"></circle>
+                </svg>
+                <span id="rss-title">Feed RSS</span>
+              </h4>
             </div>
-            <div class="skeleton-category">
-              <div class="skeleton-header">
-                <div class="skeleton-title"></div>
-              </div>
-              <div class="skeleton-grid">
-                <div class="skeleton-item">
-                  <div class="skeleton-icon"></div>
-                  <div class="skeleton-name"></div>
-                </div>
-                <div class="skeleton-item">
-                  <div class="skeleton-icon"></div>
-                  <div class="skeleton-name"></div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </main>
-      </div>
-
-      <!-- RIGHT ACTION SIDEBAR -->
-      <aside id="action-sidebar">
-        <div class="action-top">
-          <!-- Theme & Appearance Quick Popover -->
-          <button
-            id="theme-toggle-btn"
-            class="action-btn"
-            title="Aparência Rápida: Temas, Estilo e Desfoque"
-            aria-label="Abrir painel de aparência rápida"
-            aria-haspopup="dialog"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="5" />
-              <path
-                d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
-              />
-            </svg>
-          </button>
-
-          <!-- Lock Layout Mode -->
-          <button
-            id="lock-layout-btn"
-            class="action-btn"
-            title="Travar/Destravar Edição e Arraste (Alt+L)"
-            aria-label="Travar ou destravar edição de cartões"
-            aria-pressed="false"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="22"
-              height="22"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
-              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
-            </svg>
-          </button>
-
-          <!-- Zen Mode -->
-          <button
-            id="zen-mode-btn"
-            class="action-btn"
-            title="Modo Zen (Alt+Z)"
-            aria-label="Alternar modo zen"
-            aria-pressed="false"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
-              <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
-              <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
-              <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
-              <circle cx="12" cy="12" r="3"></circle>
-            </svg>
-          </button>
-
-          <!-- Search Bookmarks -->
-          <button
-            id="search-btn"
-            class="action-btn"
-            title="Buscar Bookmarks (/)"
-            aria-label="Buscar marcadores"
-            aria-haspopup="dialog"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="11" cy="11" r="8"></circle>
-              <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-            </svg>
-          </button>
-
-          <!-- Bookmarks (Chrome) -->
-          <button
-            id="chrome-bookmarks-btn"
-            class="action-btn"
-            title="Bookmarks"
-            aria-label="Abrir favoritos do Chrome"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path
-                d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"
-              ></path>
-            </svg>
-          </button>
-
-          <!-- History (Chrome) -->
-          <button
-            id="chrome-history-btn"
-            class="action-btn"
-            title="Histórico"
-            aria-label="Abrir histórico do Chrome"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="10"></circle>
-              <polyline points="12 6 12 12 16 14"></polyline>
-            </svg>
-          </button>
-
-          <!-- Downloads (Chrome) -->
-          <button
-            id="chrome-downloads-btn"
-            class="action-btn"
-            title="Downloads"
-            aria-label="Abrir downloads do Chrome"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-          </button>
-        </div>
-
-        <div class="action-bottom">
-          <!-- Shortcuts Cheatsheet -->
-          <button
-            id="shortcuts-btn"
-            class="action-btn"
-            title="Atalhos de Teclado (Alt+/)"
-            aria-label="Exibir atalhos de teclado"
-            aria-haspopup="dialog"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
-              <line x1="6" y1="8" x2="6.01" y2="8" />
-              <line x1="10" y1="8" x2="10.01" y2="8" />
-              <line x1="14" y1="8" x2="14.01" y2="8" />
-              <line x1="18" y1="8" x2="18.01" y2="8" />
-              <line x1="6" y1="12" x2="6.01" y2="12" />
-              <line x1="10" y1="12" x2="10.01" y2="12" />
-              <line x1="14" y1="12" x2="14.01" y2="12" />
-              <line x1="18" y1="12" x2="18.01" y2="12" />
-              <line x1="7" y1="16" x2="17" y2="16" />
-            </svg>
-          </button>
-
-          <!-- Settings -->
-          <button
-            id="settings-btn"
-            class="action-btn"
-            title="Configurações"
-            aria-label="Abrir tela de configurações"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="12" r="3" />
-              <path
-                d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"
-              />
-            </svg>
-          </button>
-        </div>
-      </aside>
-
-      <!-- POMODORO WIDGET -->
-      <div id="pomodoro-widget" class="pomodoro-widget" style="display: none">
-        <div class="pomodoro-header">
-          <span class="pomodoro-title">
-            <svg
-              class="widget-title-icon"
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-            >
-              <circle cx="12" cy="13" r="8"></circle>
-              <path d="M12 9v4l2 2"></path>
-              <path d="M5 3L2 6"></path>
-              <path d="M22 6l-3-3"></path>
-            </svg>
-            Foco
-          </span>
-          <span id="pomodoro-mode-badge" class="badge">Trabalho</span>
-        </div>
-        <div class="pomodoro-timer">
-          <span id="pomodoro-time">25:00</span>
-        </div>
-        <div class="pomodoro-controls">
-          <input
-            type="text"
-            id="pomodoro-desc"
-            placeholder="O que fará agora?"
-            class="pomodoro-input"
-            autocomplete="off"
-          />
-          <select
-            id="pomodoro-project"
-            class="pomodoro-input"
-            style="display: none"
-          >
-            <option value="none">Sem Projeto</option>
-          </select>
-          <div class="pomodoro-buttons">
-            <button
-              id="pomodoro-play-btn"
-              class="pomo-btn play"
-              title="Iniciar"
-              aria-label="Iniciar timer"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                stroke="none"
-              >
-                <polygon points="6 3 20 12 6 21 6 3"></polygon>
-              </svg>
-            </button>
-            <button
-              id="pomodoro-stop-btn"
-              class="pomo-btn stop"
-              title="Parar"
-              aria-label="Parar timer"
-              style="display: none"
-            >
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="currentColor"
-                stroke="none"
-              >
-                <rect x="5" y="5" width="14" height="14" rx="2"></rect>
-              </svg>
-            </button>
+            <ul id="rss-list" class="rss-list">
+              <div class="rss-loading">Carregando notícias...</div>
+            </ul>
           </div>
         </div>
       </div>
 
-      <!-- Unsplash Info -->
-      <div id="unsplash-info" class="unsplash-info" style="display: none">
-        <a
-          id="unsplash-link"
-          href="#"
-          target="_blank"
-          title="Ver foto no Unsplash"
-        >
-          <span id="unsplash-location"></span>
-          <span id="unsplash-date"></span>
-          <span id="unsplash-views"></span>
-          <span id="unsplash-user"></span>
-        </a>
-        <button
-          id="next-wallpaper-btn"
-          title="Próximo Wallpaper (Unsplash)"
-          aria-label="Próximo wallpaper"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="23 4 23 10 17 10"></polyline>
-            <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+      <main id="content-area">
+        <!-- SKELETON LOADERS (Hidden automatically when bookmarks are rendered) -->
+        <div id="loading-skeletons" class="loading-skeletons">
+          <div class="skeleton-category">
+            <div class="skeleton-header">
+              <div class="skeleton-title"></div>
+            </div>
+            <div class="skeleton-grid">
+              <div class="skeleton-item">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-name"></div>
+              </div>
+              <div class="skeleton-item">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-name"></div>
+              </div>
+              <div class="skeleton-item">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-name"></div>
+              </div>
+              <div class="skeleton-item">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-name"></div>
+              </div>
+            </div>
+          </div>
+          <div class="skeleton-category">
+            <div class="skeleton-header">
+              <div class="skeleton-title"></div>
+            </div>
+            <div class="skeleton-grid">
+              <div class="skeleton-item">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-name"></div>
+              </div>
+              <div class="skeleton-item">
+                <div class="skeleton-icon"></div>
+                <div class="skeleton-name"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </main>
+    </div>
+
+    <!-- RIGHT ACTION SIDEBAR -->
+    <aside id="action-sidebar">
+      <div class="action-top">
+        <!-- Theme & Appearance Quick Popover -->
+        <button id="theme-toggle-btn" class="action-btn" title="Aparência Rápida: Temas, Estilo e Desfoque"
+          aria-label="Abrir painel de aparência rápida" aria-haspopup="dialog">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5" />
+            <path
+              d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42" />
+          </svg>
+        </button>
+
+        <!-- Lock Layout Mode -->
+        <button id="lock-layout-btn" class="action-btn" title="Travar/Destravar Edição e Arraste (Alt+L)"
+          aria-label="Travar ou destravar edição de cartões" aria-pressed="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+            <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+          </svg>
+        </button>
+
+        <!-- Zen Mode -->
+        <button id="zen-mode-btn" class="action-btn" title="Modo Zen (Alt+Z)" aria-label="Alternar modo zen"
+          aria-pressed="false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M3 7V5a2 2 0 0 1 2-2h2"></path>
+            <path d="M17 3h2a2 2 0 0 1 2 2v2"></path>
+            <path d="M21 17v2a2 2 0 0 1-2 2h-2"></path>
+            <path d="M7 21H5a2 2 0 0 1-2-2v-2"></path>
+            <circle cx="12" cy="12" r="3"></circle>
+          </svg>
+        </button>
+
+        <!-- Search Bookmarks -->
+        <button id="search-btn" class="action-btn" title="Buscar Bookmarks (/)" aria-label="Buscar marcadores"
+          aria-haspopup="dialog">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="11" cy="11" r="8"></circle>
+            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+          </svg>
+        </button>
+
+        <!-- Bookmarks (Chrome) -->
+        <button id="chrome-bookmarks-btn" class="action-btn" title="Bookmarks" aria-label="Abrir favoritos do Chrome">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M19 21l-7-5-7 5V5a2 2 0 0 1 2-2h10a2 2 0 0 1 2 2z"></path>
+          </svg>
+        </button>
+
+        <!-- History (Chrome) -->
+        <button id="chrome-history-btn" class="action-btn" title="Histórico" aria-label="Abrir histórico do Chrome">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </button>
+
+        <!-- Downloads (Chrome) -->
+        <button id="chrome-downloads-btn" class="action-btn" title="Downloads" aria-label="Abrir downloads do Chrome">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
           </svg>
         </button>
       </div>
 
-      <!-- Quick Appearance Popover (Live Customization on New Tab) -->
-      <div
-        id="quick-appearance-popover"
-        class="quick-appearance-popover"
-        style="display: none"
-        role="dialog"
-        aria-label="Aparência rápida"
-      >
-        <div class="qap-header">
-          <span class="qap-title">✨ Aparência Rápida</span>
-          <span class="qap-autosave-badge">✓ Salvo ao vivo</span>
-        </div>
+      <div class="action-bottom">
+        <!-- Shortcuts Cheatsheet -->
+        <button id="shortcuts-btn" class="action-btn" title="Atalhos de Teclado (Alt+/)"
+          aria-label="Exibir atalhos de teclado" aria-haspopup="dialog">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <rect x="2" y="4" width="20" height="16" rx="2" ry="2" />
+            <line x1="6" y1="8" x2="6.01" y2="8" />
+            <line x1="10" y1="8" x2="10.01" y2="8" />
+            <line x1="14" y1="8" x2="14.01" y2="8" />
+            <line x1="18" y1="8" x2="18.01" y2="8" />
+            <line x1="6" y1="12" x2="6.01" y2="12" />
+            <line x1="10" y1="12" x2="10.01" y2="12" />
+            <line x1="14" y1="12" x2="14.01" y2="12" />
+            <line x1="18" y1="12" x2="18.01" y2="12" />
+            <line x1="7" y1="16" x2="17" y2="16" />
+          </svg>
+        </button>
 
-        <div class="qap-section">
-          <label class="qap-label">Tema de Cores</label>
-          <div id="qap-theme-swatches" class="qap-theme-grid"></div>
+        <!-- Settings -->
+        <button id="settings-btn" class="action-btn" title="Configurações" aria-label="Abrir tela de configurações">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="3" />
+            <path
+              d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          </svg>
+        </button>
+      </div>
+    </aside>
+
+    <!-- POMODORO WIDGET -->
+    <div id="pomodoro-widget" class="pomodoro-widget" style="display: none">
+      <div class="pomodoro-header">
+        <span class="pomodoro-title">
+          <svg class="widget-title-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="13" r="8"></circle>
+            <path d="M12 9v4l2 2"></path>
+            <path d="M5 3L2 6"></path>
+            <path d="M22 6l-3-3"></path>
+          </svg>
+          Foco
+        </span>
+        <span id="pomodoro-mode-badge" class="badge">Trabalho</span>
+      </div>
+      <div class="pomodoro-timer">
+        <span id="pomodoro-time">25:00</span>
+      </div>
+      <div class="pomodoro-controls">
+        <input type="text" id="pomodoro-desc" placeholder="O que fará agora?" class="pomodoro-input"
+          autocomplete="off" />
+        <select id="pomodoro-project" class="pomodoro-input" style="display: none">
+          <option value="none">Sem Projeto</option>
+        </select>
+        <div class="pomodoro-buttons">
+          <button id="pomodoro-play-btn" class="pomo-btn play" title="Iniciar" aria-label="Iniciar timer">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+              stroke="none">
+              <polygon points="6 3 20 12 6 21 6 3"></polygon>
+            </svg>
+          </button>
+          <button id="pomodoro-stop-btn" class="pomo-btn stop" title="Parar" aria-label="Parar timer"
+            style="display: none">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="currentColor"
+              stroke="none">
+              <rect x="5" y="5" width="14" height="14" rx="2"></rect>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Unsplash Info -->
+    <div id="unsplash-info" class="unsplash-info" style="display: none">
+      <a id="unsplash-link" href="#" target="_blank" title="Ver foto no Unsplash">
+        <span id="unsplash-location"></span>
+        <span id="unsplash-date"></span>
+        <span id="unsplash-views"></span>
+        <span id="unsplash-user"></span>
+      </a>
+      <button id="next-wallpaper-btn" title="Próximo Wallpaper (Unsplash)" aria-label="Próximo wallpaper">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <polyline points="23 4 23 10 17 10"></polyline>
+          <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
+        </svg>
+      </button>
+    </div>
+
+    <!-- Quick Appearance Popover (Live Customization on New Tab) -->
+    <!-- Quick Appearance & Settings Popover (Live Customization on New Tab) -->
+    <div id="quick-appearance-popover" class="quick-appearance-popover" style="display: none" role="dialog"
+      aria-label="Aparência rápida" aria-label="Ajustes rápidos">
+      <div class="qap-header">
+        <span class="qap-title">✨ Aparência Rápida</span>
+        <span class="qap-autosave-badge">✓ Salvo ao vivo</span>
+        <span class="qap-title">⚡ Ajustes Rápidos</span>
+        <span class="qap-autosave-badge">✓ Ao vivo</span>
+      </div>
+
+      <div class="qap-section">
+        <label class="qap-label">Tema de Cores</label>
+        <div id="qap-theme-swatches" class="qap-theme-grid"></div>
+        <!-- Micro-tabs Navigation -->
+        <div class="qap-tabs" role="tablist">
+          <button type="button" class="qap-tab-btn active" data-qap-tab="appearance" role="tab">
+            🎨 Aparência
+          </button>
+          <button type="button" class="qap-tab-btn" data-qap-tab="grid" role="tab">
+            📐 Grade
+          </button>
+          <button type="button" class="qap-tab-btn" data-qap-tab="widgets" role="tab">
+            ✨ Widgets
+          </button>
         </div>
 
         <div class="qap-section">
@@ -620,723 +370,595 @@
             <button type="button" class="qap-seg-btn" data-style="compact">
               Compacto
             </button>
-          </div>
-        </div>
-
-        <div class="qap-section">
-          <div class="qap-slider-header">
-            <label class="qap-label" for="qap-wallpaper-blur"
-              >Desfoque do Fundo (Blur)</label
-            >
-            <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
-          </div>
-          <input
-            type="range"
-            id="qap-wallpaper-blur"
-            min="0"
-            max="24"
-            step="1"
-            value="0"
-          />
-        </div>
-
-        <div class="qap-section">
-          <div class="qap-slider-header">
-            <label class="qap-label" for="qap-filter-opacity"
-              >Contraste / Filtro do Fundo</label
-            >
-            <span id="qap-filter-opacity-val" class="qap-val">0.30</span>
-          </div>
-          <input
-            type="range"
-            id="qap-filter-opacity"
-            min="0"
-            max="0.95"
-            step="0.05"
-            value="0.3"
-          />
-        </div>
-
-        <div class="qap-footer">
-          <button
-            type="button"
-            id="qap-open-full-settings"
-            class="qap-settings-link"
-          >
-            ⚙️ Abrir todas as configurações...
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Edit Link Modal -->
-    <div
-      id="edit-link-modal"
-      class="modal-overlay"
-      style="display: none"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="edit-modal-title"
-    >
-      <div class="modal-content glass-effect">
-        <div class="modal-header">
-          <h2 id="edit-modal-title">Editar Link</h2>
-          <button
-            id="close-modal-btn"
-            class="close-btn"
-            aria-label="Fechar modal"
-          >
-            &times;
-          </button>
-        </div>
-        <div class="modal-body">
-          <!-- Live Preview Card -->
-          <div class="preview-section">
-            <label>Pré-visualização</label>
-            <div class="preview-card-container">
-              <div
-                id="preview-bookmark-item"
-                class="bookmark-item"
-                style="pointer-events: none"
-              >
-                <img
-                  id="preview-favicon"
-                  class="bookmark-favicon"
-                  src=""
-                  alt=""
-                />
-                <span id="preview-name" class="bookmark-name"
-                  >Nome do Link</span
-                >
+            <!-- PANE 1: APARÊNCIA -->
+            <div class="qap-pane active" data-qap-pane="appearance">
+              <div class="qap-section">
+                <label class="qap-label">Tema de Cores</label>
+                <div id="qap-theme-swatches" class="qap-theme-grid"></div>
               </div>
             </div>
-          </div>
 
-          <div class="form-group">
-            <label for="edit-link-name">Nome de Exibição</label>
-            <input
-              type="text"
-              id="edit-link-name"
-              class="modern-input"
-              placeholder="Ex: Uptime Kuma"
-            />
-          </div>
-
-          <div class="form-group">
-            <label for="edit-link-url">URL de Destino</label>
-            <input
-              type="url"
-              id="edit-link-url"
-              class="modern-input"
-              placeholder="http://192.168.1.10:3001"
-            />
-          </div>
-
-          <div class="form-group">
-            <label>Ícone Inteligente</label>
-            <div class="icon-tabs">
-              <button class="icon-tab-btn active" data-tab="auto">
-                Automático
-              </button>
-              <button class="icon-tab-btn" data-tab="gallery">
-                Galeria Oficial
-              </button>
-              <button class="icon-tab-btn" data-tab="custom">
-                Link/Upload
-              </button>
-            </div>
-
-            <!-- Tab: Auto (Smart Resolution) -->
-            <div id="tab-auto" class="icon-tab-content active">
-              <p class="tab-desc">
-                Detecta automaticamente o melhor ícone no
-                <strong>DashboardIcons</strong> (com fallback para o Favicon
-                oficial caso não exista).
-              </p>
-              <div
-                id="auto-detected-badge"
-                class="auto-detected-badge"
-                style="display: none"
-              ></div>
-            </div>
-
-            <!-- Tab: Unified Gallery -->
-            <div
-              id="tab-gallery"
-              class="icon-tab-content"
-              style="display: none"
-            >
-              <div class="form-group" style="margin-bottom: 12px">
-                <label for="gallery-source">Fonte do Ícone</label>
-                <select
-                  id="gallery-source"
-                  class="modern-input"
-                  style="padding: 8px"
-                >
-                  <option value="dashboardicons">
-                    DashboardIcons (Apps, Serviços e Self-Hosted — Recomendado)
-                  </option>
-                  <option value="simpleicons">
-                    SimpleIcons (Logos Monocromáticos / Flat)
-                  </option>
-                  <option value="techicons">
-                    TechIcons (Linguagens e Ferramentas Dev)
-                  </option>
-                </select>
+            <div class="qap-section">
+              <div class="qap-slider-header">
+                <label class="qap-label" for="qap-wallpaper-blur">Desfoque do Fundo (Blur)</label <div
+                  class="qap-section">
+                <label class="qap-label">Estilo dos Cartões</label>
+                <div class="qap-segmented" id="qap-card-style-group">
+                  <button type="button" class="qap-seg-btn" data-style="card">
+                    Cartão
+                  </button>
+                  <button type="button" class="qap-seg-btn" data-style="frameless">
+                    Sem Moldura
+                  </button>
+                  <button type="button" class="qap-seg-btn" data-style="compact">
+                    Compacto
+                  </button>
+                </div>
               </div>
 
-              <input
-                type="text"
-                id="gallery-search"
-                class="modern-input"
-                placeholder="Digite para filtrar ou clique em um ícone abaixo..."
-                autocomplete="off"
-              />
+              <div class="qap-section">
+                <div class="qap-slider-header">
+                  <label class="qap-label">Papel de Parede</label>
+                  <button type="button" id="qap-refresh-wallpaper-btn" class="qap-mini-action-btn"
+                    title="Sortear nova foto do Unsplash">
+                    🔄 Trocar foto
+                  </button>
+                </div>
+                <div class="qap-segmented" id="qap-wallpaper-source-group">
+                  <button type="button" class="qap-seg-btn" data-wp-source="unsplash">
+                    Unsplash
+                  </button>
+                  <button type="button" class="qap-seg-btn" data-wp-source="custom">
+                    Imagem/URL
+                  </button>
+                  <button type="button" class="qap-seg-btn" data-wp-source="none">
+                    Cor Sólida
+                  </button>
+                </div>
+                <div id="qap-custom-wallpaper-box" class="qap-custom-wp-box" style="display: none">
+                  <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
+                  <button type="button" id="qap-upload-wp-btn" class="qap-upload-btn">
+                    📁 Escolher Imagem do PC
+                  </button>
+                  <input type="file" id="qap-upload-wp-input" accept="image/*" style="display: none" />
+                </div>
+              </div>
+              <input type="range" id="qap-wallpaper-blur" min="0" max="24" step="1" value="0" />
 
-              <!-- Visual Catalog Grid -->
-              <div
-                id="icon-suggestions-grid"
-                class="icon-suggestions-grid"
-                aria-label="Sugestões visuais de ícones"
-              ></div>
+              <div class="qap-section">
+                <div class="qap-slider-header">
+                  <label class="qap-label" for="qap-wallpaper-blur">Desfoque do Fundo (Blur)</label>
+                  <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
+                </div>
+                <input type="range" id="qap-wallpaper-blur" min="0" max="24" step="1" value="0" />
+              </div>
 
-              <!-- Dynamic settings inside Gallery -->
-              <div id="gallery-settings" style="margin-top: 15px">
-                <!-- SimpleIcons: Color Picker -->
-                <div
-                  id="gallery-simpleicons-settings"
-                  class="gallery-dynamic-settings"
-                >
-                  <label for="edit-icon-color">Cor da Silhueta (SVG)</label>
-                  <div
-                    class="color-picker-row"
-                    style="
+              <div class="qap-section">
+                <div class="qap-slider-header">
+                  <label class="qap-label" for="qap-filter-opacity">Contraste / Filtro Escuro</label>
+                  <span id="qap-filter-opacity-val" class="qap-val">30%</span>
+                </div>
+                <input type="range" id="qap-filter-opacity" min="0" max="0.95" step="0.05" value="0.3" />
+              </div>
+
+              <div class="qap-toggle-row">
+                <span>Modo Sólido (desligar vidro)</span>
+                <input type="checkbox" id="qap-solid-surfaces" />
+              </div>
+            </div>
+
+            <div class="qap-section">
+              <div class="qap-slider-header">
+                <label class="qap-label" for="qap-filter-opacity">Contraste / Filtro do Fundo</label>
+                <span id="qap-filter-opacity-val" class="qap-val">0.30</span>
+                <!-- PANE 2: GRADE & CARTÕES -->
+                <div class="qap-pane" data-qap-pane="grid">
+                  <div class="qap-section">
+                    <label class="qap-label">Disposição dos Grupos</label>
+                    <div class="qap-segmented" id="qap-layout-mode-group">
+                      <button type="button" class="qap-seg-btn" data-layout-mode="list">
+                        ☰ Lista Vertical
+                      </button>
+                      <button type="button" class="qap-seg-btn" data-layout-mode="columns">
+                        ☷ Colunas
+                      </button>
+                    </div>
+                  </div>
+                  <input type="range" id="qap-filter-opacity" min="0" max="0.95" step="0.05" value="0.3" />
+
+                  <div class="qap-section" id="qap-columns-section" style="display: none">
+                    <div class="qap-slider-header">
+                      <label class="qap-label" for="qap-column-count">Número de Colunas</label>
+                      <span id="qap-column-count-val" class="qap-val">3</span>
+                    </div>
+                    <input type="range" id="qap-column-count" min="1" max="6" step="1" value="3" />
+                  </div>
+
+                  <div class="qap-section">
+                    <label class="qap-label">Orientação do Ícone</label>
+                    <div class="qap-segmented" id="qap-icon-layout-group">
+                      <button type="button" class="qap-seg-btn" data-icon-layout="row">
+                        ➡️ Ao Lado
+                      </button>
+                      <button type="button" class="qap-seg-btn" data-icon-layout="column">
+                        ⬇️ Acima
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="qap-section">
+                    <div class="qap-slider-header">
+                      <label class="qap-label" for="qap-icon-size">Tamanho dos Ícones</label>
+                      <span id="qap-icon-size-val" class="qap-val">28px</span>
+                    </div>
+                    <input type="range" id="qap-icon-size" min="16" max="64" step="2" value="28" />
+                  </div>
+
+                  <div class="qap-section">
+                    <div class="qap-slider-header">
+                      <label class="qap-label" for="qap-card-width">Largura Mínima do Cartão</label>
+                      <span id="qap-card-width-val" class="qap-val">150px</span>
+                    </div>
+                    <input type="range" id="qap-card-width" min="80" max="260" step="10" value="150" />
+                  </div>
+
+                  <div class="qap-section">
+                    <div class="qap-slider-header">
+                      <label class="qap-label" for="qap-category-gap">Espaço entre Grupos</label>
+                      <span id="qap-category-gap-val" class="qap-val">12px</span>
+                    </div>
+                    <input type="range" id="qap-category-gap" min="0" max="48" step="2" value="12" />
+                  </div>
+                </div>
+
+                <!-- PANE 3: WIDGETS -->
+                <div class="qap-pane" data-qap-pane="widgets">
+                  <div class="qap-section">
+                    <label class="qap-label">Estilo do Relógio</label>
+                    <div class="qap-segmented" id="qap-clock-style-group">
+                      <button type="button" class="qap-seg-btn" data-clock-style="analog">
+                        ⏱️ Analógico
+                      </button>
+                      <button type="button" class="qap-seg-btn" data-clock-style="digital">
+                        💻 Digital
+                      </button>
+                    </div>
+                  </div>
+
+                  <div class="qap-toggles-list">
+                    <label class="qap-toggle-row" for="qap-todo-enabled">
+                      <span>📋 Lista de Tarefas (To-Do)</span>
+                      <input type="checkbox" id="qap-todo-enabled" checked />
+                    </label>
+                    <label class="qap-toggle-row" for="qap-quotes-enabled">
+                      <span>💬 Citações Motivacionais</span>
+                      <input type="checkbox" id="qap-quotes-enabled" checked />
+                    </label>
+                    <label class="qap-toggle-row" for="qap-rss-enabled">
+                      <span>📰 Feed de Notícias (RSS)</span>
+                      <input type="checkbox" id="qap-rss-enabled" checked />
+                    </label>
+                    <label class="qap-toggle-row" for="qap-pomodoro-enabled">
+                      <span>🍅 Timer Foco (Pomodoro / Toggl)</span>
+                      <input type="checkbox" id="qap-pomodoro-enabled" />
+                    </label>
+                  </div>
+                </div>
+
+                <div class="qap-footer">
+                  <button type="button" id="qap-open-full-settings" class="qap-settings-link">
+                    ⚙️ Abrir todas as configurações...
+                    ⚙️ Configurações avançadas (Links, APIs e Backup)...
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Edit Link Modal -->
+            <div id="edit-link-modal" class="modal-overlay" style="display: none" role="dialog" aria-modal="true"
+              aria-labelledby="edit-modal-title">
+              <div class="modal-content glass-effect">
+                <div class="modal-header">
+                  <h2 id="edit-modal-title">Editar Link</h2>
+                  <button id="close-modal-btn" class="close-btn" aria-label="Fechar modal">
+                    &times;
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <!-- Live Preview Card -->
+                  <div class="preview-section">
+                    <label>Pré-visualização</label>
+                    <div class="preview-card-container">
+                      <div id="preview-bookmark-item" class="bookmark-item" style="pointer-events: none">
+                        <img id="preview-favicon" class="bookmark-favicon" src="" alt="" />
+                        <span id="preview-name" class="bookmark-name">Nome do Link</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="edit-link-name">Nome de Exibição</label>
+                    <input type="text" id="edit-link-name" class="modern-input" placeholder="Ex: Uptime Kuma" />
+                  </div>
+
+                  <div class="form-group">
+                    <label for="edit-link-url">URL de Destino</label>
+                    <input type="url" id="edit-link-url" class="modern-input" placeholder="http://192.168.1.10:3001" />
+                  </div>
+
+                  <div class="form-group">
+                    <label>Ícone Inteligente</label>
+                    <div class="icon-tabs">
+                      <button class="icon-tab-btn active" data-tab="auto">
+                        Automático
+                      </button>
+                      <button class="icon-tab-btn" data-tab="gallery">
+                        Galeria Oficial
+                      </button>
+                      <button class="icon-tab-btn" data-tab="custom">
+                        Link/Upload
+                      </button>
+                    </div>
+
+                    <!-- Tab: Auto (Smart Resolution) -->
+                    <div id="tab-auto" class="icon-tab-content active">
+                      <p class="tab-desc">
+                        Detecta automaticamente o melhor ícone no
+                        <strong>DashboardIcons</strong> (com fallback para o Favicon
+                        oficial caso não exista).
+                      </p>
+                      <div id="auto-detected-badge" class="auto-detected-badge" style="display: none"></div>
+                    </div>
+
+                    <!-- Tab: Unified Gallery -->
+                    <div id="tab-gallery" class="icon-tab-content" style="display: none">
+                      <div class="form-group" style="margin-bottom: 12px">
+                        <label for="gallery-source">Fonte do Ícone</label>
+                        <select id="gallery-source" class="modern-input" style="padding: 8px">
+                          <option value="dashboardicons">
+                            DashboardIcons (Apps, Serviços e Self-Hosted — Recomendado)
+                          </option>
+                          <option value="simpleicons">
+                            SimpleIcons (Logos Monocromáticos / Flat)
+                          </option>
+                          <option value="techicons">
+                            TechIcons (Linguagens e Ferramentas Dev)
+                          </option>
+                        </select>
+                      </div>
+
+                      <input type="text" id="gallery-search" class="modern-input"
+                        placeholder="Digite para filtrar ou clique em um ícone abaixo..." autocomplete="off" />
+
+                      <!-- Visual Catalog Grid -->
+                      <div id="icon-suggestions-grid" class="icon-suggestions-grid"
+                        aria-label="Sugestões visuais de ícones"></div>
+
+                      <!-- Dynamic settings inside Gallery -->
+                      <div id="gallery-settings" style="margin-top: 15px">
+                        <!-- SimpleIcons: Color Picker -->
+                        <div id="gallery-simpleicons-settings" class="gallery-dynamic-settings">
+                          <label for="edit-icon-color">Cor da Silhueta (SVG)</label>
+                          <div class="color-picker-row" style="
                       display: flex;
                       align-items: center;
                       gap: 10px;
                       margin-top: 5px;
-                    "
-                  >
-                    <input
-                      type="color"
-                      id="edit-icon-color"
-                      value="#ffffff"
-                      style="
+                    ">
+                            <input type="color" id="edit-icon-color" value="#ffffff" style="
                         cursor: pointer;
                         padding: 0;
                         border: none;
                         border-radius: 4px;
                         width: 30px;
                         height: 30px;
-                      "
-                    />
-                    <span
-                      id="edit-icon-color-hex"
-                      style="font-family: monospace"
-                      >#ffffff</span
-                    >
+                      " />
+                            <span id="edit-icon-color-hex" style="font-family: monospace">#ffffff</span>
+                          </div>
+                        </div>
+
+                        <!-- TechIcons: Colorized View -->
+                        <div id="gallery-techicons-settings" class="gallery-dynamic-settings" style="display: none">
+                          <div style="display: flex; gap: 10px; align-items: center">
+                            <input type="checkbox" id="techicon-colored" checked />
+                            <label for="techicon-colored" style="margin-bottom: 0">Colorido (Original)</label>
+                          </div>
+                        </div>
+
+                        <!-- DashboardIcons: Only message/info -->
+                        <div id="gallery-dashboardicons-settings" class="gallery-dynamic-settings"
+                          style="display: none">
+                          <p style="font-size: 0.8rem; opacity: 0.7; margin: 0">
+                            Ícones desenhados especialmente para dashboards e home
+                            servers.
+                          </p>
+                        </div>
+                      </div>
+                    </div>
+
+                    <!-- Tab: Custom -->
+                    <div id="tab-custom" class="icon-tab-content" style="display: none">
+                      <p class="tab-desc">
+                        Cole o link direto da imagem (.png, .jpg, .svg).
+                      </p>
+                      <input type="url" id="custom-icon-url" class="modern-input"
+                        placeholder="https://exemplo.com/logo.png" />
+                    </div>
                   </div>
                 </div>
-
-                <!-- TechIcons: Colorized View -->
-                <div
-                  id="gallery-techicons-settings"
-                  class="gallery-dynamic-settings"
-                  style="display: none"
-                >
-                  <div style="display: flex; gap: 10px; align-items: center">
-                    <input type="checkbox" id="techicon-colored" checked />
-                    <label for="techicon-colored" style="margin-bottom: 0"
-                      >Colorido (Original)</label
-                    >
-                  </div>
-                </div>
-
-                <!-- DashboardIcons: Only message/info -->
-                <div
-                  id="gallery-dashboardicons-settings"
-                  class="gallery-dynamic-settings"
-                  style="display: none"
-                >
-                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 0">
-                    Ícones desenhados especialmente para dashboards e home
-                    servers.
-                  </p>
+                <div class="modal-footer">
+                  <button id="cancel-link-btn" class="modal-btn secondary-btn">
+                    Cancelar
+                  </button>
+                  <button id="save-link-btn" class="modal-btn primary-btn">
+                    Salvar Alterações
+                  </button>
                 </div>
               </div>
             </div>
 
-            <!-- Tab: Custom -->
-            <div id="tab-custom" class="icon-tab-content" style="display: none">
-              <p class="tab-desc">
-                Cole o link direto da imagem (.png, .jpg, .svg).
-              </p>
-              <input
-                type="url"
-                id="custom-icon-url"
-                class="modern-input"
-                placeholder="https://exemplo.com/logo.png"
-              />
-            </div>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button id="cancel-link-btn" class="modal-btn secondary-btn">
-            Cancelar
-          </button>
-          <button id="save-link-btn" class="modal-btn primary-btn">
-            Salvar Alterações
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Add Bookmark Modal (substitui os prompts do Alt+N) -->
-    <div
-      id="add-bookmark-modal"
-      class="modal-overlay"
-      style="display: none"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="add-bookmark-title"
-    >
-      <div class="modal-content glass-effect" style="max-width: 420px">
-        <div class="modal-header">
-          <h2 id="add-bookmark-title">Novo Bookmark</h2>
-          <button
-            id="close-add-bookmark-btn"
-            class="close-btn"
-            aria-label="Fechar modal"
-          >
-            &times;
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="add-bookmark-url">URL</label>
-            <input
-              type="url"
-              id="add-bookmark-url"
-              class="modern-input"
-              placeholder="https://exemplo.com"
-              autocomplete="off"
-            />
-          </div>
-          <div class="form-group">
-            <label for="add-bookmark-name">Nome</label>
-            <input
-              type="text"
-              id="add-bookmark-name"
-              class="modern-input"
-              placeholder="Preenchido automaticamente pela URL"
-              autocomplete="off"
-            />
-          </div>
-          <div class="form-group">
-            <label for="add-bookmark-group">Grupo</label>
-            <select id="add-bookmark-group" class="modern-input"></select>
-          </div>
-        </div>
-        <div class="modal-footer">
-          <button id="cancel-add-bookmark-btn" class="modal-btn secondary-btn">
-            Cancelar
-          </button>
-          <button id="save-add-bookmark-btn" class="modal-btn primary-btn">
-            Adicionar
-          </button>
-        </div>
-      </div>
-    </div>
-
-    <!-- Search Bookmarks Modal -->
-    <div
-      id="search-modal"
-      class="modal-overlay"
-      style="display: none"
-      role="dialog"
-      aria-modal="true"
-      aria-label="Buscar Marcadores"
-    >
-      <div class="modal-content glass-effect search-modal-content">
-        <div class="search-input-container">
-          <svg
-            class="search-modal-icon"
-            xmlns="http://www.w3.org/2000/svg"
-            width="20"
-            height="20"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <circle cx="11" cy="11" r="8"></circle>
-            <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
-          </svg>
-          <input
-            type="text"
-            id="search-input"
-            placeholder="Buscar bookmarks... (digite > para comandos)"
-            autocomplete="off"
-          />
-          <button
-            id="search-close-btn"
-            class="close-btn"
-            title="Fechar"
-            aria-label="Fechar busca"
-          >
-            &times;
-          </button>
-        </div>
-
-        <div id="search-space-filters" class="search-space-filters">
-          <!-- Populado dinamicamente: Todos, Espaço 1, Espaço 2... -->
-        </div>
-
-        <div id="search-results-container" class="search-results-container">
-          <div id="search-results-list" class="search-results-list"></div>
-          <div
-            id="search-no-results"
-            class="search-no-results"
-            style="display: none"
-          >
-            Nenhum bookmark encontrado.
-          </div>
-        </div>
-
-        <div class="search-modal-footer">
-          <span class="search-shortcut"><kbd>↑↓</kbd> para navegar</span>
-          <span class="search-shortcut"><kbd>Enter</kbd> para abrir</span>
-          <span class="search-shortcut"><kbd>&gt;</kbd> comandos</span>
-          <span class="search-shortcut"><kbd>Esc</kbd> para fechar</span>
-        </div>
-      </div>
-    </div>
-
-    <!-- Custom Right-Click Context Menu -->
-    <div
-      id="context-menu"
-      class="context-menu glass-effect"
-      style="display: none"
-    >
-      <button class="context-menu-item" data-action="open-tab">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"
-            />
-            <polyline points="15 3 21 3 21 9" />
-            <line x1="10" y1="14" x2="21" y2="3" /></svg
-        ></span>
-        <span class="context-menu-text">Abrir em Nova Guia</span>
-      </button>
-      <button class="context-menu-item" data-action="open-incognito">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"
-            />
-            <path
-              d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"
-            />
-            <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
-            <line x1="1" y1="1" x2="23" y2="23" /></svg
-        ></span>
-        <span class="context-menu-text">Abrir em Guia Anônima</span>
-      </button>
-      <button class="context-menu-item" data-action="copy">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-            <path
-              d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"
-            /></svg
-        ></span>
-        <span class="context-menu-text">Copiar Link</span>
-      </button>
-      <div class="context-menu-divider"></div>
-      <button class="context-menu-item" data-action="edit">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
-            /></svg
-        ></span>
-        <span class="context-menu-text">Editar Link</span>
-      </button>
-      <button class="context-menu-item" data-action="move">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"
-            /></svg
-        ></span>
-        <span class="context-menu-text">Mover para...</span>
-        <span class="context-menu-arrow"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="12"
-            height="12"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="9 18 15 12 9 6" /></svg
-        ></span>
-        <div
-          id="context-menu-submenu"
-          class="context-menu-submenu glass-effect"
-        >
-          <!-- Populado dinamicamente -->
-        </div>
-      </button>
-      <div class="context-menu-divider"></div>
-      <button class="context-menu-item delete-item" data-action="delete">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="3 6 5 6 21 6" />
-            <path
-              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-            />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" /></svg
-        ></span>
-        <span class="context-menu-text">Excluir</span>
-      </button>
-    </div>
-
-    <!-- Shortcuts Cheatsheet Modal -->
-    <div
-      id="shortcuts-modal"
-      class="modal-overlay"
-      style="display: none"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="shortcuts-modal-title"
-    >
-      <div class="modal-content glass-effect shortcuts-modal-content">
-        <div class="modal-header">
-          <h2 id="shortcuts-modal-title">Atalhos de Teclado</h2>
-          <button
-            id="close-shortcuts-btn"
-            class="close-btn"
-            aria-label="Fechar atalhos de teclado"
-          >
-            &times;
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="shortcuts-list">
-            <div class="shortcut-row">
-              <kbd>Alt + 1-9</kbd>
-              <span>Alternar entre Espaços (Spaces)</span>
-            </div>
-            <div class="shortcut-row">
-              <kbd>Alt + N</kbd>
-              <span>Adicionar novo bookmark</span>
-            </div>
-            <div class="shortcut-row">
-              <kbd>Alt + G</kbd>
-              <span>Adicionar novo grupo (categoria)</span>
-            </div>
-            <div class="shortcut-row">
-              <kbd>Alt + ,</kbd>
-              <span>Abrir configurações</span>
-            </div>
-            <div class="shortcut-row">
-              <kbd>Alt + K</kbd> ou <kbd>/</kbd>
-              <span>Abrir busca de bookmarks</span>
-            </div>
-            <div class="shortcut-row">
-              <kbd>Alt + Z</kbd>
-              <span>Alternar Modo Zen (foco total)</span>
-            </div>
-            <div class="shortcut-row">
-              <kbd>Alt + /</kbd> ou <kbd>?</kbd>
-              <span>Exibir este guia de atalhos</span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <!-- Space Modal (Create / Edit) -->
-    <div
-      id="space-modal"
-      class="modal-overlay"
-      style="display: none"
-      role="dialog"
-      aria-modal="true"
-      aria-labelledby="space-modal-title"
-    >
-      <div class="modal-content glass-effect" style="max-width: 450px">
-        <div class="modal-header">
-          <h2 id="space-modal-title">Novo Espaço</h2>
-          <button
-            id="close-space-modal-btn"
-            class="close-btn"
-            aria-label="Fechar modal de espaço"
-          >
-            &times;
-          </button>
-        </div>
-        <div class="modal-body">
-          <div class="form-group">
-            <label for="space-name-input">Nome do Espaço</label>
-            <input
-              type="text"
-              id="space-name-input"
-              class="modern-input"
-              placeholder="Ex: Trabalho, Estudos, Pessoal"
-            />
-          </div>
-          <div class="form-group">
-            <label>Ícone / Emoji</label>
-            <div class="emoji-picker-container">
-              <input
-                type="text"
-                id="space-icon-input"
-                class="modern-input"
-                placeholder="Emoji (ex: 🏠) ou deixe vazio"
-                style="font-size: 1.2rem; text-align: center; width: 100px"
-              />
-              <div id="quick-emojis" class="quick-emojis">
-                <!-- Emojis will be populated dynamically or static -->
-                <button class="quick-emoji-btn" type="button">🏠</button>
-                <button class="quick-emoji-btn" type="button">💼</button>
-                <button class="quick-emoji-btn" type="button">🎯</button>
-                <button class="quick-emoji-btn" type="button">📚</button>
-                <button class="quick-emoji-btn" type="button">🔧</button>
-                <button class="quick-emoji-btn" type="button">🎨</button>
-                <button class="quick-emoji-btn" type="button">🎵</button>
-                <button class="quick-emoji-btn" type="button">🎮</button>
-                <button class="quick-emoji-btn" type="button">📰</button>
-                <button class="quick-emoji-btn" type="button">🚀</button>
-                <button class="quick-emoji-btn" type="button">💻</button>
-                <button class="quick-emoji-btn" type="button">🍕</button>
+            <!-- Add Bookmark Modal (substitui os prompts do Alt+N) -->
+            <div id="add-bookmark-modal" class="modal-overlay" style="display: none" role="dialog" aria-modal="true"
+              aria-labelledby="add-bookmark-title">
+              <div class="modal-content glass-effect" style="max-width: 420px">
+                <div class="modal-header">
+                  <h2 id="add-bookmark-title">Novo Bookmark</h2>
+                  <button id="close-add-bookmark-btn" class="close-btn" aria-label="Fechar modal">
+                    &times;
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="add-bookmark-url">URL</label>
+                    <input type="url" id="add-bookmark-url" class="modern-input" placeholder="https://exemplo.com"
+                      autocomplete="off" />
+                  </div>
+                  <div class="form-group">
+                    <label for="add-bookmark-name">Nome</label>
+                    <input type="text" id="add-bookmark-name" class="modern-input"
+                      placeholder="Preenchido automaticamente pela URL" autocomplete="off" />
+                  </div>
+                  <div class="form-group">
+                    <label for="add-bookmark-group">Grupo</label>
+                    <select id="add-bookmark-group" class="modern-input"></select>
+                  </div>
+                </div>
+                <div class="modal-footer">
+                  <button id="cancel-add-bookmark-btn" class="modal-btn secondary-btn">
+                    Cancelar
+                  </button>
+                  <button id="save-add-bookmark-btn" class="modal-btn primary-btn">
+                    Adicionar
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-        </div>
-        <div
-          class="modal-footer"
-          style="display: flex; justify-content: flex-end; gap: 10px"
-        >
-          <button
-            id="delete-space-btn"
-            class="modal-btn delete-btn"
-            style="margin-right: auto; display: none"
-          >
-            Excluir
-          </button>
-          <button id="cancel-space-btn" class="modal-btn secondary-btn">
-            Cancelar
-          </button>
-          <button id="save-space-btn" class="modal-btn primary-btn">
-            Salvar
-          </button>
-        </div>
-      </div>
-    </div>
 
-    <!-- Space Context Menu -->
-    <div
-      id="space-context-menu"
-      class="context-menu glass-effect"
-      style="display: none"
-    >
-      <button class="context-menu-item" id="space-menu-edit">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <path
-              d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"
-            /></svg
-        ></span>
-        <span class="context-menu-text">Editar Espaço</span>
-      </button>
-      <div class="context-menu-divider"></div>
-      <button class="context-menu-item delete-item" id="space-menu-delete">
-        <span class="context-menu-icon"
-          ><svg
-            xmlns="http://www.w3.org/2000/svg"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-          >
-            <polyline points="3 6 5 6 21 6" />
-            <path
-              d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"
-            />
-            <line x1="10" y1="11" x2="10" y2="17" />
-            <line x1="14" y1="11" x2="14" y2="17" /></svg
-        ></span>
-        <span class="context-menu-text">Excluir Espaço</span>
-      </button>
-    </div>
+            <!-- Search Bookmarks Modal -->
+            <div id="search-modal" class="modal-overlay" style="display: none" role="dialog" aria-modal="true"
+              aria-label="Buscar Marcadores">
+              <div class="modal-content glass-effect search-modal-content">
+                <div class="search-input-container">
+                  <svg class="search-modal-icon" xmlns="http://www.w3.org/2000/svg" width="20" height="20"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <circle cx="11" cy="11" r="8"></circle>
+                    <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                  </svg>
+                  <input type="text" id="search-input" placeholder="Buscar bookmarks... (digite > para comandos)"
+                    autocomplete="off" />
+                  <button id="search-close-btn" class="close-btn" title="Fechar" aria-label="Fechar busca">
+                    &times;
+                  </button>
+                </div>
 
-    <script type="module" src="js/app.js"></script>
-  </body>
+                <div id="search-space-filters" class="search-space-filters">
+                  <!-- Populado dinamicamente: Todos, Espaço 1, Espaço 2... -->
+                </div>
+
+                <div id="search-results-container" class="search-results-container">
+                  <div id="search-results-list" class="search-results-list"></div>
+                  <div id="search-no-results" class="search-no-results" style="display: none">
+                    Nenhum bookmark encontrado.
+                  </div>
+                </div>
+
+                <div class="search-modal-footer">
+                  <span class="search-shortcut"><kbd>↑↓</kbd> para navegar</span>
+                  <span class="search-shortcut"><kbd>Enter</kbd> para abrir</span>
+                  <span class="search-shortcut"><kbd>&gt;</kbd> comandos</span>
+                  <span class="search-shortcut"><kbd>Esc</kbd> para fechar</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Custom Right-Click Context Menu -->
+            <div id="context-menu" class="context-menu glass-effect" style="display: none">
+              <button class="context-menu-item" data-action="open-tab">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6" />
+                    <polyline points="15 3 21 3 21 9" />
+                    <line x1="10" y1="14" x2="21" y2="3" />
+                  </svg></span>
+                <span class="context-menu-text">Abrir em Nova Guia</span>
+              </button>
+              <button class="context-menu-item" data-action="open-incognito">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94" />
+                    <path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19" />
+                    <path d="M14.12 14.12a3 3 0 1 1-4.24-4.24" />
+                    <line x1="1" y1="1" x2="23" y2="23" />
+                  </svg></span>
+                <span class="context-menu-text">Abrir em Guia Anônima</span>
+              </button>
+              <button class="context-menu-item" data-action="copy">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg></span>
+                <span class="context-menu-text">Copiar Link</span>
+              </button>
+              <div class="context-menu-divider"></div>
+              <button class="context-menu-item" data-action="edit">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                  </svg></span>
+                <span class="context-menu-text">Editar Link</span>
+              </button>
+              <button class="context-menu-item" data-action="move">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z" />
+                  </svg></span>
+                <span class="context-menu-text">Mover para...</span>
+                <span class="context-menu-arrow"><svg xmlns="http://www.w3.org/2000/svg" width="12" height="12"
+                    viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <polyline points="9 18 15 12 9 6" />
+                  </svg></span>
+                <div id="context-menu-submenu" class="context-menu-submenu glass-effect">
+                  <!-- Populado dinamicamente -->
+                </div>
+              </button>
+              <div class="context-menu-divider"></div>
+              <button class="context-menu-item delete-item" data-action="delete">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg></span>
+                <span class="context-menu-text">Excluir</span>
+              </button>
+            </div>
+
+            <!-- Shortcuts Cheatsheet Modal -->
+            <div id="shortcuts-modal" class="modal-overlay" style="display: none" role="dialog" aria-modal="true"
+              aria-labelledby="shortcuts-modal-title">
+              <div class="modal-content glass-effect shortcuts-modal-content">
+                <div class="modal-header">
+                  <h2 id="shortcuts-modal-title">Atalhos de Teclado</h2>
+                  <button id="close-shortcuts-btn" class="close-btn" aria-label="Fechar atalhos de teclado">
+                    &times;
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="shortcuts-list">
+                    <div class="shortcut-row">
+                      <kbd>Alt + 1-9</kbd>
+                      <span>Alternar entre Espaços (Spaces)</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <kbd>Alt + N</kbd>
+                      <span>Adicionar novo bookmark</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <kbd>Alt + G</kbd>
+                      <span>Adicionar novo grupo (categoria)</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <kbd>Alt + ,</kbd>
+                      <span>Abrir configurações</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <kbd>Alt + K</kbd> ou <kbd>/</kbd>
+                      <span>Abrir busca de bookmarks</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <kbd>Alt + Z</kbd>
+                      <span>Alternar Modo Zen (foco total)</span>
+                    </div>
+                    <div class="shortcut-row">
+                      <kbd>Alt + /</kbd> ou <kbd>?</kbd>
+                      <span>Exibir este guia de atalhos</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Space Modal (Create / Edit) -->
+            <div id="space-modal" class="modal-overlay" style="display: none" role="dialog" aria-modal="true"
+              aria-labelledby="space-modal-title">
+              <div class="modal-content glass-effect" style="max-width: 450px">
+                <div class="modal-header">
+                  <h2 id="space-modal-title">Novo Espaço</h2>
+                  <button id="close-space-modal-btn" class="close-btn" aria-label="Fechar modal de espaço">
+                    &times;
+                  </button>
+                </div>
+                <div class="modal-body">
+                  <div class="form-group">
+                    <label for="space-name-input">Nome do Espaço</label>
+                    <input type="text" id="space-name-input" class="modern-input"
+                      placeholder="Ex: Trabalho, Estudos, Pessoal" />
+                  </div>
+                  <div class="form-group">
+                    <label>Ícone / Emoji</label>
+                    <div class="emoji-picker-container">
+                      <input type="text" id="space-icon-input" class="modern-input"
+                        placeholder="Emoji (ex: 🏠) ou deixe vazio"
+                        style="font-size: 1.2rem; text-align: center; width: 100px" />
+                      <div id="quick-emojis" class="quick-emojis">
+                        <!-- Emojis will be populated dynamically or static -->
+                        <button class="quick-emoji-btn" type="button">🏠</button>
+                        <button class="quick-emoji-btn" type="button">💼</button>
+                        <button class="quick-emoji-btn" type="button">🎯</button>
+                        <button class="quick-emoji-btn" type="button">📚</button>
+                        <button class="quick-emoji-btn" type="button">🔧</button>
+                        <button class="quick-emoji-btn" type="button">🎨</button>
+                        <button class="quick-emoji-btn" type="button">🎵</button>
+                        <button class="quick-emoji-btn" type="button">🎮</button>
+                        <button class="quick-emoji-btn" type="button">📰</button>
+                        <button class="quick-emoji-btn" type="button">🚀</button>
+                        <button class="quick-emoji-btn" type="button">💻</button>
+                        <button class="quick-emoji-btn" type="button">🍕</button>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+                <div class="modal-footer" style="display: flex; justify-content: flex-end; gap: 10px">
+                  <button id="delete-space-btn" class="modal-btn delete-btn" style="margin-right: auto; display: none">
+                    Excluir
+                  </button>
+                  <button id="cancel-space-btn" class="modal-btn secondary-btn">
+                    Cancelar
+                  </button>
+                  <button id="save-space-btn" class="modal-btn primary-btn">
+                    Salvar
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Space Context Menu -->
+            <div id="space-context-menu" class="context-menu glass-effect" style="display: none">
+              <button class="context-menu-item" id="space-menu-edit">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z" />
+                  </svg></span>
+                <span class="context-menu-text">Editar Espaço</span>
+              </button>
+              <div class="context-menu-divider"></div>
+              <button class="context-menu-item delete-item" id="space-menu-delete">
+                <span class="context-menu-icon"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="3 6 5 6 21 6" />
+                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2" />
+                    <line x1="10" y1="11" x2="10" y2="17" />
+                    <line x1="14" y1="11" x2="14" y2="17" />
+                  </svg></span>
+                <span class="context-menu-text">Excluir Espaço</span>
+              </button>
+            </div>
+
+            <script type="module" src="js/app.js"></script>
+</body>
+
 </html>

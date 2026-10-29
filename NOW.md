@@ -5,18 +5,23 @@ Atualizado por: Antigravity (Gemini 4 Argon (Medium))
 
 ## Em andamento
 
-- Nenhuma atividade bloqueada. Todas as frentes planejadas (`ACT-001` a `ACT-006` e `ACT-008` a `ACT-014`) foram validadas (`HUMAN_VALIDATED`) e enviadas ao GitHub.
+- Validação das correções estruturais nas Configurações (`ACT-015`) e do novo **Quick Settings Popover em 3 micro-abas** (`ACT-016`).
 
 ## Concluído recentemente
 
-- **Implementação dos 5 Pacotes de Evolução (`ACT-010` a `ACT-014` / `AGT-010`):**
-  - **Navegabilidade `Ctrl+T` (`ACT-010`):** *Type-to-Search* instantâneo ao digitar qualquer caractere alfanumérico ou `>` na Nova Aba (`js/features/search.js`), badges numéricos `1..9` nos Espaços da Sidebar (`js/features/sidebar.js`) e contador + botão *"Abrir todos"* nos cabeçalhos de cada grupo (`js/bookmark-renderer.js`).
-  - **Layout & Densidade (`ACT-011`):** Controle de *Blur* do papel de parede (`0..24px` via `backdrop-filter`), 3 estilos visuais de cartão (`Card`, `Frameless` e `Compact`) com zero-FOUC via `js/theme-cache.js`, e ícones automáticos do DashboardIcons na barra superior de Quick Links (`js/features/quick-links.js`).
-  - **Cores & Temas (`ACT-012`):** 5 novas paletas consagradas integradas ao sistema e ao Theme Builder (*Catppuccin Mocha*, *Dracula*, *Nord*, *Tokyo Night* e *Rosé Pine*).
-  - **UX de Configurações & Salvar (`ACT-013`):** Popover Rápido de Aparência (`#quick-appearance-popover`) diretamente na Nova Aba com preview ao vivo e salvamento automático nos Favoritos do Chrome, além de indicador explícito de *Auto-Save* em `settings.html`.
-  - **Trava de Layout / Lock Mode (`ACT-014`):** Botão de cadeado na barra lateral direita (`#lock-layout-btn` / `Alt+L`) que bloqueia o SortableJS e oculta botões destrutivos/de edição para navegação rápida sem arrastes acidentais.
-- **Benchmark Competitivo e Registro na Wiki (`AGT-009`):**
-  - Fichas técnicas em `_wiki/referencias/` ([`nighttab.md`](_wiki/referencias/nighttab.md), [`bonjourr.md`](_wiki/referencias/bonjourr.md), [`toby.md`](_wiki/referencias/toby.md), [`homepage-homarr-glance.md`](_wiki/referencias/homepage-homarr-glance.md)), matriz comparativa em [`_wiki/referencias-e-inspiracoes.md`](_wiki/referencias-e-inspiracoes.md) e roadmap em [`_wiki/plano-evolucao-ux-layout.md`](_wiki/plano-evolucao-ux-layout.md).
+- **Diagnóstico de Configurações, Correções Estruturais e Quick Settings Popover (`ACT-015` e `ACT-016` / `AGT-011`):**
+  - **Plano e Achados registrados na Wiki:** [`_wiki/plano-diagnostico-configs-e-quick-popover.md`](_wiki/plano-diagnostico-configs-e-quick-popover.md) indexado em [`_wiki/INDEX.md`](_wiki/INDEX.md).
+  - **Correção dos 6 defeitos das Configurações (`ACT-015`):**
+    1. Substituição da opção quebrada `"Pasta Local do PC"` por **Upload de Imagem do PC (`FileReader` + `chrome.storage.local`) ou URL Direta** (`wallpaperSource: 'custom'`).
+    2. Preservação das cores e glassmorphism nativos dos 10 temas predefinidos (`useCustomColors: false` por padrão; só sobrescreve cores inline no `body` quando o usuário edita um color picker ou ativa a chave manual).
+    3. Reatividade em tempo real para `quickLinksSize` (`applyQuickLinksSizeSetting`).
+    4. Reatividade em tempo real para `pomodoroEnabled`, `pomodoroWork` e `pomodoroBreak` (`initPomodoro()` idempotente).
+    5. Extração automática de cor dominante via `<canvas>` (`extractDominantColorFromUrl`) para o Acento Dinâmico em imagens locais/URL.
+    6. Ampliação do slider de largura mínima do cartão (`#bookmark-min-width`) de `50..150px` para `80..260px`.
+  - **Quick Settings Popover em 3 Micro-Abas na Nova Aba (`ACT-016`):**
+    - `🎨 Aparência`: Temas, Estilo dos Cartões, Papel de Parede (Unsplash + botão `🔄 Trocar foto` / Upload de Imagem do PC / Cor Sólida), Blur (`0..24px`), Contraste e Modo Sólido.
+    - `📐 Grade`: Lista vs. Colunas (`1..6`), Orientação do Ícone (`Ao Lado` / `Acima`), Tamanho dos Ícones (`16..64px`), Largura do Cartão (`80..260px`) e Espaço entre Grupos (`0..48px`).
+    - `✨ Widgets`: Estilo do Relógio (`Analógico` / `Digital`) e switches ao vivo para `Tarefas`, `Citações`, `Feed RSS` e `Timer Pomodoro`.
 
 ## Bloqueios e pendências
 
@@ -24,9 +29,8 @@ Atualizado por: Antigravity (Gemini 4 Argon (Medium))
 
 ## Próximos passos
 
-1. Testar as novas funcionalidades recarregando a extensão no Chrome (`Ctrl+T` -> digitar direto, testar o Popover Rápido de Aparência no botão de paleta, testar os 5 novos temas, estilos de cartão, blur do fundo e o botão de cadeado `Alt+L`).
-2. Realizar commit e push das melhorias para o GitHub após validação.
-3. Opcional futuro (`ACT-007`): Modularizar o arquivo `css/style.css`.
+4. Testar na Nova Aba (`Ctrl+T`) o novo **Quick Settings Popover** com as 3 abas (`🎨 Aparência`, `📐 Grade` e `✨ Widgets`) e o upload de papel de parede personalizado.
+5. Fazer commit e push para o GitHub após validação.
 
 ## Consulte quando necessário
 

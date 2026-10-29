@@ -1,721 +1,696 @@
 <!doctype html>
 <html lang="pt-BR">
-  <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Configurações</title>
-    <!-- Use variables from main style -->
-    <link rel="stylesheet" href="css/tokens.css" />
-    <link rel="stylesheet" href="css/style.css" />
-    <style>
-      body {
-        /* Variáveis locais herdam do tema ativo (tokens.css + style.css) */
-        --settings-bg: var(--bg);
-        --settings-sidebar-bg: var(--surface);
-        --settings-text: var(--text);
-        --settings-border: var(--surface-border);
-        --input-bg: color-mix(in srgb, var(--text) 5%, transparent);
 
-        margin: 0;
-        padding: 0;
-        background-color: var(--settings-bg);
-        color: var(--settings-text);
-        font-family: var(--font-ui);
-        height: 100vh;
-        display: flex;
-        overflow: hidden;
-      }
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Configurações</title>
+  <!-- Use variables from main style -->
+  <link rel="stylesheet" href="css/tokens.css" />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body {
+      /* Variáveis locais herdam do tema ativo (tokens.css + style.css) */
+      --settings-bg: var(--bg);
+      --settings-sidebar-bg: var(--surface);
+      --settings-text: var(--text);
+      --settings-border: var(--surface-border);
+      --input-bg: color-mix(in srgb, var(--text) 5%, transparent);
 
-      /* LAYOUT */
-      .settings-layout {
-        display: flex;
-        width: 100%;
-        height: 100%;
-      }
+      margin: 0;
+      padding: 0;
+      background-color: var(--settings-bg);
+      color: var(--settings-text);
+      font-family: var(--font-ui);
+      height: 100vh;
+      display: flex;
+      overflow: hidden;
+    }
 
-      /* SIDEBAR */
-      .settings-sidebar {
-        width: 250px;
-        background-color: var(--settings-sidebar-bg);
-        backdrop-filter: blur(var(--surface-blur));
-        border-right: 1px solid var(--settings-border);
-        display: flex;
-        flex-direction: column;
-        padding: var(--space-5) 0;
-        flex-shrink: 0;
-      }
+    /* LAYOUT */
+    .settings-layout {
+      display: flex;
+      width: 100%;
+      height: 100%;
+    }
 
-      .settings-logo {
-        padding: 0 var(--space-6) var(--space-5);
-        font-size: var(--text-lg);
-        font-weight: 700;
-        letter-spacing: -0.2px;
-        color: var(--text);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        border-bottom: 1px solid var(--settings-border);
-        margin-bottom: var(--space-3);
-      }
+    /* SIDEBAR */
+    .settings-sidebar {
+      width: 250px;
+      background-color: var(--settings-sidebar-bg);
+      backdrop-filter: blur(var(--surface-blur));
+      border-right: 1px solid var(--settings-border);
+      display: flex;
+      flex-direction: column;
+      padding: var(--space-5) 0;
+      flex-shrink: 0;
+    }
 
-      .settings-logo span {
-        opacity: 0.9;
-      }
+    .settings-logo {
+      padding: 0 var(--space-6) var(--space-5);
+      font-size: var(--text-lg);
+      font-weight: 700;
+      letter-spacing: -0.2px;
+      color: var(--text);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      border-bottom: 1px solid var(--settings-border);
+      margin-bottom: var(--space-3);
+    }
 
-      .nav-items {
-        flex: 1;
-        display: flex;
-        flex-direction: column;
-        gap: 2px;
-        padding: 0 var(--space-3);
-      }
+    .settings-logo span {
+      opacity: 0.9;
+    }
 
-      .nav-btn {
-        background: none;
-        border: none;
-        padding: 10px 14px;
-        text-align: left;
-        border-radius: var(--radius-md);
-        cursor: pointer;
-        color: var(--settings-text);
-        font-family: inherit;
-        font-size: var(--text-base);
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-        transition:
-          background-color var(--dur-fast) var(--ease-out),
-          transform var(--dur-fast) var(--ease-out);
-        opacity: 0.75;
-      }
+    .nav-items {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+      padding: 0 var(--space-3);
+    }
 
-      .nav-btn:hover {
-        background-color: var(--surface-hover);
-        opacity: 1;
-      }
+    .nav-btn {
+      background: none;
+      border: none;
+      padding: 10px 14px;
+      text-align: left;
+      border-radius: var(--radius-md);
+      cursor: pointer;
+      color: var(--settings-text);
+      font-family: inherit;
+      font-size: var(--text-base);
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      transition:
+        background-color var(--dur-fast) var(--ease-out),
+        transform var(--dur-fast) var(--ease-out);
+      opacity: 0.75;
+    }
 
-      .nav-btn:active {
-        transform: scale(0.98);
-      }
+    .nav-btn:hover {
+      background-color: var(--surface-hover);
+      opacity: 1;
+    }
 
-      .nav-btn.active {
-        background-color: color-mix(in srgb, var(--accent) 16%, transparent);
-        color: color-mix(in srgb, var(--accent) 65%, var(--text));
-        opacity: 1;
-        font-weight: 600;
-      }
+    .nav-btn:active {
+      transform: scale(0.98);
+    }
 
-      .sidebar-footer {
-        padding: var(--space-5);
-        border-top: 1px solid var(--settings-border);
-      }
+    .nav-btn.active {
+      background-color: color-mix(in srgb, var(--accent) 16%, transparent);
+      color: color-mix(in srgb, var(--accent) 65%, var(--text));
+      opacity: 1;
+      font-weight: 600;
+    }
 
-      /* CONTENT AREA */
-      .settings-content-wrapper {
-        flex: 1;
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        background-color: var(--settings-bg);
-      }
+    .sidebar-footer {
+      padding: var(--space-5);
+      border-top: 1px solid var(--settings-border);
+    }
 
-      .settings-content {
-        flex: 1;
-        padding: var(--space-8) var(--space-8) var(--space-6);
-        overflow-y: auto;
-        max-width: 900px;
-        margin: 0 auto;
-        width: 100%;
-        box-sizing: border-box;
-      }
+    /* CONTENT AREA */
+    .settings-content-wrapper {
+      flex: 1;
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      background-color: var(--settings-bg);
+    }
 
-      .tab-pane {
-        display: none;
-        animation: fadeIn var(--dur-base) var(--ease-out);
-      }
+    .settings-content {
+      flex: 1;
+      padding: var(--space-8) var(--space-8) var(--space-6);
+      overflow-y: auto;
+      max-width: 900px;
+      margin: 0 auto;
+      width: 100%;
+      box-sizing: border-box;
+    }
 
-      .tab-pane.active {
-        display: block;
-      }
+    .tab-pane {
+      display: none;
+      animation: fadeIn var(--dur-base) var(--ease-out);
+    }
 
-      @keyframes fadeIn {
-        from {
-          opacity: 0;
-          transform: translateY(8px);
-        }
+    .tab-pane.active {
+      display: block;
+    }
 
-        to {
-          opacity: 1;
-          transform: translateY(0);
-        }
-      }
-
-      .section-header {
-        margin-bottom: var(--space-6);
-      }
-
-      .section-title {
-        font-size: 1.6rem;
-        font-weight: 700;
-        letter-spacing: -0.4px;
-        margin: 0 0 var(--space-2);
-      }
-
-      .section-desc {
-        color: var(--settings-text);
-        opacity: 0.6;
-        margin: 0;
-        font-size: var(--text-base);
-      }
-
-      /* CARDS & GROUPS */
-      .settings-group {
-        background-color: var(--surface);
-        backdrop-filter: blur(var(--surface-blur));
-        border: 1px solid var(--settings-border);
-        border-radius: var(--radius-lg);
-        padding: var(--space-6);
-        margin-bottom: var(--space-5);
-        box-shadow: var(--shadow-sm);
-      }
-
-      .group-title {
-        font-size: var(--text-xs);
-        font-weight: 700;
-        text-transform: uppercase;
-        letter-spacing: 0.8px;
-        margin-bottom: var(--space-5);
-        color: var(--settings-text);
-        opacity: 0.55;
-      }
-
-      /* CONTROLS GRID */
-      .controls-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-        gap: var(--space-5) var(--space-6);
-      }
-
-      .control-item {
-        display: flex;
-        flex-direction: column;
-        gap: var(--space-2);
-      }
-
-      .control-item.full-width {
-        grid-column: 1 / -1;
-      }
-
-      label {
-        font-weight: 500;
-        font-size: var(--text-sm);
-        color: var(--settings-text);
-        opacity: 0.9;
-      }
-
-      /* INPUT STYLES */
-      .control-item input[type='text'],
-      .control-item input[type='number'],
-      .control-item input[type='password'],
-      .control-item select {
-        width: 100%;
-        box-sizing: border-box;
-        padding: 10px 14px;
-        border-radius: var(--radius-sm);
-        border: 1px solid var(--settings-border);
-        background-color: var(--input-bg);
-        color: var(--settings-text);
-        font-family: inherit;
-        font-size: var(--text-base);
-        transition:
-          border-color var(--dur-fast) var(--ease-out),
-          box-shadow var(--dur-fast) var(--ease-out);
-        outline: none;
-      }
-
-      .control-item select option {
-        background-color: var(--card);
-        color: var(--text);
-      }
-
-      .control-item input[type='text']:focus,
-      .control-item input[type='number']:focus,
-      .control-item input[type='password']:focus,
-      .control-item select:focus {
-        border-color: var(--accent);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
-      }
-
-      /* RANGE SLIDER */
-      .range-wrapper {
-        display: flex;
-        align-items: center;
-        gap: var(--space-4);
-      }
-
-      input[type='range'] {
-        flex: 1;
-        height: 5px;
-        border-radius: var(--radius-full);
-        accent-color: var(--accent);
-        background: var(--input-bg);
-        border: none;
-      }
-
-      .range-value {
-        font-variant-numeric: tabular-nums;
-        font-size: var(--text-sm);
-        padding: 4px 8px;
-        background-color: var(--input-bg);
-        border-radius: var(--radius-sm);
-        min-width: 60px;
-        text-align: center;
-        border: 1px solid var(--settings-border);
-      }
-
-      /* COLOR INPUT */
-      .color-wrapper {
-        display: flex;
-        align-items: center;
-        gap: var(--space-3);
-      }
-
-      input[type='color'] {
-        -webkit-appearance: none;
-        appearance: none;
-        width: 38px;
-        height: 38px;
-        border: none;
-        border-radius: var(--radius-full);
-        cursor: pointer;
-        padding: 0;
-        overflow: hidden;
-        box-shadow: var(--shadow-sm);
-        transition:
-          transform var(--dur-fast) var(--ease-spring),
-          box-shadow var(--dur-fast) var(--ease-out);
-      }
-
-      input[type='color']::-webkit-color-swatch-wrapper {
-        padding: 0;
-      }
-
-      input[type='color']::-webkit-color-swatch {
-        border: 2px solid var(--settings-border);
-        border-radius: var(--radius-full);
-      }
-
-      input[type='color']:hover,
-      input[type='color']:focus {
-        transform: scale(1.08);
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
-        outline: none;
-      }
-
-      /* BUTTONS */
-      .btn {
-        padding: 10px 20px;
-        border-radius: var(--radius-sm);
-        border: none;
-        cursor: pointer;
-        font-family: inherit;
-        font-weight: 600;
-        font-size: var(--text-base);
-        transition:
-          transform var(--dur-fast) var(--ease-out),
-          box-shadow var(--dur-fast) var(--ease-out),
-          background-color var(--dur-fast) var(--ease-out);
-      }
-
-      .btn:active {
-        transform: scale(0.97);
-      }
-
-      .btn-primary {
-        background-color: var(--accent);
-        color: var(--on-accent);
-        box-shadow: 0 4px 10px
-          color-mix(in srgb, var(--accent) 35%, transparent);
-      }
-
-      .btn-primary:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 6px 15px
-          color-mix(in srgb, var(--accent) 45%, transparent);
-      }
-
-      .btn-secondary {
-        background-color: var(--input-bg);
-        border: 1px solid var(--settings-border);
-        color: var(--settings-text);
-      }
-
-      .btn-secondary:hover {
-        border-color: var(--accent);
-        color: var(--accent);
-      }
-
-      /* BOTTOM BAR */
-      .save-bar {
-        padding: var(--space-4) var(--space-8);
-        background-color: var(--surface-strong);
-        backdrop-filter: blur(var(--surface-blur));
-        border-top: 1px solid var(--settings-border);
-        display: flex;
-        justify-content: flex-end;
-        align-items: center;
-        gap: var(--space-4);
-      }
-
-      #save-status {
-        color: var(--success);
-        font-weight: 500;
+    @keyframes fadeIn {
+      from {
         opacity: 0;
-        transition: opacity var(--dur-base) var(--ease-out);
+        transform: translateY(8px);
       }
 
-      #save-status.show {
+      to {
         opacity: 1;
+        transform: translateY(0);
       }
+    }
 
-      /* TOGGLE SWITCH */
-      .switch {
-        position: relative;
-        display: inline-block;
-        width: 44px;
-        height: 26px;
-        flex-shrink: 0;
-      }
-      .switch input {
-        opacity: 0;
-        width: 0;
-        height: 0;
-      }
-      .switch .slider {
-        position: absolute;
-        cursor: pointer;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: var(--input-bg);
-        border: 1px solid var(--settings-border);
-        transition:
-          background-color var(--dur-base) var(--ease-out),
-          border-color var(--dur-base) var(--ease-out);
-        border-radius: var(--radius-full);
-      }
-      .switch .slider:before {
-        position: absolute;
-        content: '';
-        height: 18px;
-        width: 18px;
-        left: 3px;
-        bottom: 3px;
-        background-color: color-mix(
-          in srgb,
+    .section-header {
+      margin-bottom: var(--space-6);
+    }
+
+    .section-title {
+      font-size: 1.6rem;
+      font-weight: 700;
+      letter-spacing: -0.4px;
+      margin: 0 0 var(--space-2);
+    }
+
+    .section-desc {
+      color: var(--settings-text);
+      opacity: 0.6;
+      margin: 0;
+      font-size: var(--text-base);
+    }
+
+    /* CARDS & GROUPS */
+    .settings-group {
+      background-color: var(--surface);
+      backdrop-filter: blur(var(--surface-blur));
+      border: 1px solid var(--settings-border);
+      border-radius: var(--radius-lg);
+      padding: var(--space-6);
+      margin-bottom: var(--space-5);
+      box-shadow: var(--shadow-sm);
+    }
+
+    .group-title {
+      font-size: var(--text-xs);
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      margin-bottom: var(--space-5);
+      color: var(--settings-text);
+      opacity: 0.55;
+    }
+
+    /* CONTROLS GRID */
+    .controls-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: var(--space-5) var(--space-6);
+    }
+
+    .control-item {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+    }
+
+    .control-item.full-width {
+      grid-column: 1 / -1;
+    }
+
+    label {
+      font-weight: 500;
+      font-size: var(--text-sm);
+      color: var(--settings-text);
+      opacity: 0.9;
+    }
+
+    /* INPUT STYLES */
+    .control-item input[type='text'],
+    .control-item input[type='number'],
+    .control-item input[type='password'],
+    .control-item select {
+      width: 100%;
+      box-sizing: border-box;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      border: 1px solid var(--settings-border);
+      background-color: var(--input-bg);
+      color: var(--settings-text);
+      font-family: inherit;
+      font-size: var(--text-base);
+      transition:
+        border-color var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur-fast) var(--ease-out);
+      outline: none;
+    }
+
+    .control-item select option {
+      background-color: var(--card);
+      color: var(--text);
+    }
+
+    .control-item input[type='text']:focus,
+    .control-item input[type='number']:focus,
+    .control-item input[type='password']:focus,
+    .control-item select:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent);
+    }
+
+    /* RANGE SLIDER */
+    .range-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    input[type='range'] {
+      flex: 1;
+      height: 5px;
+      border-radius: var(--radius-full);
+      accent-color: var(--accent);
+      background: var(--input-bg);
+      border: none;
+    }
+
+    .range-value {
+      font-variant-numeric: tabular-nums;
+      font-size: var(--text-sm);
+      padding: 4px 8px;
+      background-color: var(--input-bg);
+      border-radius: var(--radius-sm);
+      min-width: 60px;
+      text-align: center;
+      border: 1px solid var(--settings-border);
+    }
+
+    /* COLOR INPUT */
+    .color-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    input[type='color'] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 38px;
+      height: 38px;
+      border: none;
+      border-radius: var(--radius-full);
+      cursor: pointer;
+      padding: 0;
+      overflow: hidden;
+      box-shadow: var(--shadow-sm);
+      transition:
+        transform var(--dur-fast) var(--ease-spring),
+        box-shadow var(--dur-fast) var(--ease-out);
+    }
+
+    input[type='color']::-webkit-color-swatch-wrapper {
+      padding: 0;
+    }
+
+    input[type='color']::-webkit-color-swatch {
+      border: 2px solid var(--settings-border);
+      border-radius: var(--radius-full);
+    }
+
+    input[type='color']:hover,
+    input[type='color']:focus {
+      transform: scale(1.08);
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+      outline: none;
+    }
+
+    /* BUTTONS */
+    .btn {
+      padding: 10px 20px;
+      border-radius: var(--radius-sm);
+      border: none;
+      cursor: pointer;
+      font-family: inherit;
+      font-weight: 600;
+      font-size: var(--text-base);
+      transition:
+        transform var(--dur-fast) var(--ease-out),
+        box-shadow var(--dur-fast) var(--ease-out),
+        background-color var(--dur-fast) var(--ease-out);
+    }
+
+    .btn:active {
+      transform: scale(0.97);
+    }
+
+    .btn-primary {
+      background-color: var(--accent);
+      color: var(--on-accent);
+      box-shadow: 0 4px 10px color-mix(in srgb, var(--accent) 35%, transparent);
+    }
+
+    .btn-primary:hover {
+      transform: translateY(-1px);
+      box-shadow: 0 6px 15px color-mix(in srgb, var(--accent) 45%, transparent);
+    }
+
+    .btn-secondary {
+      background-color: var(--input-bg);
+      border: 1px solid var(--settings-border);
+      color: var(--settings-text);
+    }
+
+    .btn-secondary:hover {
+      border-color: var(--accent);
+      color: var(--accent);
+    }
+
+    /* BOTTOM BAR */
+    .save-bar {
+      padding: var(--space-4) var(--space-8);
+      background-color: var(--surface-strong);
+      backdrop-filter: blur(var(--surface-blur));
+      border-top: 1px solid var(--settings-border);
+      display: flex;
+      justify-content: flex-end;
+      align-items: center;
+      gap: var(--space-4);
+    }
+
+    #save-status {
+      color: var(--success);
+      font-weight: 500;
+      opacity: 0;
+      transition: opacity var(--dur-base) var(--ease-out);
+    }
+
+    #save-status.show {
+      opacity: 1;
+    }
+
+    /* TOGGLE SWITCH */
+    .switch {
+      position: relative;
+      display: inline-block;
+      width: 44px;
+      height: 26px;
+      flex-shrink: 0;
+    }
+
+    .switch input {
+      opacity: 0;
+      width: 0;
+      height: 0;
+    }
+
+    .switch .slider {
+      position: absolute;
+      cursor: pointer;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background-color: var(--input-bg);
+      border: 1px solid var(--settings-border);
+      transition:
+        background-color var(--dur-base) var(--ease-out),
+        border-color var(--dur-base) var(--ease-out);
+      border-radius: var(--radius-full);
+    }
+
+    .switch .slider:before {
+      position: absolute;
+      content: '';
+      height: 18px;
+      width: 18px;
+      left: 3px;
+      bottom: 3px;
+      background-color: color-mix(in srgb,
           var(--settings-text) 70%,
-          transparent
-        );
-        transition: transform var(--dur-base) var(--ease-spring);
-        border-radius: 50%;
-      }
-      .switch input:checked + .slider {
-        background-color: var(--accent);
-        border-color: var(--accent);
-      }
-      .switch input:checked + .slider:before {
-        transform: translateX(18px);
-        background-color: var(--on-accent);
-      }
-      .switch input:focus-visible + .slider {
-        box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
-      }
-    </style>
-  </head>
+          transparent);
+      transition: transform var(--dur-base) var(--ease-spring);
+      border-radius: 50%;
+    }
 
-  <body>
-    <script src="js/theme-cache.js"></script>
-    <div class="settings-layout">
-      <!-- SIDEBAR NAV -->
-      <aside class="settings-sidebar">
-        <div class="settings-logo"><span>⚙️</span> Configurações</div>
-        <nav class="nav-items">
-          <button class="nav-btn active" data-tab="widgets">
-            <span>✨</span> Widgets
-          </button>
-          <button class="nav-btn" data-tab="layout">
-            <span>📐</span> Layout e Tema
-          </button>
-          <button class="nav-btn" data-tab="bookmarks">
-            <span>🔖</span> Cartões e Ícones
-          </button>
-          <button class="nav-btn" data-tab="links">
-            <span>🔗</span> Links Rápidos
-          </button>
-          <button class="nav-btn" data-tab="productivity">
-            <span>⏱️</span> Produtividade
-          </button>
-          <button class="nav-btn" data-tab="wallpaper">
-            <span>🖼️</span> Papel de Parede
-          </button>
-          <button class="nav-btn" data-tab="system">
-            <span>💾</span> Sistema
-          </button>
-        </nav>
-        <div class="sidebar-footer">
-          <button
-            id="close-settings-btn"
-            class="btn btn-secondary"
-            style="width: 100%"
-          >
-            Voltar para Nova Aba
-          </button>
-        </div>
-      </aside>
+    .switch input:checked+.slider {
+      background-color: var(--accent);
+      border-color: var(--accent);
+    }
 
-      <div class="settings-content-wrapper">
-        <main class="settings-content">
-          <!-- TAB: WIDGETS -->
-          <div id="tab-widgets" class="tab-pane active">
-            <div class="section-header">
-              <h2 class="section-title">Widgets e Funcionalidades</h2>
-              <p class="section-desc">
-                Personalize o relógio, saudação e previsão do tempo.
-              </p>
-            </div>
+    .switch input:checked+.slider:before {
+      transform: translateX(18px);
+      background-color: var(--on-accent);
+    }
 
-            <div class="settings-group">
-              <div class="group-title">Configurações de Widgets</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="clock-style">Estilo do Relógio</label>
-                  <select id="clock-style">
-                    <option value="analog">⏱️ Analógico</option>
-                    <option value="digital">💻 Digital Moderno</option>
-                  </select>
-                </div>
-                <div class="control-item">
-                  <label for="user-name">Seu Nome (Para Saudações)</label>
-                  <input type="text" id="user-name" placeholder="Ex: Estêvão" />
-                </div>
-                <div class="control-item">
-                  <label for="weather-city"
-                    >Cidade para Previsão do Tempo</label
-                  >
-                  <input
-                    type="text"
-                    id="weather-city"
-                    placeholder="Ex: São Paulo"
-                  />
-                </div>
+    .switch input:focus-visible+.slider {
+      box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 30%, transparent);
+    }
+  </style>
+</head>
+
+<body>
+  <script src="js/theme-cache.js"></script>
+  <div class="settings-layout">
+    <!-- SIDEBAR NAV -->
+    <aside class="settings-sidebar">
+      <div class="settings-logo"><span>⚙️</span> Configurações</div>
+      <nav class="nav-items">
+        <button class="nav-btn active" data-tab="widgets">
+          <span>✨</span> Widgets
+        </button>
+        <button class="nav-btn" data-tab="layout">
+          <span>📐</span> Layout e Tema
+        </button>
+        <button class="nav-btn" data-tab="bookmarks">
+          <span>🔖</span> Cartões e Ícones
+        </button>
+        <button class="nav-btn" data-tab="links">
+          <span>🔗</span> Links Rápidos
+        </button>
+        <button class="nav-btn" data-tab="productivity">
+          <span>⏱️</span> Produtividade
+        </button>
+        <button class="nav-btn" data-tab="wallpaper">
+          <span>🖼️</span> Papel de Parede
+        </button>
+        <button class="nav-btn" data-tab="system">
+          <span>💾</span> Sistema
+        </button>
+      </nav>
+      <div class="sidebar-footer">
+        <button id="close-settings-btn" class="btn btn-secondary" style="width: 100%">
+          Voltar para Nova Aba
+        </button>
+      </div>
+    </aside>
+
+    <div class="settings-content-wrapper">
+      <main class="settings-content">
+        <!-- TAB: WIDGETS -->
+        <div id="tab-widgets" class="tab-pane active">
+          <div class="section-header">
+            <h2 class="section-title">Widgets e Funcionalidades</h2>
+            <p class="section-desc">
+              Personalize o relógio, saudação e previsão do tempo.
+            </p>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Configurações de Widgets</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="clock-style">Estilo do Relógio</label>
+                <select id="clock-style">
+                  <option value="analog">⏱️ Analógico</option>
+                  <option value="digital">💻 Digital Moderno</option>
+                </select>
               </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Feed RSS</div>
-              <div class="controls-grid">
-                <div class="control-item full-width">
-                  <label for="rss-url">Link do Feed RSS</label>
-                  <input
-                    type="url"
-                    id="rss-url"
-                    placeholder="Ex: https://hnrss.org/frontpage"
-                  />
-                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
-                    Insira a URL de um feed RSS (XML) para acompanhar as últimas
-                    notícias diretamente no seu dashboard.
-                  </p>
-                </div>
+              <div class="control-item">
+                <label for="user-name">Seu Nome (Para Saudações)</label>
+                <input type="text" id="user-name" placeholder="Ex: Estêvão" />
               </div>
-            </div>
-            <div class="settings-group">
-              <div class="group-title">Visibilidade dos Widgets</div>
-              <div
-                class="controls-grid"
-                style="grid-template-columns: 1fr; gap: 15px"
-              >
-                <div
-                  class="control-item"
-                  style="
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 0;
-                  "
-                >
-                  <label for="todo-enabled" style="font-size: 0.95rem"
-                    >Exibir Bloco de Tarefas (To-Do List)</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="todo-enabled" checked />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-                <div
-                  class="control-item"
-                  style="
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 0;
-                  "
-                >
-                  <label for="quotes-enabled" style="font-size: 0.95rem"
-                    >Exibir Citações Motivacionais</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="quotes-enabled" checked />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-                <div
-                  class="control-item"
-                  style="
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 0;
-                  "
-                >
-                  <label for="rss-enabled" style="font-size: 0.95rem"
-                    >Exibir Feed RSS</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="rss-enabled" checked />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
+              <div class="control-item">
+                <label for="weather-city">Cidade para Previsão do Tempo</label>
+                <input type="text" id="weather-city" placeholder="Ex: São Paulo" />
               </div>
             </div>
           </div>
 
-          <!-- TAB: LAYOUT -->
-          <div id="tab-layout" class="tab-pane">
-            <div class="section-header">
-              <h2 class="section-title">Layout & Tema</h2>
-              <p class="section-desc">
-                Defina as cores globais e a organização da tela.
-              </p>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Tema Principal</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="theme-preset">Selecione o Tema Base</label>
-                  <select id="theme-preset">
-                    <option value="auto">Auto (segue o sistema)</option>
-                    <option value="dark">🌙 Escuro (Slate)</option>
-                    <option value="catppuccin">🪻 Catppuccin Mocha</option>
-                    <option value="dracula">🧛 Dracula</option>
-                    <option value="nord">❄️ Nord</option>
-                    <option value="tokyonight">🌃 Tokyo Night</option>
-                    <option value="rosepine">🌹 Rosé Pine</option>
-                    <option value="solar">🌅 Solarized</option>
-                    <option value="light">☀️ Claro (Padrão)</option>
-                    <option value="minimal">⚪ Minimalista</option>
-                    <option value="custom_builder">
-                      🎨 Criar Tema Customizado...
-                    </option>
-                  </select>
-                </div>
-                <div
-                  class="control-item"
-                  style="
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 0;
-                  "
-                >
-                  <label for="lock-layout" style="font-size: 0.95rem"
-                    >🔒 Travar Layout (bloqueia arraste acidental e exclusão)</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="lock-layout" />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-                <div
-                  class="control-item"
-                  style="
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 0;
-                  "
-                >
-                  <label for="solid-surfaces" style="font-size: 0.95rem"
-                    >Modo Solido (desliga o efeito de vidro/blur)</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="solid-surfaces" />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-                <div
-                  class="control-item"
-                  style="
-                    display: flex;
-                    flex-direction: row;
-                    align-items: center;
-                    justify-content: space-between;
-                    margin-bottom: 0;
-                  "
-                >
-                  <label for="dynamic-accent" style="font-size: 0.95rem"
-                    >Acento dinamico (cor extraida do wallpaper)</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="dynamic-accent" />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
+          <div class="settings-group">
+            <div class="group-title">Feed RSS</div>
+            <div class="controls-grid">
+              <div class="control-item full-width">
+                <label for="rss-url">Link do Feed RSS</label>
+                <input type="url" id="rss-url" placeholder="Ex: https://hnrss.org/frontpage" />
+                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
+                  Insira a URL de um feed RSS (XML) para acompanhar as últimas
+                  notícias diretamente no seu dashboard.
+                </p>
               </div>
             </div>
+          </div>
+          <div class="settings-group">
+            <div class="group-title">Visibilidade dos Widgets</div>
+            <div class="controls-grid" style="grid-template-columns: 1fr; gap: 15px">
+              <div class="control-item" style="
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="todo-enabled" style="font-size: 0.95rem">Exibir Bloco de Tarefas (To-Do List)</label>
+                <label class="switch">
+                  <input type="checkbox" id="todo-enabled" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="control-item" style="
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="quotes-enabled" style="font-size: 0.95rem">Exibir Citações Motivacionais</label>
+                <label class="switch">
+                  <input type="checkbox" id="quotes-enabled" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="control-item" style="
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="rss-enabled" style="font-size: 0.95rem">Exibir Feed RSS</label>
+                <label class="switch">
+                  <input type="checkbox" id="rss-enabled" checked />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+        </div>
 
-            <!-- Theme Builder Section (Fase 6) -->
-            <div
-              id="custom-theme-builder-container"
-              class="settings-group"
-              style="display: none"
-            >
-              <div class="group-title">🎨 Criador de Tema Personalizado</div>
+        <!-- TAB: LAYOUT -->
+        <div id="tab-layout" class="tab-pane">
+          <div class="section-header">
+            <h2 class="section-title">Layout & Tema</h2>
+            <p class="section-desc">
+              Defina as cores globais e a organização da tela.
+            </p>
+          </div>
 
-              <div style="display: flex; gap: 20px; flex-wrap: wrap">
-                <!-- Mockup Preview Box -->
-                <div style="flex: 1; min-width: 250px">
-                  <label>Pré-visualização (Mockup)</label>
-                  <div
-                    id="theme-preview-mockup"
-                    class="theme-preview-mockup"
-                    style="
+          <div class="settings-group">
+            <div class="group-title">Tema Principal</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="theme-preset">Selecione o Tema Base</label>
+                <select id="theme-preset">
+                  <option value="auto">Auto (segue o sistema)</option>
+                  <option value="dark">🌙 Escuro (Slate)</option>
+                  <option value="catppuccin">🪻 Catppuccin Mocha</option>
+                  <option value="dracula">🧛 Dracula</option>
+                  <option value="nord">❄️ Nord</option>
+                  <option value="tokyonight">🌃 Tokyo Night</option>
+                  <option value="rosepine">🌹 Rosé Pine</option>
+                  <option value="solar">🌅 Solarized</option>
+                  <option value="light">☀️ Claro (Padrão)</option>
+                  <option value="minimal">⚪ Minimalista</option>
+                  <option value="custom_builder">
+                    🎨 Criar Tema Customizado...
+                  </option>
+                </select>
+              </div>
+              <div class="control-item" style="
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="lock-layout" style="font-size: 0.95rem">🔒 Travar Layout (bloqueia arraste acidental e
+                  exclusão)</label>
+                <label class="switch">
+                  <input type="checkbox" id="lock-layout" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="control-item" style="
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="solid-surfaces" style="font-size: 0.95rem">Modo Solido (desliga o efeito de
+                  vidro/blur)</label>
+                <label class="switch">
+                  <input type="checkbox" id="solid-surfaces" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="control-item" style="
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="dynamic-accent" style="font-size: 0.95rem">Acento dinamico (cor extraida do
+                  wallpaper)</label>Acento dinâmico (cor extraída do wallpaper — requer API Key no Unsplash ou Imagem do
+                PC)</label>
+                <label class="switch">
+                  <input type="checkbox" id="dynamic-accent" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+              <div class="control-item" style="
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  ">
+                <label for="use-custom-colors" style="font-size: 0.95rem">🎨 Sobrescrever cores do tema manualmente
+                  (seções e cartões)</label>
+                <label class="switch">
+                  <input type="checkbox" id="use-custom-colors" />
+                  <span class="slider round"></span>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <!-- Theme Builder Section (Fase 6) -->
+          <div id="custom-theme-builder-container" class="settings-group" style="display: none">
+            <div class="group-title">🎨 Criador de Tema Personalizado</div>
+
+            <div style="display: flex; gap: 20px; flex-wrap: wrap">
+              <!-- Mockup Preview Box -->
+              <div style="flex: 1; min-width: 250px">
+                <label>Pré-visualização (Mockup)</label>
+                <div id="theme-preview-mockup" class="theme-preview-mockup" style="
                       margin-top: 10px;
                       border-radius: 8px;
                       padding: 15px;
                       border: 1px solid var(--icon-border-color);
                       background-color: var(--bg);
                       color: var(--text);
-                    "
-                  >
-                    <div
-                      style="
+                    ">
+                  <div style="
                         border-bottom: 2px solid
                           var(--section-line-color, var(--accent));
                         padding-bottom: 5px;
                         margin-bottom: 10px;
                         font-weight: bold;
                         color: var(--text);
-                      "
-                    >
-                      📁 Categoria de Exemplo
+                      ">
+                    📁 Categoria de Exemplo
+                  </div>
+                  <div style="display: flex; gap: 10px">
+                    <div style="
+                          flex: 1;
+                          border-radius: var(--icon-border-radius, 8px);
+                          border: 1px solid var(--icon-border-color);
+                          background-color: var(--icon-bg-color);
+                          color: var(--bookmark-font-color);
+                          padding: 8px;
+                          text-align: center;
+                          font-size: 0.8rem;
+                        ">
+                      <span>🔗 Link 1</span>
                     </div>
-                    <div style="display: flex; gap: 10px">
-                      <div
-                        style="
+                    <div style="
                           flex: 1;
                           border-radius: var(--icon-border-radius, 8px);
                           border: 1px solid var(--icon-border-color);
@@ -724,416 +699,218 @@
                           padding: 8px;
                           text-align: center;
                           font-size: 0.8rem;
-                        "
-                      >
-                        <span>🔗 Link 1</span>
-                      </div>
-                      <div
-                        style="
-                          flex: 1;
-                          border-radius: var(--icon-border-radius, 8px);
-                          border: 1px solid var(--icon-border-color);
-                          background-color: var(--icon-bg-color);
-                          color: var(--bookmark-font-color);
-                          padding: 8px;
-                          text-align: center;
-                          font-size: 0.8rem;
-                        "
-                      >
-                        <span>🔗 Link 2</span>
-                      </div>
+                        ">
+                      <span>🔗 Link 2</span>
                     </div>
                   </div>
                 </div>
+              </div>
 
-                <!-- Color Pickers list -->
-                <div
-                  style="
+              <!-- Color Pickers list -->
+              <div style="
                     flex: 2;
                     min-width: 300px;
                     display: grid;
                     grid-template-columns: 1fr 1fr;
                     gap: 15px;
-                  "
-                >
-                  <div class="control-item">
-                    <label for="theme-bg">Fundo da Página</label>
-                    <div class="color-wrapper">
-                      <input type="color" id="theme-bg" value="#0f172a" />
-                      <span id="theme-bg-hex" style="font-family: monospace"
-                        >#0F172A</span
-                      >
-                    </div>
+                  ">
+                <div class="control-item">
+                  <label for="theme-bg">Fundo da Página</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-bg" value="#0f172a" />
+                    <span id="theme-bg-hex" style="font-family: monospace">#0F172A</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-card">Fundo da Sidebar/Modais</label>
-                    <div class="color-wrapper">
-                      <input type="color" id="theme-card" value="#1e293b" />
-                      <span id="theme-card-hex" style="font-family: monospace"
-                        >#1E293B</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-card">Fundo da Sidebar/Modais</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-card" value="#1e293b" />
+                    <span id="theme-card-hex" style="font-family: monospace">#1E293B</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-text">Texto Principal</label>
-                    <div class="color-wrapper">
-                      <input type="color" id="theme-text" value="#e2e8f0" />
-                      <span id="theme-text-hex" style="font-family: monospace"
-                        >#E2E8F0</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-text">Texto Principal</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-text" value="#e2e8f0" />
+                    <span id="theme-text-hex" style="font-family: monospace">#E2E8F0</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-accent">Cor de Destaque (Accent)</label>
-                    <div class="color-wrapper">
-                      <input type="color" id="theme-accent" value="#38bdf8" />
-                      <span id="theme-accent-hex" style="font-family: monospace"
-                        >#38BDF8</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-accent">Cor de Destaque (Accent)</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-accent" value="#38bdf8" />
+                    <span id="theme-accent-hex" style="font-family: monospace">#38BDF8</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-section-bg"
-                      >Fundo das Seções (Categorias)</label
-                    >
-                    <div class="color-wrapper">
-                      <input
-                        type="color"
-                        id="theme-section-bg"
-                        value="#1e293b"
-                      />
-                      <span
-                        id="theme-section-bg-hex"
-                        style="font-family: monospace"
-                        >#1E293B</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-section-bg">Fundo das Seções (Categorias)</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-section-bg" value="#1e293b" />
+                    <span id="theme-section-bg-hex" style="font-family: monospace">#1E293B</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-section-opacity"
-                      >Opacidade das Seções</label
-                    >
-                    <div class="range-wrapper">
-                      <input
-                        type="range"
-                        id="theme-section-opacity"
-                        min="0"
-                        max="1"
-                        step="0.05"
-                        value="0.95"
-                      />
-                      <span id="theme-section-opacity-value" class="range-value"
-                        >0.95</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-section-opacity">Opacidade das Seções</label>
+                  <div class="range-wrapper">
+                    <input type="range" id="theme-section-opacity" min="0" max="1" step="0.05" value="0.95" />
+                    <span id="theme-section-opacity-value" class="range-value">0.95</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-section-line">Linha das Seções</label>
-                    <div class="color-wrapper">
-                      <input
-                        type="color"
-                        id="theme-section-line"
-                        value="#38bdf8"
-                      />
-                      <span
-                        id="theme-section-line-hex"
-                        style="font-family: monospace"
-                        >#38BDF8</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-section-line">Linha das Seções</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-section-line" value="#38bdf8" />
+                    <span id="theme-section-line-hex" style="font-family: monospace">#38BDF8</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-card-bg">Fundo dos Cartões</label>
-                    <div class="color-wrapper">
-                      <input type="color" id="theme-card-bg" value="#334155" />
-                      <span
-                        id="theme-card-bg-hex"
-                        style="font-family: monospace"
-                        >#334155</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-card-bg">Fundo dos Cartões</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-card-bg" value="#334155" />
+                    <span id="theme-card-bg-hex" style="font-family: monospace">#334155</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-card-opacity"
-                      >Opacidade dos Cartões</label
-                    >
-                    <div class="range-wrapper">
-                      <input
-                        type="range"
-                        id="theme-card-opacity"
-                        min="0"
-                        max="1"
-                        step="0.05"
-                        value="0.75"
-                      />
-                      <span id="theme-card-opacity-value" class="range-value"
-                        >0.75</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-card-opacity">Opacidade dos Cartões</label>
+                  <div class="range-wrapper">
+                    <input type="range" id="theme-card-opacity" min="0" max="1" step="0.05" value="0.75" />
+                    <span id="theme-card-opacity-value" class="range-value">0.75</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-card-border">Borda dos Cartões</label>
-                    <div class="color-wrapper">
-                      <input
-                        type="color"
-                        id="theme-card-border"
-                        value="#475569"
-                      />
-                      <span
-                        id="theme-card-border-hex"
-                        style="font-family: monospace"
-                        >#475569</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-card-border">Borda dos Cartões</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-card-border" value="#475569" />
+                    <span id="theme-card-border-hex" style="font-family: monospace">#475569</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-card-text">Texto dos Cartões</label>
-                    <div class="color-wrapper">
-                      <input
-                        type="color"
-                        id="theme-card-text"
-                        value="#e2e8f0"
-                      />
-                      <span
-                        id="theme-card-text-hex"
-                        style="font-family: monospace"
-                        >#E2E8F0</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-card-text">Texto dos Cartões</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-card-text" value="#e2e8f0" />
+                    <span id="theme-card-text-hex" style="font-family: monospace">#E2E8F0</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-filter-color"
-                      >Filtro de Wallpaper (Overlay)</label
-                    >
-                    <div class="color-wrapper">
-                      <input
-                        type="color"
-                        id="theme-filter-color"
-                        value="#000000"
-                      />
-                      <span
-                        id="theme-filter-color-hex"
-                        style="font-family: monospace"
-                        >#000000</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-filter-color">Filtro de Wallpaper (Overlay)</label>
+                  <div class="color-wrapper">
+                    <input type="color" id="theme-filter-color" value="#000000" />
+                    <span id="theme-filter-color-hex" style="font-family: monospace">#000000</span>
                   </div>
-                  <div class="control-item">
-                    <label for="theme-filter-opacity"
-                      >Opacidade do Filtro</label
-                    >
-                    <div class="range-wrapper">
-                      <input
-                        type="range"
-                        id="theme-filter-opacity"
-                        min="0"
-                        max="1"
-                        step="0.05"
-                        value="0.3"
-                      />
-                      <span id="theme-filter-opacity-value" class="range-value"
-                        >0.30</span
-                      >
-                    </div>
+                </div>
+                <div class="control-item">
+                  <label for="theme-filter-opacity">Opacidade do Filtro</label>
+                  <div class="range-wrapper">
+                    <input type="range" id="theme-filter-opacity" min="0" max="1" step="0.05" value="0.3" />
+                    <span id="theme-filter-opacity-value" class="range-value">0.30</span>
                   </div>
                 </div>
               </div>
+            </div>
 
-              <div
-                class="controls-grid"
-                style="
+            <div class="controls-grid" style="
                   margin-top: 20px;
                   border-top: 1px solid var(--settings-border);
                   padding-top: 20px;
                   grid-template-columns: 2fr 1fr auto;
                   align-items: end;
-                "
-              >
-                <div class="control-item">
-                  <label for="custom-theme-name">Nome do Tema</label>
-                  <input
-                    type="text"
-                    id="custom-theme-name"
-                    placeholder="Ex: Cyberpunk Neon"
-                  />
-                </div>
-                <div style="display: flex; gap: 10px; align-items: flex-end">
-                  <button
-                    id="save-custom-theme-btn"
-                    class="btn btn-primary"
-                    style="width: 100%"
-                  >
-                    Salvar Tema
-                  </button>
-                  <button
-                    id="delete-custom-theme-btn"
-                    class="btn btn-secondary"
-                    style="border-color: #ef4444; color: #ef4444; height: 42px"
-                    title="Excluir Tema Selecionado"
-                  >
-                    🗑️
-                  </button>
-                </div>
-                <div style="display: flex; gap: 10px; align-items: flex-end">
-                  <button
-                    id="export-custom-theme-btn"
-                    class="btn btn-secondary"
-                    style="height: 42px"
-                    title="Exportar tema como JSON"
-                  >
-                    📥 Exportar
-                  </button>
-                  <button
-                    id="import-custom-theme-btn"
-                    class="btn btn-secondary"
-                    style="height: 42px"
-                    title="Importar tema JSON"
-                  >
-                    📤 Importar
-                  </button>
-                  <input
-                    type="file"
-                    id="import-custom-theme-file"
-                    accept=".json"
-                    style="display: none"
-                  />
-                </div>
-              </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Menu Lateral (Sidebar)</div>
+                ">
               <div class="control-item">
-                <label for="sidebar-width">Largura do Menu</label>
+                <label for="custom-theme-name">Nome do Tema</label>
+                <input type="text" id="custom-theme-name" placeholder="Ex: Cyberpunk Neon" />
+              </div>
+              <div style="display: flex; gap: 10px; align-items: flex-end">
+                <button id="save-custom-theme-btn" class="btn btn-primary" style="width: 100%">
+                  Salvar Tema
+                </button>
+                <button id="delete-custom-theme-btn" class="btn btn-secondary"
+                  style="border-color: #ef4444; color: #ef4444; height: 42px" title="Excluir Tema Selecionado">
+                  🗑️
+                </button>
+              </div>
+              <div style="display: flex; gap: 10px; align-items: flex-end">
+                <button id="export-custom-theme-btn" class="btn btn-secondary" style="height: 42px"
+                  title="Exportar tema como JSON">
+                  📥 Exportar
+                </button>
+                <button id="import-custom-theme-btn" class="btn btn-secondary" style="height: 42px"
+                  title="Importar tema JSON">
+                  📤 Importar
+                </button>
+                <input type="file" id="import-custom-theme-file" accept=".json" style="display: none" />
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Menu Lateral (Sidebar)</div>
+            <div class="control-item">
+              <label for="sidebar-width">Largura do Menu</label>
+              <div class="range-wrapper">
+                <input type="range" id="sidebar-width" min="120" max="320" step="10" value="200" />
+                <span id="sidebar-width-value" class="range-value">200px</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Organização da Grade</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="layout-mode">Modo de Exibição</label>
+                <select id="layout-mode">
+                  <option value="list">
+                    Lista Vertical (Uma abaixo da outra)
+                  </option>
+                  <option value="columns">Colunas (Masonry / Grade)</option>
+                </select>
+              </div>
+
+              <div class="control-item" id="column-count-container" style="display: none">
+                <label for="column-count">Quantidade de Colunas</label>
                 <div class="range-wrapper">
-                  <input
-                    type="range"
-                    id="sidebar-width"
-                    min="120"
-                    max="320"
-                    step="10"
-                    value="200"
-                  />
-                  <span id="sidebar-width-value" class="range-value"
-                    >200px</span
-                  >
+                  <input type="range" id="column-count" min="1" max="6" step="1" value="3" />
+                  <span id="column-count-value" class="range-value">3</span>
                 </div>
               </div>
-            </div>
 
-            <div class="settings-group">
-              <div class="group-title">Organização da Grade</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="layout-mode">Modo de Exibição</label>
-                  <select id="layout-mode">
-                    <option value="list">
-                      Lista Vertical (Uma abaixo da outra)
-                    </option>
-                    <option value="columns">Colunas (Masonry / Grade)</option>
-                  </select>
+              <div class="control-item full-width">
+                <label for="category-gap">Espaço entre Grupos</label>
+                <div class="range-wrapper">
+                  <input type="range" id="category-gap" min="0" max="60" step="2" value="20" />
+                  <span id="category-gap-value" class="range-value">20px</span>
                 </div>
-
-                <div
-                  class="control-item"
-                  id="column-count-container"
-                  style="display: none"
-                >
-                  <label for="column-count">Quantidade de Colunas</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="column-count"
-                      min="1"
-                      max="6"
-                      step="1"
-                      value="3"
-                    />
-                    <span id="column-count-value" class="range-value">3</span>
+                <div class="settings-group">
+                  <div class="group-title">
+                    Estilo das Seções (Categorias)
                   </div>
-                </div>
-
-                <div class="control-item full-width">
-                  <label for="category-gap">Espaço entre Grupos</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="category-gap"
-                      min="0"
-                      max="60"
-                      step="2"
-                      value="20"
-                    />
-                    <span id="category-gap-value" class="range-value"
-                      >20px</span
-                    >
-                  </div>
-                  <div class="settings-group">
-                    <div class="group-title">
-                      Estilo das Seções (Categorias)
+                  <div class="controls-grid">
+                    <div class="control-item">
+                      <label for="section-padding">Padding (Tamanho Interno)</label>
+                      <div class="range-wrapper">
+                        <input type="range" id="section-padding" min="5" max="40" step="5" value="15" />
+                        <span id="section-padding-value" class="range-value">15px</span>
+                      </div>
                     </div>
-                    <div class="controls-grid">
-                      <div class="control-item">
-                        <label for="section-padding"
-                          >Padding (Tamanho Interno)</label
-                        >
-                        <div class="range-wrapper">
-                          <input
-                            type="range"
-                            id="section-padding"
-                            min="5"
-                            max="40"
-                            step="5"
-                            value="15"
-                          />
-                          <span id="section-padding-value" class="range-value"
-                            >15px</span
-                          >
-                        </div>
+                    <div class="control-item">
+                      <label for="section-bg-color">Cor da Seção</label>
+                      <div class="color-wrapper">
+                        <input type="color" id="section-bg-color" value="#ffffff" />
+                        <span>Fundo Seção</span>
                       </div>
-                      <div class="control-item">
-                        <label for="section-bg-color">Cor da Seção</label>
-                        <div class="color-wrapper">
-                          <input
-                            type="color"
-                            id="section-bg-color"
-                            value="#ffffff"
-                          />
-                          <span>Fundo Seção</span>
-                        </div>
+                    </div>
+                    <div class="control-item">
+                      <label for="section-bg-opacity">Transparência da Seção</label>
+                      <div class="range-wrapper">
+                        <input type="range" id="section-bg-opacity" min="0" max="1" step="0.05" value="1" />
+                        <span id="section-bg-opacity-value" class="range-value">1.00</span>
                       </div>
-                      <div class="control-item">
-                        <label for="section-bg-opacity"
-                          >Transparência da Seção</label
-                        >
-                        <div class="range-wrapper">
-                          <input
-                            type="range"
-                            id="section-bg-opacity"
-                            min="0"
-                            max="1"
-                            step="0.05"
-                            value="1"
-                          />
-                          <span
-                            id="section-bg-opacity-value"
-                            class="range-value"
-                            >1.00</span
-                          >
-                        </div>
-                      </div>
-                      <div class="control-item">
-                        <label for="section-line-color"
-                          >Cor da Linha (Divisória)</label
-                        >
-                        <div class="color-wrapper">
-                          <input
-                            type="color"
-                            id="section-line-color"
-                            value="#007bff"
-                          />
-                          <span>Cor Linha</span>
-                        </div>
+                    </div>
+                    <div class="control-item">
+                      <label for="section-line-color">Cor da Linha (Divisória)</label>
+                      <div class="color-wrapper">
+                        <input type="color" id="section-line-color" value="#007bff" />
+                        <span>Cor Linha</span>
                       </div>
                     </div>
                   </div>
@@ -1141,541 +918,395 @@
               </div>
             </div>
           </div>
+        </div>
 
-          <!-- TAB: BOOKMARKS -->
-          <div id="tab-bookmarks" class="tab-pane">
-            <div class="section-header">
-              <h2 class="section-title">Cartões e Ícones</h2>
-              <p class="section-desc">
-                Personalize o visual individual de cada bookmark.
-              </p>
-            </div>
+        <!-- TAB: BOOKMARKS -->
+        <div id="tab-bookmarks" class="tab-pane">
+          <div class="section-header">
+            <h2 class="section-title">Cartões e Ícones</h2>
+            <p class="section-desc">
+              Personalize o visual individual de cada bookmark.
+            </p>
+          </div>
 
-            <div class="settings-group">
-              <div class="group-title">Dimensões</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="icon-size">Tamanho do Ícone</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="icon-size"
-                      min="0"
-                      max="64"
-                      step="4"
-                      value="32"
-                    />
-                    <span id="icon-size-value" class="range-value">32px</span>
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="icon-spacing">Padding (Interno)</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="icon-spacing"
-                      min="0"
-                      max="20"
-                      step="1"
-                      value="8"
-                    />
-                    <span id="icon-spacing-value" class="range-value">8px</span>
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="icon-gap">Gap (Entre Ícone e Texto)</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="icon-gap"
-                      min="0"
-                      max="40"
-                      step="1"
-                      value="8"
-                    />
-                    <span id="icon-gap-value" class="range-value">8px</span>
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="bookmark-min-width"
-                    >Largura Mínima do Cartão</label
-                  >
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="bookmark-min-width"
-                      min="50"
-                      max="150"
-                      step="5"
-                      value="100"
-                    />
-                    <span id="bookmark-min-width-value" class="range-value"
-                      >100px</span
-                    >
-                  </div>
+          <div class="settings-group">
+            <div class="group-title">Dimensões</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="icon-size">Tamanho do Ícone</label>
+                <div class="range-wrapper">
+                  <input type="range" id="icon-size" min="0" max="64" step="4" value="32" />
+                  <span id="icon-size-value" class="range-value">32px</span>
                 </div>
               </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Estilo do Cartão</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="icon-border-radius">Arredondamento</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="icon-border-radius"
-                      min="0"
-                      max="32"
-                      step="1"
-                      value="6"
-                    />
-                    <span id="icon-border-radius-value" class="range-value"
-                      >6px</span
-                    >
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="icon-bg-color">Cor de Fundo</label>
-                  <div class="color-wrapper">
-                    <input type="color" id="icon-bg-color" value="#ffffff" />
-                    <span>Fundo Card</span>
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="icon-border-color">Cor da Borda</label>
-                  <div class="color-wrapper">
-                    <input
-                      type="color"
-                      id="icon-border-color"
-                      value="#dddddd"
-                    />
-                    <span>Borda Card</span>
-                  </div>
-                </div>
-                <div class="control-item full-width">
-                  <label for="icon-bg-opacity"
-                    >Transparência do Fundo do Cartão</label
-                  >
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="icon-bg-opacity"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value="1"
-                    />
-                    <span id="icon-bg-opacity-value" class="range-value"
-                      >1.00</span
-                    >
-                  </div>
-                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
-                    0 = Totalmente transparente, 1 = Cor Sólida
-                  </p>
+              <div class="control-item">
+                <label for="icon-spacing">Padding (Interno)</label>
+                <div class="range-wrapper">
+                  <input type="range" id="icon-spacing" min="0" max="20" step="1" value="8" />
+                  <span id="icon-spacing-value" class="range-value">8px</span>
                 </div>
               </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Fonte Automática de Ícones</div>
-              <div class="controls-grid">
-                <div class="control-item full-width">
-                  <label for="default-icon-source"
-                    >Provedor Padrão para Links sem Ícone Manual</label
-                  >
-                  <select id="default-icon-source">
-                    <option value="dashboardicons">
-                      ✨ DashboardIcons Inteligente + Fallback Favicon (Recomendado)
-                    </option>
-                    <option value="simpleicons">
-                      🎨 SimpleIcons (Flat SVG) + Fallback Favicon
-                    </option>
-                    <option value="favicon">
-                      🌐 Apenas Favicon Oficial do Site (Google)
-                    </option>
-                  </select>
-                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
-                    No modo <strong>DashboardIcons Inteligente</strong>, a
-                    extensão identifica automaticamente o serviço pelo nome ou
-                    URL (ex: GitHub, Gmail, YouTube, Proxmox, Plex, Notion) e
-                    aplica o ícone vetorial em alta definição sem precisar
-                    configurar manualmente.
-                  </p>
+              <div class="control-item">
+                <label for="icon-gap">Gap (Entre Ícone e Texto)</label>
+                <div class="range-wrapper">
+                  <input type="range" id="icon-gap" min="0" max="40" step="1" value="8" />
+                  <span id="icon-gap-value" class="range-value">8px</span>
                 </div>
               </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Texto e Exibição</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="card-style">Estilo Visual dos Cartões</label>
-                  <select id="card-style">
-                    <option value="card">🃏 Cartão Padrão (Com Borda e Fundo)</option>
-                    <option value="frameless">
-                      ✨ Sem Moldura (Frameless / Launchpad)
-                    </option>
-                    <option value="compact">
-                      💊 Compacto (Pílula Densa Horizontal)
-                    </option>
-                  </select>
-                </div>
-                <div class="control-item">
-                  <label for="icon-layout">Orientação</label>
-                  <select id="icon-layout">
-                    <option value="row">➡️ Ícone ao Lado do Texto</option>
-                    <option value="column">⬇️ Ícone Acima do Texto</option>
-                  </select>
-                </div>
-                <div class="control-item">
-                  <label for="name-display">Visibilidade do Nome</label>
-                  <select id="name-display">
-                    <option value="always">Sempre Visível</option>
-                    <option value="hover">Apenas ao Passar o Mouse</option>
-                  </select>
-                </div>
-                <div class="control-item full-width">
-                  <label for="text-behavior"
-                    >Comportamento de Texto Longo</label
-                  >
-                  <select id="text-behavior">
-                    <option value="truncate">
-                      Cortar em 2 Linhas (Padrão)
-                    </option>
-                    <option value="single">
-                      Cortar em 1 Linha (Mais compacto)
-                    </option>
-                    <option value="expand">
-                      Expandir (Mostrar texto completo)
-                    </option>
-                  </select>
-                </div>
-              </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Tipografia</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="bookmark-font-family">Fonte</label>
-                  <select id="bookmark-font-family">
-                    <option value="sans-serif">Sans-serif (Padrão)</option>
-                    <option value="serif">Serif (Clássica)</option>
-                    <option value="monospace">Monospace (Código)</option>
-                    <option value="cursive">Cursive (Manuscrita)</option>
-                  </select>
-                </div>
-                <div class="control-item">
-                  <label for="bookmark-font-size">Tamanho (px)</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="number"
-                      id="bookmark-font-size"
-                      min="8"
-                      max="30"
-                      value="14"
-                    />
-                    <span
-                      id="bookmark-font-size-value"
-                      class="range-value"
-                      style="display: none"
-                      >14px</span
-                    >
-                    <!-- Mantendo ID para compatibilidade -->
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="bookmark-font-color">Cor da Fonte</label>
-                  <div class="color-wrapper">
-                    <input
-                      type="color"
-                      id="bookmark-font-color"
-                      value="#333333"
-                    />
-                    <span>Cor Texto</span>
-                  </div>
+              <div class="control-item">
+                <label for="bookmark-min-width">Largura Mínima do Cartão</label>
+                <div class="range-wrapper">
+                  <input type="range" id="bookmark-min-width" min="50" max="150" step="5" value="100" min="80" max="260"
+                    step="10" value="150" />
+                  <span id="bookmark-min-width-value" class="range-value">100px</span>150px</span>
                 </div>
               </div>
             </div>
           </div>
 
-          <!-- TAB: LINKS (NEW) -->
-          <div id="tab-links" class="tab-pane">
-            <div class="section-header">
-              <h2 class="section-title">Links Rápidos</h2>
-              <p class="section-desc">
-                Gerencie os atalhos fixos no topo da tela.
-              </p>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-header">
-                <h3>Aparência</h3>
+          <div class="settings-group">
+            <div class="group-title">Estilo do Cartão</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="icon-border-radius">Arredondamento</label>
+                <div class="range-wrapper">
+                  <input type="range" id="icon-border-radius" min="0" max="32" step="1" value="6" />
+                  <span id="icon-border-radius-value" class="range-value">6px</span>
+                </div>
               </div>
-              <div class="controls-grid">
-                <div class="control-item full-width">
-                  <label for="quick-links-size">Tamanho da Fonte</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="quick-links-size"
-                      min="10"
-                      max="20"
-                      step="1"
-                      value="13"
-                    />
-                    <span id="quick-links-size-value" class="range-value"
-                      >13px</span
-                    >
-                  </div>
+              <div class="control-item">
+                <label for="icon-bg-color">Cor de Fundo</label>
+                <div class="color-wrapper">
+                  <input type="color" id="icon-bg-color" value="#ffffff" />
+                  <span>Fundo Card</span>
+                </div>
+              </div>
+              <div class="control-item">
+                <label for="icon-border-color">Cor da Borda</label>
+                <div class="color-wrapper">
+                  <input type="color" id="icon-border-color" value="#dddddd" />
+                  <span>Borda Card</span>
+                </div>
+              </div>
+              <div class="control-item full-width">
+                <label for="icon-bg-opacity">Transparência do Fundo do Cartão</label>
+                <div class="range-wrapper">
+                  <input type="range" id="icon-bg-opacity" min="0" max="1" step="0.05" value="1" />
+                  <span id="icon-bg-opacity-value" class="range-value">1.00</span>
+                </div>
+                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
+                  0 = Totalmente transparente, 1 = Cor Sólida
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Fonte Automática de Ícones</div>
+            <div class="controls-grid">
+              <div class="control-item full-width">
+                <label for="default-icon-source">Provedor Padrão para Links sem Ícone Manual</label>
+                <select id="default-icon-source">
+                  <option value="dashboardicons">
+                    ✨ DashboardIcons Inteligente + Fallback Favicon (Recomendado)
+                  </option>
+                  <option value="simpleicons">
+                    🎨 SimpleIcons (Flat SVG) + Fallback Favicon
+                  </option>
+                  <option value="favicon">
+                    🌐 Apenas Favicon Oficial do Site (Google)
+                  </option>
+                </select>
+                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
+                  No modo <strong>DashboardIcons Inteligente</strong>, a
+                  extensão identifica automaticamente o serviço pelo nome ou
+                  URL (ex: GitHub, Gmail, YouTube, Proxmox, Plex, Notion) e
+                  aplica o ícone vetorial em alta definição sem precisar
+                  configurar manualmente.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Texto e Exibição</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="card-style">Estilo Visual dos Cartões</label>
+                <select id="card-style">
+                  <option value="card">🃏 Cartão Padrão (Com Borda e Fundo)</option>
+                  <option value="frameless">
+                    ✨ Sem Moldura (Frameless / Launchpad)
+                  </option>
+                  <option value="compact">
+                    💊 Compacto (Pílula Densa Horizontal)
+                  </option>
+                </select>
+              </div>
+              <div class="control-item">
+                <label for="icon-layout">Orientação</label>
+                <select id="icon-layout">
+                  <option value="row">➡️ Ícone ao Lado do Texto</option>
+                  <option value="column">⬇️ Ícone Acima do Texto</option>
+                </select>
+              </div>
+              <div class="control-item">
+                <label for="name-display">Visibilidade do Nome</label>
+                <select id="name-display">
+                  <option value="always">Sempre Visível</option>
+                  <option value="hover">Apenas ao Passar o Mouse</option>
+                </select>
+              </div>
+              <div class="control-item full-width">
+                <label for="text-behavior">Comportamento de Texto Longo</label>
+                <select id="text-behavior">
+                  <option value="truncate">
+                    Cortar em 2 Linhas (Padrão)
+                  </option>
+                  <option value="single">
+                    Cortar em 1 Linha (Mais compacto)
+                  </option>
+                  <option value="expand">
+                    Expandir (Mostrar texto completo)
+                  </option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Tipografia</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="bookmark-font-family">Fonte</label>
+                <select id="bookmark-font-family">
+                  <option value="sans-serif">Sans-serif (Padrão)</option>
+                  <option value="serif">Serif (Clássica)</option>
+                  <option value="monospace">Monospace (Código)</option>
+                  <option value="cursive">Cursive (Manuscrita)</option>
+                </select>
+              </div>
+              <div class="control-item">
+                <label for="bookmark-font-size">Tamanho (px)</label>
+                <div class="range-wrapper">
+                  <input type="number" id="bookmark-font-size" min="8" max="30" value="14" />
+                  <span id="bookmark-font-size-value" class="range-value" style="display: none">14px</span>
+                  <!-- Mantendo ID para compatibilidade -->
+                </div>
+              </div>
+              <div class="control-item">
+                <label for="bookmark-font-color">Cor da Fonte</label>
+                <div class="color-wrapper">
+                  <input type="color" id="bookmark-font-color" value="#333333" />
+                  <span>Cor Texto</span>
                 </div>
               </div>
             </div>
+          </div>
+        </div>
 
-            <div class="settings-group">
-              <div class="group-header">
-                <h3>Gerenciar Links</h3>
+        <!-- TAB: LINKS (NEW) -->
+        <div id="tab-links" class="tab-pane">
+          <div class="section-header">
+            <h2 class="section-title">Links Rápidos</h2>
+            <p class="section-desc">
+              Gerencie os atalhos fixos no topo da tela.
+            </p>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-header">
+              <h3>Aparência</h3>
+            </div>
+            <div class="controls-grid">
+              <div class="control-item full-width">
+                <label for="quick-links-size">Tamanho da Fonte</label>
+                <div class="range-wrapper">
+                  <input type="range" id="quick-links-size" min="10" max="20" step="1" value="13" />
+                  <span id="quick-links-size-value" class="range-value">13px</span>
+                </div>
               </div>
+            </div>
+          </div>
 
-              <div
-                id="quick-links-list"
-                style="
+          <div class="settings-group">
+            <div class="group-header">
+              <h3>Gerenciar Links</h3>
+            </div>
+
+            <div id="quick-links-list" style="
                   margin-bottom: 20px;
                   border: 1px solid var(--settings-border);
                   border-radius: 8px;
                   overflow: hidden;
-                "
-              >
-                <!-- Populated by JS -->
-                <div
-                  style="
+                ">
+              <!-- Populated by JS -->
+              <div style="
                     padding: 15px;
                     text-align: center;
                     color: var(--settings-text);
                     opacity: 0.7;
-                  "
-                >
-                  Carregando links...
-                </div>
+                  ">
+                Carregando links...
               </div>
+            </div>
 
-              <div
-                class="controls-grid"
-                style="
+            <div class="controls-grid" style="
                   grid-template-columns: 1fr 2fr auto;
                   align-items: end;
                   gap: 10px;
-                "
-              >
-                <div class="control-item" style="margin-bottom: 0">
-                  <label for="new-link-name">Nome</label>
-                  <input
-                    type="text"
-                    id="new-link-name"
-                    placeholder="Ex: Gmail"
-                  />
-                </div>
-                <div class="control-item" style="margin-bottom: 0">
-                  <label for="new-link-url">URL</label>
-                  <input
-                    type="text"
-                    id="new-link-url"
-                    placeholder="https://..."
-                  />
-                </div>
-                <button
-                  id="add-link-btn"
-                  class="btn btn-primary"
-                  style="height: 42px"
-                >
-                  Adicionar
-                </button>
+                ">
+              <div class="control-item" style="margin-bottom: 0">
+                <label for="new-link-name">Nome</label>
+                <input type="text" id="new-link-name" placeholder="Ex: Gmail" />
               </div>
+              <div class="control-item" style="margin-bottom: 0">
+                <label for="new-link-url">URL</label>
+                <input type="text" id="new-link-url" placeholder="https://..." />
+              </div>
+              <button id="add-link-btn" class="btn btn-primary" style="height: 42px">
+                Adicionar
+              </button>
             </div>
           </div>
+        </div>
 
-          <!-- TAB: PRODUCTIVITY (NEW) -->
-          <div id="tab-productivity" class="tab-pane">
-            <div class="section-header">
-              <h2 class="section-title">Produtividade e Foco</h2>
-              <p class="section-desc">
-                Configure seu Timer Pomodoro e integração com o Toggl Track.
-              </p>
-            </div>
+        <!-- TAB: PRODUCTIVITY (NEW) -->
+        <div id="tab-productivity" class="tab-pane">
+          <div class="section-header">
+            <h2 class="section-title">Produtividade e Foco</h2>
+            <p class="section-desc">
+              Configure seu Timer Pomodoro e integração com o Toggl Track.
+            </p>
+          </div>
 
-            <div class="settings-group">
-              <div class="group-title">Status do Módulo</div>
-              <div class="controls-grid">
-                <div
-                  class="control-item full-width"
-                  style="
+          <div class="settings-group">
+            <div class="group-title">Status do Módulo</div>
+            <div class="controls-grid">
+              <div class="control-item full-width" style="
                     flex-direction: row;
                     align-items: center;
                     justify-content: space-between;
-                  "
-                >
-                  <label for="pomodoro-enabled" style="font-size: 1.1rem"
-                    >Ativar Módulo de Foco (Toggl/Pomodoro)</label
-                  >
-                  <label class="switch">
-                    <input type="checkbox" id="pomodoro-enabled" />
-                    <span class="slider round"></span>
-                  </label>
-                </div>
-              </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Integração Toggl Track</div>
-              <div class="controls-grid">
-                <div class="control-item full-width">
-                  <label for="toggl-api-token">API Token (Toggl)</label>
-                  <div style="display: flex; gap: 5px">
-                    <input
-                      type="password"
-                      id="toggl-api-token"
-                      placeholder="Encontre-o no final da aba 'Profile settings' no Toggl"
-                      style="flex: 1"
-                    />
-                    <button
-                      id="toggle-toggl-token-btn"
-                      class="btn btn-secondary"
-                      title="Mostrar/Ocultar"
-                      style="padding: 0 10px; flex-shrink: 0"
-                    >
-                      👁️
-                    </button>
-                  </div>
-                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
-                    Utilizado para sincronizar o Pomodoro com sua conta do Toggl
-                    em tempo real. Salvo automaticamente.
-                  </p>
-                </div>
-              </div>
-            </div>
-
-            <div class="settings-group">
-              <div class="group-title">Configurações do Pomodoro</div>
-              <div class="controls-grid">
-                <div class="control-item">
-                  <label for="pomodoro-work">Tempo de Foco (minutos)</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="number"
-                      id="pomodoro-work"
-                      min="1"
-                      max="120"
-                      value="25"
-                      class="modern-input"
-                    />
-                  </div>
-                </div>
-                <div class="control-item">
-                  <label for="pomodoro-break">Tempo de Pausa (minutos)</label>
-                  <div class="range-wrapper">
-                    <input
-                      type="number"
-                      id="pomodoro-break"
-                      min="1"
-                      max="60"
-                      value="5"
-                      class="modern-input"
-                    />
-                  </div>
-                </div>
+                  ">
+                <label for="pomodoro-enabled" style="font-size: 1.1rem">Ativar Módulo de Foco (Toggl/Pomodoro)</label>
+                <label class="switch">
+                  <input type="checkbox" id="pomodoro-enabled" />
+                  <span class="slider round"></span>
+                </label>
               </div>
             </div>
           </div>
 
-          <!-- TAB: WALLPAPER -->
-          <div id="tab-wallpaper" class="tab-pane">
-            <div class="section-header">
-              <h2 class="section-title">Papel de Parede e Fundo</h2>
-              <p class="section-desc">
-                Gerencie o fundo dinâmico e filtros visuais.
-              </p>
+          <div class="settings-group">
+            <div class="group-title">Integração Toggl Track</div>
+            <div class="controls-grid">
+              <div class="control-item full-width">
+                <label for="toggl-api-token">API Token (Toggl)</label>
+                <div style="display: flex; gap: 5px">
+                  <input type="password" id="toggl-api-token"
+                    placeholder="Encontre-o no final da aba 'Profile settings' no Toggl" style="flex: 1" />
+                  <button id="toggle-toggl-token-btn" class="btn btn-secondary" title="Mostrar/Ocultar"
+                    style="padding: 0 10px; flex-shrink: 0">
+                    👁️
+                  </button>
+                </div>
+                <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
+                  Utilizado para sincronizar o Pomodoro com sua conta do Toggl
+                  em tempo real. Salvo automaticamente.
+                </p>
+              </div>
             </div>
+          </div>
 
-            <div class="settings-group">
-              <div class="group-title">Fundo Dinâmico</div>
-              <div class="controls-grid">
-                <div class="control-item full-width">
-                  <label for="wallpaper-source">Origem do Wallpaper</label>
-                  <select id="wallpaper-source">
-                    <option value="local">Pasta Local do PC</option>
-                    <option value="unsplash">Internet (Unsplash Diário)</option>
-                    <option value="none">Nenhum (Usar cor do tema)</option>
-                  </select>
+          <div class="settings-group">
+            <div class="group-title">Configurações do Pomodoro</div>
+            <div class="controls-grid">
+              <div class="control-item">
+                <label for="pomodoro-work">Tempo de Foco (minutos)</label>
+                <div class="range-wrapper">
+                  <input type="number" id="pomodoro-work" min="1" max="120" value="25" class="modern-input" />
                 </div>
+              </div>
+              <div class="control-item">
+                <label for="pomodoro-break">Tempo de Pausa (minutos)</label>
+                <div class="range-wrapper">
+                  <input type="number" id="pomodoro-break" min="1" max="60" value="5" class="modern-input" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
 
-                <div
-                  class="control-item full-width"
-                  id="wallpaper-local-config"
-                >
-                  <label for="wallpaper-folder-path"
-                    >Caminho da Pasta de Wallpapers</label
-                  >
+        <!-- TAB: WALLPAPER -->
+        <div id="tab-wallpaper" class="tab-pane">
+          <div class="section-header">
+            <h2 class="section-title">Papel de Parede e Fundo</h2>
+            <p class="section-desc">
+              Gerencie o fundo dinâmico e filtros visuais.
+            </p>
+          </div>
+
+          <div class="settings-group">
+            <div class="group-title">Fundo Dinâmico</div>
+            <div class="controls-grid">
+              <div class="control-item full-width">
+                <label for="wallpaper-source">Origem do Wallpaper</label>
+                <select id="wallpaper-source">
+                  <option value="local">Pasta Local do PC</option>
+                  <option value="unsplash">Internet (Unsplash Diário)</option>
+                  <option value="custom">
+                    🖼️ Imagem do PC (Upload) ou URL Direta
+                  </option>
+                  <option value="none">Nenhum (Usar cor do tema)</option>
+                </select>
+              </div>
+
+              <div class="control-item full-width" id="wallpaper-local-config" style="display: none">
+                <label for="wallpaper-folder-path">Caminho da Pasta de Wallpapers</label <label>Imagem Personalizada de
+                Fundo</label>
+                <div style="
+                      display: flex;
+                      gap: 10px;
+                      align-items: center;
+                      flex-wrap: wrap;
+                      margin-bottom: 10px;
+                    ">
                   <div style="display: flex; gap: 10px">
-                    <input
-                      type="text"
-                      id="wallpaper-folder-path"
-                      value="C:\Users\estev\OneDrive\Imagens\Wallpapers"
-                      readonly
-                      style="flex: 1"
-                    />
-                    <button
-                      id="select-wallpaper-folder-btn"
-                      class="btn btn-secondary"
-                    >
+                    <input type="text" id="wallpaper-folder-path" value="C:\Users\estev\OneDrive\Imagens\Wallpapers"
+                      readonly style="flex: 1" />
+                    <button type="button" id="select-wallpaper-folder-btn" class="btn btn-secondary"
+                      class="btn btn-primary">
                       Selecionar
+                      📁 Escolher Imagem do Computador...
                     </button>
+                    <input type="file" id="upload-wallpaper-input" accept="image/*" style="display: none" />
+                    <span id="custom-wallpaper-status" style="font-size: 0.85rem; opacity: 0.8"></span>
                   </div>
+                  <label for="custom-wallpaper-url">Ou cole a URL direta de uma imagem (https://...)</label>
+                  <input type="text" id="custom-wallpaper-url"
+                    placeholder="Ex: https://images.unsplash.com/photo-..." />
                 </div>
 
-                <div
-                  class="control-item full-width"
-                  id="wallpaper-unsplash-config"
-                  style="display: none"
-                >
+                <div class="control-item full-width" id="wallpaper-unsplash-config" style="display: none">
                   <div style="display: flex; gap: 15px">
                     <div style="flex: 1">
-                      <label for="wallpaper-api-key"
-                        >Chave da API (Access Key)</label
-                      >
+                      <label for="wallpaper-api-key">Chave da API (Access Key)</label>
                       <div style="display: flex; gap: 5px">
-                        <input
-                          type="password"
-                          id="wallpaper-api-key"
-                          placeholder="Sua Access Key do Unsplash"
-                          style="flex: 1"
-                        />
-                        <button
-                          id="toggle-api-key-btn"
-                          class="btn btn-secondary"
-                          title="Mostrar/Ocultar"
-                          style="padding: 0 10px; flex-shrink: 0"
-                        >
+                        <input type="password" id="wallpaper-api-key" placeholder="Sua Access Key do Unsplash"
+                          style="flex: 1" />
+                        <button id="toggle-api-key-btn" class="btn btn-secondary" title="Mostrar/Ocultar"
+                          style="padding: 0 10px; flex-shrink: 0">
                           👁️
                         </button>
-                        <button
-                          id="clear-api-key-btn"
-                          class="btn btn-secondary"
-                          title="Limpar Chave"
-                          style="padding: 0 10px; flex-shrink: 0"
-                        >
+                        <button id="clear-api-key-btn" class="btn btn-secondary" title="Limpar Chave"
+                          style="padding: 0 10px; flex-shrink: 0">
                           🗑️
                         </button>
                       </div>
                     </div>
                     <div style="flex: 1">
                       <label for="wallpaper-theme">Tema de Imagens</label>
-                      <select
-                        id="wallpaper-theme"
-                        class="modern-input"
-                        style="margin-bottom: 5px"
-                      >
+                      <select id="wallpaper-theme" class="modern-input" style="margin-bottom: 5px">
                         <option value="random">Aleatório (Rotacionar)</option>
                         <option value="nature" selected>
                           Natureza (Nature)
@@ -1689,13 +1320,8 @@
                         <option value="landscape">Paisagem</option>
                         <option value="custom">Personalizado...</option>
                       </select>
-                      <input
-                        type="text"
-                        id="wallpaper-theme-custom"
-                        class="modern-input"
-                        placeholder="Ex: cars, animals..."
-                        style="display: none"
-                      />
+                      <input type="text" id="wallpaper-theme-custom" class="modern-input"
+                        placeholder="Ex: cars, animals..." style="display: none" />
                     </div>
                   </div>
                   <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
@@ -1707,17 +1333,8 @@
                 <div class="control-item">
                   <label for="wallpaper-frequency">Trocar a cada (horas)</label>
                   <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="wallpaper-frequency"
-                      min="0"
-                      max="24"
-                      step="0.5"
-                      value="1"
-                    />
-                    <span id="wallpaper-frequency-value" class="range-value"
-                      >1h</span
-                    >
+                    <input type="range" id="wallpaper-frequency" min="0" max="24" step="0.5" value="1" />
+                    <span id="wallpaper-frequency-value" class="range-value">1h</span>
                   </div>
                 </div>
               </div>
@@ -1736,38 +1353,19 @@
                 <div class="control-item">
                   <label for="filter-opacity">Opacidade da Camada</label>
                   <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="filter-opacity"
-                      min="0"
-                      max="1"
-                      step="0.05"
-                      value="0.3"
-                    />
-                    <span id="filter-opacity-value" class="range-value"
-                      >0.30</span
-                    >
+                    <input type="range" id="filter-opacity" min="0" max="1" step="0.05" value="0.3" />
+                    <span id="filter-opacity-value" class="range-value">0.30</span>
                   </div>
                 </div>
                 <div class="control-item full-width">
-                  <label for="wallpaper-blur"
-                    >Desfoque do Papel de Parede (Blur)</label
-                  >
+                  <label for="wallpaper-blur">Desfoque do Papel de Parede (Blur)</label>
                   <div class="range-wrapper">
-                    <input
-                      type="range"
-                      id="wallpaper-blur"
-                      min="0"
-                      max="24"
-                      step="1"
-                      value="0"
-                    />
-                    <span id="wallpaper-blur-value" class="range-value"
-                      >0px</span
-                    >
+                    <input type="range" id="wallpaper-blur" min="0" max="24" step="1" value="0" />
+                    <span id="wallpaper-blur-value" class="range-value">0px</span>
                   </div>
                   <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
-                    Desfoca suavemente a foto de fundo para destacar os cartões e textos sem precisar escurecer a imagem.
+                    Desfoca suavemente a foto de fundo para destacar os cartões e textos sem precisar escurecer a
+                    imagem.
                   </p>
                 </div>
               </div>
@@ -1787,31 +1385,26 @@
               <div class="group-title">
                 🛡️ Proteção Contra Reinstalação (Auto-Persistência)
               </div>
-              <p
-                style="
+              <p style="
                   margin-bottom: 15px;
                   font-size: 0.9rem;
                   color: var(--settings-text);
                   opacity: 0.85;
                   line-height: 1.5;
-                "
-              >
-                Suas configurações e <strong>todos os seus ícones personalizados</strong> são salvos automaticamente dentro da pasta <code>Pagina Inicial</code> dos Favoritos do Chrome (que nunca é apagada ao remover a extensão). Além disso, você pode salvar o arquivo <code>user-defaults.json</code> diretamente na pasta do projeto para tê-lo versionado no seu OneDrive.
+                ">
+                Suas configurações e <strong>todos os seus ícones personalizados</strong> são salvos automaticamente
+                dentro da pasta <code>Pagina Inicial</code> dos Favoritos do Chrome (que nunca é apagada ao remover a
+                extensão). Além disso, você pode salvar o arquivo <code>user-defaults.json</code> diretamente na pasta
+                do projeto para tê-lo versionado no seu OneDrive.
               </p>
               <div class="controls-grid">
                 <div class="control-item">
-                  <button
-                    id="save-project-defaults-btn"
-                    class="btn btn-primary"
-                  >
+                  <button id="save-project-defaults-btn" class="btn btn-primary">
                     📌 Baixar user-defaults.json (Para Pasta do Projeto)
                   </button>
                 </div>
                 <div class="control-item">
-                  <button
-                    id="force-bookmark-sync-btn"
-                    class="btn btn-secondary"
-                  >
+                  <button id="force-bookmark-sync-btn" class="btn btn-secondary">
                     🔄 Sincronizar Agora nos Favoritos do Chrome
                   </button>
                 </div>
@@ -1820,24 +1413,18 @@
 
             <div class="settings-group">
               <div class="group-title">Backup e Restauração Manual</div>
-              <p
-                style="
+              <p style="
                   margin-bottom: 15px;
                   font-size: 0.9rem;
                   color: var(--settings-text);
                   opacity: 0.8;
-                "
-              >
+                ">
                 Exporte suas configurações e bookmarks para um arquivo JSON ou
                 importe de um backup.
               </p>
               <div class="controls-grid">
                 <div class="control-item">
-                  <button
-                    id="export-data-btn"
-                    class="btn btn-primary"
-                    style="background-color: #10b981"
-                  >
+                  <button id="export-data-btn" class="btn btn-primary" style="background-color: #10b981">
                     📥 Baixar Backup (Exportar)
                   </button>
                 </div>
@@ -1845,12 +1432,7 @@
                   <button id="import-data-btn" class="btn btn-secondary">
                     📤 Restaurar Backup (Importar)
                   </button>
-                  <input
-                    type="file"
-                    id="import-file-input"
-                    accept=".json"
-                    style="display: none"
-                  />
+                  <input type="file" id="import-file-input" accept=".json" style="display: none" />
                 </div>
               </div>
             </div>
@@ -1864,40 +1446,34 @@
                   Isso irá redefinir todas as configurações visuais para o
                   padrão original. Seus bookmarks não serão apagados.
                 </p>
-                <button
-                  id="reset-settings-btn"
-                  class="btn btn-secondary"
-                  style="border-color: #ef4444; color: #ef4444"
-                >
+                <button id="reset-settings-btn" class="btn btn-secondary" style="border-color: #ef4444; color: #ef4444">
                   ⚠️ Restaurar Configurações Padrão
                 </button>
               </div>
             </div>
           </div>
-        </main>
+      </main>
 
-        <!-- Sticky Save Bar -->
-        <div class="save-bar">
-          <span
-            style="
+      <!-- Sticky Save Bar -->
+      <div class="save-bar">
+        <span style="
               font-size: 0.82rem;
               opacity: 0.8;
               display: inline-flex;
               align-items: center;
               gap: 6px;
-            "
-            >⚡ Auto-save ativo (sincronizado nos Favoritos)</span
-          >
-          <span id="save-status">✓ Alterações salvas!</span>
-          <button id="save-settings-btn" class="btn btn-primary">
-            Salvar e Sincronizar Agora
-          </button>
-        </div>
+            ">⚡ Auto-save ativo (sincronizado nos Favoritos)</span>
+        <span id="save-status">✓ Alterações salvas!</span>
+        <button id="save-settings-btn" class="btn btn-primary">
+          Salvar e Sincronizar Agora
+        </button>
       </div>
     </div>
+  </div>
 
-    <!-- Simple script for Tab Switching inside settings page -->
+  <!-- Simple script for Tab Switching inside settings page -->
 
-    <script type="module" src="js/settings-app.js"></script>
-  </body>
+  <script type="module" src="js/settings-app.js"></script>
+</body>
+
 </html>

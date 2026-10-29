@@ -11,6 +11,7 @@ import { defaultSettings } from './config.js';
 let timerInterval = null;
 let currentSettings = null;
 let togglWorkspaceId = null;
+let pomodoroListenersBound = false;
 
 // DOM Elements
 const pomodoroWidget = document.getElementById('pomodoro-widget');
@@ -52,11 +53,13 @@ export async function initPomodoro() {
   // Handle toggle button
   if (toggleBtn) {
     toggleBtn.style.display = 'flex';
-    toggleBtn.addEventListener('click', (e) => {
-      e.preventDefault();
-      pomodoroWidget.style.display =
-        pomodoroWidget.style.display === 'none' ? 'flex' : 'none';
-    });
+    if (!pomodoroListenersBound) {
+      toggleBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        pomodoroWidget.style.display =
+          pomodoroWidget.style.display === 'none' ? 'flex' : 'none';
+      });
+    }
   }
 
   // Setup Toggl if token exists
@@ -89,13 +92,16 @@ export async function initPomodoro() {
   }
 
   // Event Listeners
-  playBtn.addEventListener('click', startTimer);
-  stopBtn.addEventListener('click', stopTimer);
+  if (!pomodoroListenersBound) {
+    pomodoroListenersBound = true;
+    playBtn.addEventListener('click', startTimer);
+    stopBtn.addEventListener('click', stopTimer);
 
-  // Auto-save description
-  descInput.addEventListener('change', () => {
-    chrome.storage.local.set({ pomodoroDesc: descInput.value });
-  });
+    // Auto-save description
+    descInput.addEventListener('change', () => {
+      chrome.storage.local.set({ pomodoroDesc: descInput.value });
+    });
+  }
 
   // Restore description
   chrome.storage.local.get(['pomodoroDesc'], (res) => {

@@ -23,15 +23,42 @@ export function applySidebarWidthSetting(width) {
   document.documentElement.style.setProperty('--sidebar-width', `${width}px`);
 }
 
+export function applyQuickLinksSizeSetting(size) {
+  if (size !== undefined) {
+    document.documentElement.style.setProperty(
+      '--quick-links-size',
+      `${size}px`,
+    );
+  }
+}
+
 export function applyIconAppearance(
   borderRadius,
   borderColor,
   bgColor,
   bgOpacity = 1,
+  useCustomColors = false,
 ) {
   const target = document.body || document.documentElement;
-  target.style.setProperty('--icon-border-radius', `${borderRadius}px`);
-  target.style.setProperty('--icon-border-color', borderColor);
+  if (borderRadius !== undefined) {
+    target.style.setProperty('--icon-border-radius', `${borderRadius}px`);
+    document.documentElement.style.setProperty(
+      '--icon-border-radius',
+      `${borderRadius}px`,
+    );
+  }
+
+  if (!useCustomColors) {
+    target.style.removeProperty('--icon-border-color');
+    target.style.removeProperty('--icon-bg-color');
+    document.documentElement.style.removeProperty('--icon-border-color');
+    document.documentElement.style.removeProperty('--icon-bg-color');
+    return;
+  }
+
+  if (borderColor) {
+    target.style.setProperty('--icon-border-color', borderColor);
+  }
 
   // Convert hex to rgba for bgColor
   let rgbaStr = bgColor;
@@ -50,7 +77,9 @@ export function applyIconAppearance(
     }
     rgbaStr = `rgba(${r}, ${g}, ${b}, ${bgOpacity})`;
   }
-  target.style.setProperty('--icon-bg-color', rgbaStr);
+  if (rgbaStr) {
+    target.style.setProperty('--icon-bg-color', rgbaStr);
+  }
 }
 
 export function applyIconSpacingSetting(spacing) {
@@ -72,218 +101,256 @@ export function applyCategoryGapSetting(gap) {
   document.documentElement.style.setProperty('--category-gap', `${gap}px`);
 }
 
-export function applyBookmarkFontSettings(fontFamily, fontSize, fontColor) {
-  document.documentElement.style.setProperty(
-    '--bookmark-font-family',
+  export function applyBookmarkFontSettings(
     fontFamily,
-  );
-  document.documentElement.style.setProperty(
-    '--bookmark-font-size',
-    `${fontSize}px`,
-  );
-  document.documentElement.style.setProperty(
-    '--bookmark-font-color',
+    fontSize,
     fontColor,
-  );
-}
-
-export function applySectionAppearance(padding, bgColor, bgOpacity, lineColor) {
-  if (padding !== undefined)
-    document.documentElement.style.setProperty(
-      '--section-padding',
-      `${padding}px`,
-    );
-  if (lineColor)
-    document.documentElement.style.setProperty(
-      '--section-line-color',
-      lineColor,
-    );
-
-  if (bgColor) {
-    let rgbaStr = bgColor;
-    if (bgColor.startsWith('#')) {
-      let r = 0,
-        g = 0,
-        b = 0;
-      if (bgColor.length === 4) {
-        r = parseInt(bgColor[1] + bgColor[1], 16);
-        g = parseInt(bgColor[2] + bgColor[2], 16);
-        b = parseInt(bgColor[3] + bgColor[3], 16);
-      } else if (bgColor.length === 7) {
-        r = parseInt(bgColor.substring(1, 3), 16);
-        g = parseInt(bgColor.substring(3, 5), 16);
-        b = parseInt(bgColor.substring(5, 7), 16);
-      }
-      rgbaStr = `rgba(${r}, ${g}, ${b}, ${bgOpacity !== undefined ? bgOpacity : 1})`;
+    useCustomColors = false,
+  ) {
+    if (fontFamily) {
+      document.documentElement.style.setProperty(
+        '--bookmark-font-family',
+        fontFamily,
+      );
     }
-    document.documentElement.style.setProperty('--section-bg-color', rgbaStr);
+    if (fontSize !== undefined) {
+      document.documentElement.style.setProperty(
+        '--bookmark-font-size',
+        `${fontSize}px`,
+      );
+    }
+    const target = document.body || document.documentElement;
+    if (useCustomColors && fontColor) {
+      document.documentElement.style.setProperty(
+        '--bookmark-font-color',
+        fontColor,
+      );
+      target.style.setProperty('--bookmark-font-color', fontColor);
+    } else {
+      document.documentElement.style.removeProperty('--bookmark-font-color');
+      target.style.removeProperty('--bookmark-font-color');
+    }
   }
-}
 
-export function applyBackgroundFilter(color, opacity, blur) {
-  const filter = document.getElementById('background-filter');
-  if (filter) {
-    if (color && opacity !== undefined) {
-      const r = parseInt(color.slice(1, 3), 16) || 0;
-      const g = parseInt(color.slice(3, 5), 16) || 0;
-      const b = parseInt(color.slice(5, 7), 16) || 0;
-      filter.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+      export function applySectionAppearance(
+        padding,
+        bgColor,
+        bgOpacity,
+        lineColor,
+        useCustomColors = false,
+      ) {
+        if (padding !== undefined) {
+          document.documentElement.style.setProperty(
+            '--section-padding',
+            `${padding}px`,
+          );
+  }
+        const target = document.body || document.documentElement;
+        if (!useCustomColors) {
+          document.documentElement.style.removeProperty('--section-line-color');
+          document.documentElement.style.removeProperty('--section-bg-color');
+          target.style.removeProperty('--section-line-color');
+          target.style.removeProperty('--section-bg-color');
+          return;
+        }
+
+        if (lineColor) {
+          document.documentElement.style.setProperty(
+            '--section-line-color',
+            lineColor,
+          );
+        }
+
+        if (bgColor) {
+          let rgbaStr = bgColor;
+          if (bgColor.startsWith('#')) {
+            let r = 0,
+              g = 0,
+              b = 0;
+            if (bgColor.length === 4) {
+              r = parseInt(bgColor[1] + bgColor[1], 16);
+              g = parseInt(bgColor[2] + bgColor[2], 16);
+              b = parseInt(bgColor[3] + bgColor[3], 16);
+            } else if (bgColor.length === 7) {
+              r = parseInt(bgColor.substring(1, 3), 16);
+              g = parseInt(bgColor.substring(3, 5), 16);
+              b = parseInt(bgColor.substring(5, 7), 16);
+            }
+            rgbaStr = `rgba(${r}, ${g}, ${b}, ${bgOpacity !== undefined ? bgOpacity : 1})`;
+          }
+          document.documentElement.style.setProperty('--section-bg-color', rgbaStr);
+        }
+      }
+
+    export function applyBackgroundFilter(color, opacity, blur) {
+      const filter = document.getElementById('background-filter');
+      if (filter) {
+        if (color && opacity !== undefined) {
+          const r = parseInt(color.slice(1, 3), 16) || 0;
+          const g = parseInt(color.slice(3, 5), 16) || 0;
+          const b = parseInt(color.slice(5, 7), 16) || 0;
+          filter.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+        }
+        if (blur !== undefined) {
+          const blurVal = Number(blur) || 0;
+          filter.style.backdropFilter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+          filter.style.webkitBackdropFilter =
+            blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+          document.documentElement.style.setProperty(
+            '--wallpaper-blur',
+            `${blurVal}px`,
+          );
+        }
+      }
     }
-    if (blur !== undefined) {
+
+    export function applyWallpaperBlurSetting(blur) {
+      const filter = document.getElementById('background-filter');
       const blurVal = Number(blur) || 0;
-      filter.style.backdropFilter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
-      filter.style.webkitBackdropFilter =
-        blurVal > 0 ? `blur(${blurVal}px)` : 'none';
       document.documentElement.style.setProperty(
         '--wallpaper-blur',
         `${blurVal}px`,
       );
-    }
-  }
-}
-
-export function applyWallpaperBlurSetting(blur) {
-  const filter = document.getElementById('background-filter');
-  const blurVal = Number(blur) || 0;
-  document.documentElement.style.setProperty(
-    '--wallpaper-blur',
-    `${blurVal}px`,
-  );
-  if (filter) {
-    filter.style.backdropFilter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
-    filter.style.webkitBackdropFilter =
-      blurVal > 0 ? `blur(${blurVal}px)` : 'none';
-  }
-}
-
-export function applyCardStyleSetting(style = 'card') {
-  document.body.classList.remove(
-    'card-style-frameless',
-    'card-style-compact',
-  );
-  if (style === 'frameless') {
-    document.body.classList.add('card-style-frameless');
-  } else if (style === 'compact') {
-    document.body.classList.add('card-style-compact');
-  }
-  try {
-    localStorage.setItem('cardStyle', style || 'card');
-  } catch {
-    // ignore
-  }
-}
-
-export function applyLockLayoutSetting(locked = false) {
-  const isLocked = Boolean(locked);
-  document.body.classList.toggle('layout-locked', isLocked);
-  try {
-    localStorage.setItem('lockLayout', isLocked ? '1' : '0');
-  } catch {
-    // ignore
-  }
-}
-
-export function applyLayoutMode(mode, columnCount) {
-  const contentArea = document.getElementById('content-area');
-  if (contentArea) {
-    if (mode === 'columns') {
-      contentArea.classList.add('layout-columns');
-      if (columnCount) {
-        contentArea.style.setProperty('--column-count', columnCount);
+      if (filter) {
+        filter.style.backdropFilter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+        filter.style.webkitBackdropFilter =
+          blurVal > 0 ? `blur(${blurVal}px)` : 'none';
       }
-    } else {
-      contentArea.classList.remove('layout-columns');
-      contentArea.style.removeProperty('--column-count');
-    }
-  }
-}
-
-export function applyIconLayoutSetting(layout) {
-  if (layout === 'column') {
-    document.body.classList.add('icon-layout-column');
-  } else {
-    document.body.classList.remove('icon-layout-column');
-  }
-}
-
-export function applyNameDisplaySetting(display) {
-  if (display === 'hover') {
-    document.body.classList.add('name-display-hover');
-  } else {
-    document.body.classList.remove('name-display-hover');
-  }
-}
-
-export function applyTextBehaviorSetting(behavior) {
-  document.body.classList.remove(
-    'text-behavior-expand',
-    'text-behavior-single',
-  );
-  if (behavior === 'expand') {
-    document.body.classList.add('text-behavior-expand');
-  } else if (behavior === 'single') {
-    document.body.classList.add('text-behavior-single');
-  }
-}
-
-export function loadSettings(state, callback) {
-  chrome.storage.sync.get(['extensionSettings'], (result) => {
-    const settings = Object.assign(
-      {},
-      defaultSettings,
-      result.extensionSettings || {},
-    );
-
-    // Map settings to state
-    Object.keys(settings).forEach((key) => {
-      state[key] = settings[key];
-    });
-
-    // Specific fallbacks
-    if (state.iconGap === undefined) {
-      state.iconGap = state.iconSpacing;
     }
 
-    // Apply settings
-    applyIconSizeSetting(state.iconSize);
-    applyIconAppearance(
-      state.iconBorderRadius,
-      state.iconBorderColor,
-      state.iconBgColor,
-      state.iconBgOpacity,
-    );
-    applyIconSpacingSetting(state.iconSpacing);
-    applyIconGapSetting(state.iconGap);
-    applyCategoryGapSetting(state.categoryGap);
-    applyIconLayoutSetting(state.iconLayout);
-    applyNameDisplaySetting(state.nameDisplay);
-    applyTextBehaviorSetting(state.textBehavior);
-    applyBookmarkFontSettings(
-      state.bookmarkFontFamily,
-      state.bookmarkFontSize,
-      state.bookmarkFontColor,
-    );
-    applyBookmarkMinWidthSetting(state.bookmarkMinWidth);
-    applySectionAppearance(
-      state.sectionPadding,
-      state.sectionBgColor,
-      state.sectionBgOpacity,
-      state.sectionLineColor,
-    );
-    applySidebarWidthSetting(state.sidebarWidth);
-    applyLayoutMode(state.layoutMode, state.columnCount);
-
-    if (state.filterColor !== undefined) {
-      applyBackgroundFilter(
-        state.filterColor,
-        state.filterOpacity,
-        state.wallpaperBlur,
+    export function applyCardStyleSetting(style = 'card') {
+      document.body.classList.remove(
+        'card-style-frameless',
+        'card-style-compact',
       );
+      if (style === 'frameless') {
+        document.body.classList.add('card-style-frameless');
+      } else if (style === 'compact') {
+        document.body.classList.add('card-style-compact');
+      }
+      try {
+        localStorage.setItem('cardStyle', style || 'card');
+      } catch {
+        // ignore
+      }
     }
-    applyWallpaperBlurSetting(state.wallpaperBlur || 0);
-    applyCardStyleSetting(state.cardStyle || 'card');
-    applyLockLayoutSetting(state.lockLayout === true);
 
-    if (callback) callback();
-  });
-}
+    export function applyLockLayoutSetting(locked = false) {
+      const isLocked = Boolean(locked);
+      document.body.classList.toggle('layout-locked', isLocked);
+      try {
+        localStorage.setItem('lockLayout', isLocked ? '1' : '0');
+      } catch {
+        // ignore
+      }
+    }
+
+    export function applyLayoutMode(mode, columnCount) {
+      const contentArea = document.getElementById('content-area');
+      if (contentArea) {
+        if (mode === 'columns') {
+          contentArea.classList.add('layout-columns');
+          if (columnCount) {
+            contentArea.style.setProperty('--column-count', columnCount);
+          }
+        } else {
+          contentArea.classList.remove('layout-columns');
+          contentArea.style.removeProperty('--column-count');
+        }
+      }
+    }
+
+    export function applyIconLayoutSetting(layout) {
+      if (layout === 'column') {
+        document.body.classList.add('icon-layout-column');
+      } else {
+        document.body.classList.remove('icon-layout-column');
+      }
+    }
+
+    export function applyNameDisplaySetting(display) {
+      if (display === 'hover') {
+        document.body.classList.add('name-display-hover');
+      } else {
+        document.body.classList.remove('name-display-hover');
+      }
+    }
+
+    export function applyTextBehaviorSetting(behavior) {
+      document.body.classList.remove(
+        'text-behavior-expand',
+        'text-behavior-single',
+      );
+      if (behavior === 'expand') {
+        document.body.classList.add('text-behavior-expand');
+      } else if (behavior === 'single') {
+        document.body.classList.add('text-behavior-single');
+      }
+    }
+
+    export function loadSettings(state, callback) {
+      chrome.storage.sync.get(['extensionSettings'], (result) => {
+        const settings = Object.assign(
+          {},
+          defaultSettings,
+          result.extensionSettings || {},
+        );
+
+        // Map settings to state
+        Object.keys(settings).forEach((key) => {
+          state[key] = settings[key];
+        });
+
+        // Specific fallbacks
+        if (state.iconGap === undefined) {
+          state.iconGap = state.iconSpacing;
+        }
+
+        // Apply settings
+        const useCustom = state.useCustomColors === true;
+        applyIconSizeSetting(state.iconSize);
+        applyIconAppearance(
+          state.iconBorderRadius,
+          state.iconBorderColor,
+          state.iconBgColor,
+          state.iconBgOpacity,
+          useCustom,
+        );
+        applyIconSpacingSetting(state.iconSpacing);
+        applyIconGapSetting(state.iconGap);
+        applyCategoryGapSetting(state.categoryGap);
+        applyIconLayoutSetting(state.iconLayout);
+        applyNameDisplaySetting(state.nameDisplay);
+        applyTextBehaviorSetting(state.textBehavior);
+        applyBookmarkFontSettings(
+          state.bookmarkFontFamily,
+          state.bookmarkFontSize,
+          state.bookmarkFontColor,
+          useCustom,
+        );
+        applyBookmarkMinWidthSetting(state.bookmarkMinWidth);
+        applySectionAppearance(
+          state.sectionPadding,
+          state.sectionBgColor,
+          state.sectionBgOpacity,
+          state.sectionLineColor,
+          useCustom,
+        );
+        applySidebarWidthSetting(state.sidebarWidth);
+        applyQuickLinksSizeSetting(state.quickLinksSize);
+        applyLayoutMode(state.layoutMode, state.columnCount);
+
+        if (state.filterColor !== undefined) {
+          applyBackgroundFilter(
+            state.filterColor,
+            state.filterOpacity,
+            state.wallpaperBlur,
+          );
+        }
+        applyWallpaperBlurSetting(state.wallpaperBlur || 0);
+        applyCardStyleSetting(state.cardStyle || 'card');
+        applyLockLayoutSetting(state.lockLayout === true);
+
+        if (callback) callback();
+      });
+    }

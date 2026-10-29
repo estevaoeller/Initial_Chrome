@@ -18,6 +18,8 @@
 | ACT-012 | Cores & Temas: Adicionar paletas Catppuccin Mocha, Dracula, Nord, Tokyo Night e Rosé Pine | Antigravity | DONE | — | Implementado em `css/style.css`, `js/modules.js`, `js/features/theme-builder.js` e `settings.html` ([plano](_wiki/plano-evolucao-ux-layout.md)) |
 | ACT-013 | UX de Configs: Popover Rápido de Aparência na Nova Aba + Indicador de Auto-Save | Antigravity | DONE | — | Implementado em `newtab.html`, `js/app.js`, `settings.html` e `js/settings-app.js` ([plano](_wiki/plano-evolucao-ux-layout.md)) |
 | ACT-014 | Modo Trava de Layout (`Lock Mode`) contra arraste acidental de cartões | Antigravity | DONE | — | Implementado em `newtab.html`, `js/app.js`, `js/bookmark-renderer.js` e `css/style.css` ([plano](_wiki/plano-evolucao-ux-layout.md)) |
+| ACT-015 | Correção dos 6 problemas nas Configurações (Wallpaper Upload/URL, Preservação de Cores de Temas, Reatividade Pomodoro/QuickLinks e limites de sliders) | Antigravity | DONE | — | Implementado em `js/settings-handlers.js`, `js/modules.js`, `js/pomodoro.js`, `settings.html` e `js/settings-app.js` ([plano](_wiki/plano-diagnostico-configs-e-quick-popover.md)) |
+| ACT-016 | Expandir Quick Popover na Nova Aba em 3 micro-abas (`Aparência`, `Grade & Cartões` e `Widgets`) | Antigravity | DONE | — | Implementado em `newtab.html`, `js/app.js` e `css/style.css` ([plano](_wiki/plano-diagnostico-configs-e-quick-popover.md)) |
 
 ## Fila dos agentes
 
@@ -33,6 +35,7 @@
 | AGT-008 | Implementação de Ícones Inteligentes (DashboardIcons + Lock Cache) e Persistência Imortal | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`_wiki/plano-icones-e-persistencia.md`](_wiki/plano-icones-e-persistencia.md), [`js/icon-resolver.js`](js/icon-resolver.js), [`js/modules.js`](js/modules.js), [`history/2026-10-28-icones-inteligentes-e-persistencia.md`](history/2026-10-28-icones-inteligentes-e-persistencia.md) |
 | AGT-009 | Benchmark de extensões/dashboards na Wiki e plano de evolução (Layout, UX, Cores, Configs, Navegabilidade) | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`_wiki/referencias-e-inspiracoes.md`](_wiki/referencias-e-inspiracoes.md), [`_wiki/plano-evolucao-ux-layout.md`](_wiki/plano-evolucao-ux-layout.md) |
 | AGT-010 | Implementação dos 5 pacotes de evolução (`ACT-010` a `ACT-014`: Navegabilidade, Layout, Temas, Quick Popover e Lock Mode) | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`history/2026-10-29-evolucao-ux-layout-temas-navegabilidade.md`](history/2026-10-29-evolucao-ux-layout-temas-navegabilidade.md), [`walkthrough.md`](file:///C:/Users/estev/.gemini/antigravity/brain/97701578-d609-474f-adba-a10b8f1934c9/walkthrough.md) |
+| AGT-011 | Diagnóstico completo das Configurações, correção dos 6 defeitos e expansão do Quick Settings Popover em 3 micro-abas | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | AI_PROPOSED | [`_wiki/plano-diagnostico-configs-e-quick-popover.md`](_wiki/plano-diagnostico-configs-e-quick-popover.md), [`history/2026-10-29-diagnostico-configs-e-quick-popover.md`](history/2026-10-29-diagnostico-configs-e-quick-popover.md) |
 
 ## Status de execução
 

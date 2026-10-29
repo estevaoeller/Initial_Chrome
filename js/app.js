@@ -22,6 +22,7 @@ import {
   applyNameDisplaySetting,
   applyTextBehaviorSetting,
   applySidebarWidthSetting,
+  applyQuickLinksSizeSetting,
   applyBookmarkFontSettings,
   applyBackgroundFilter,
   applyWallpaperBlurSetting,
@@ -521,6 +522,13 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (
+          newSettings.useCustomColors !== undefined &&
+          newSettings.useCustomColors !== settingsState.useCustomColors
+        ) {
+          settingsState.useCustomColors = newSettings.useCustomColors;
+        }
+
+        if (
           newSettings.themePreset &&
           newSettings.themePreset !== settingsState.themePreset
         ) {
@@ -535,12 +543,6 @@ document.addEventListener('DOMContentLoaded', () => {
             settingsState.sectionBgColor = palette.sectionBg;
             settingsState.sectionLineColor = palette.sectionLine;
             settingsState.filterColor = palette.filter;
-            applySectionAppearance(
-              settingsState.sectionPadding,
-              settingsState.sectionBgColor,
-              settingsState.sectionBgOpacity,
-              settingsState.sectionLineColor,
-            );
           }
         }
         if (
@@ -679,372 +681,674 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (
+          newSettings.quickLinksSize !== undefined &&
+          newSettings.quickLinksSize !== settingsState.quickLinksSize
+        ) {
+          settingsState.quickLinksSize = newSettings.quickLinksSize;
+          applyQuickLinksSizeSetting(settingsState.quickLinksSize);
+        }
+
+        if (
+          newSettings.pomodoroEnabled !== undefined ||
+          newSettings.pomodoroWork !== undefined ||
+          newSettings.pomodoroBreak !== undefined
+        ) {
+          settingsState.pomodoroEnabled = newSettings.pomodoroEnabled;
+          settingsState.pomodoroWork = newSettings.pomodoroWork;
+          settingsState.pomodoroBreak = newSettings.pomodoroBreak;
+          initPomodoro();
+        }
+
+        if (
           (newSettings.wallpaperSource !== undefined &&
             newSettings.wallpaperSource !== settingsState.wallpaperSource) ||
           (newSettings.wallpaperTheme !== undefined &&
             newSettings.wallpaperTheme !== settingsState.wallpaperTheme) ||
           (newSettings.wallpaperFrequency !== undefined &&
-            newSettings.wallpaperFrequency !== settingsState.wallpaperFrequency)
+            newSettings.wallpaperFrequency !==
+            settingsState.wallpaperFrequency) ||
+      (newSettings.customWallpaperUrl !== undefined &&
+        newSettings.customWallpaperUrl !==
+        settingsState.customWallpaperUrl)
         ) {
-          settingsState.wallpaperSource =
-            newSettings.wallpaperSource !== undefined
-              ? newSettings.wallpaperSource
-              : settingsState.wallpaperSource;
-          settingsState.wallpaperTheme =
-            newSettings.wallpaperTheme !== undefined
-              ? newSettings.wallpaperTheme
-              : settingsState.wallpaperTheme;
-          settingsState.wallpaperFrequency =
-            newSettings.wallpaperFrequency !== undefined
-              ? newSettings.wallpaperFrequency
-              : settingsState.wallpaperFrequency;
+  settingsState.wallpaperSource =
+    newSettings.wallpaperSource !== undefined
+      ? newSettings.wallpaperSource
+      : settingsState.wallpaperSource;
+  settingsState.wallpaperTheme =
+    newSettings.wallpaperTheme !== undefined
+      ? newSettings.wallpaperTheme
+      : settingsState.wallpaperTheme;
+  settingsState.wallpaperFrequency =
+    newSettings.wallpaperFrequency !== undefined
+      ? newSettings.wallpaperFrequency
+      : settingsState.wallpaperFrequency;
+  settingsState.customWallpaperUrl =
+    newSettings.customWallpaperUrl !== undefined
+      ? newSettings.customWallpaperUrl
+      : settingsState.customWallpaperUrl;
 
-          manageWallpaper(settingsState);
-        }
+  manageWallpaper(settingsState);
+}
 
-        applyIconAppearance(
-          settingsState.iconBorderRadius,
-          settingsState.iconBorderColor,
-          settingsState.iconBgColor,
-          settingsState.iconBgOpacity,
-        );
-        applyBookmarkFontSettings(
-          settingsState.bookmarkFontFamily,
-          settingsState.bookmarkFontSize,
-          settingsState.bookmarkFontColor,
-        );
-        applyBackgroundFilter(
-          settingsState.filterColor,
-          settingsState.filterOpacity,
-          settingsState.wallpaperBlur,
-        );
+const useCustom = settingsState.useCustomColors === true;
+applyIconAppearance(
+  settingsState.iconBorderRadius,
+  settingsState.iconBorderColor,
+  settingsState.iconBgColor,
+  settingsState.iconBgOpacity,
+  useCustom,
+);
+applyBookmarkFontSettings(
+  settingsState.bookmarkFontFamily,
+  settingsState.bookmarkFontSize,
+  settingsState.bookmarkFontColor,
+  useCustom,
+);
+applySectionAppearance(
+  settingsState.sectionPadding,
+  settingsState.sectionBgColor,
+  settingsState.sectionBgOpacity,
+  settingsState.sectionLineColor,
+  useCustom,
+);
+applyBackgroundFilter(
+  settingsState.filterColor,
+  settingsState.filterOpacity,
+  settingsState.wallpaperBlur,
+);
       }
 
-      if (area === 'sync' && changes.quickLinks) {
-        quickLinksManager.renderQuickLinks(
-          changes.quickLinks.newValue || [],
-          settingsState.defaultIconSource || 'dashboardicons',
-        );
-      }
+if (area === 'sync' && changes.quickLinks) {
+  quickLinksManager.renderQuickLinks(
+    changes.quickLinks.newValue || [],
+    settingsState.defaultIconSource || 'dashboardicons',
+  );
+}
+
+if (area === 'local' && changes.customWallpaperData) {
+  manageWallpaper(settingsState);
+}
     });
   }
 
-  function applyLockMode(locked) {
-    const isLocked = Boolean(locked);
-    applyLockLayoutSetting(isLocked);
-    const lockBtn = document.getElementById('lock-layout-btn');
-    if (lockBtn) {
-      lockBtn.setAttribute('aria-pressed', String(isLocked));
-      lockBtn.classList.toggle('active', isLocked);
-      lockBtn.title = isLocked
-        ? 'Layout Travado — Clique para permitir arrastar/excluir (Alt+L)'
-        : 'Layout Destravado — Clique para travar contra esbarrões (Alt+L)';
-    }
+function applyLockMode(locked) {
+  const isLocked = Boolean(locked);
+  applyLockLayoutSetting(isLocked);
+  const lockBtn = document.getElementById('lock-layout-btn');
+  if (lockBtn) {
+    lockBtn.setAttribute('aria-pressed', String(isLocked));
+    lockBtn.classList.toggle('active', isLocked);
+    lockBtn.title = isLocked
+      ? 'Layout Travado — Clique para permitir arrastar/excluir (Alt+L)'
+      : 'Layout Destravado — Clique para travar contra esbarrões (Alt+L)';
   }
+}
 
-  function toggleLockMode() {
-    const nextLocked = !document.body.classList.contains('layout-locked');
-    applyLockMode(nextLocked);
-    settingsState.lockLayout = nextLocked;
+function toggleLockMode() {
+  const nextLocked = !document.body.classList.contains('layout-locked');
+  applyLockMode(nextLocked);
+  settingsState.lockLayout = nextLocked;
+  chrome.storage.sync.get(['extensionSettings'], (res) => {
+    const s = res.extensionSettings || {};
+    s.lockLayout = nextLocked;
+    chrome.storage.sync.set({ extensionSettings: s }, () => {
+      syncBackupToChromeBookmarks();
+    });
+  });
+}
+
+function applyZenMode(enabled) {
+  document.body.classList.toggle('zen-mode', enabled === true);
+  // Cache local para aplicar sem flash na próxima aba (ver theme-cache.js)
+  localStorage.setItem('zenMode', enabled === true ? '1' : '0');
+  const zenBtn = document.getElementById('zen-mode-btn');
+  if (zenBtn) {
+    zenBtn.setAttribute('aria-pressed', String(enabled === true));
+    zenBtn.classList.toggle('active', enabled === true);
+  }
+}
+
+function toggleZenMode() {
+  const enabled = !document.body.classList.contains('zen-mode');
+  applyZenMode(enabled);
+  settingsState.zenMode = enabled;
+  chrome.storage.sync.get(['extensionSettings'], (res) => {
+    const s = res.extensionSettings || {};
+    s.zenMode = enabled;
+    chrome.storage.sync.set({ extensionSettings: s });
+  });
+}
+
+function openSettingsPopup() {
+  const width = Math.round(window.screen.availWidth * 0.42);
+  const height = Math.round(window.screen.availHeight * 0.82);
+  const left = Math.round((window.screen.availWidth - width) / 2);
+  const top = Math.round((window.screen.availHeight - height) / 2);
+
+  chrome.windows.create({
+    url: 'settings.html',
+    type: 'popup',
+    width: Math.max(width, 640),
+    height: Math.max(height, 600),
+    left: left,
+    top: top,
+  });
+}
+
+function setupQuickAppearancePopover() {
+  const popover = document.getElementById('quick-appearance-popover');
+  const toggleBtn = document.getElementById('theme-toggle-btn');
+  const tabBtns = document.querySelectorAll('.qap-tab-btn');
+  const tabPanes = document.querySelectorAll('.qap-pane');
+
+  // Tab 1: Aparência
+  const swatchesContainer = document.getElementById('qap-theme-swatches');
+  const cardStyleBtns = document.querySelectorAll(
+    '#qap-card-style-group .qap-seg-btn',
+  );
+  const wpSourceBtns = document.querySelectorAll(
+    '#qap-wallpaper-source-group .qap-seg-btn',
+  );
+  const refreshWpBtn = document.getElementById('qap-refresh-wallpaper-btn');
+  const customWpBox = document.getElementById('qap-custom-wallpaper-box');
+  const uploadWpBtn = document.getElementById('qap-upload-wp-btn');
+  const uploadWpInput = document.getElementById('qap-upload-wp-input');
+  const blurSlider = document.getElementById('qap-wallpaper-blur');
+  const blurVal = document.getElementById('qap-wallpaper-blur-val');
+  const opacitySlider = document.getElementById('qap-filter-opacity');
+  const opacityVal = document.getElementById('qap-filter-opacity-val');
+  const solidSurfacesCheck = document.getElementById('qap-solid-surfaces');
+
+  // Tab 2: Grade & Cartões
+  const layoutModeBtns = document.querySelectorAll(
+    '#qap-layout-mode-group .qap-seg-btn',
+  );
+  const columnsSection = document.getElementById('qap-columns-section');
+  const columnCountSlider = document.getElementById('qap-column-count');
+  const columnCountVal = document.getElementById('qap-column-count-val');
+  const iconLayoutBtns = document.querySelectorAll(
+    '#qap-icon-layout-group .qap-seg-btn',
+  );
+  const iconSizeSlider = document.getElementById('qap-icon-size');
+  const iconSizeVal = document.getElementById('qap-icon-size-val');
+  const cardWidthSlider = document.getElementById('qap-card-width');
+  const cardWidthVal = document.getElementById('qap-card-width-val');
+  const categoryGapSlider = document.getElementById('qap-category-gap');
+  const categoryGapVal = document.getElementById('qap-category-gap-val');
+
+  // Tab 3: Widgets
+  const clockStyleBtns = document.querySelectorAll(
+    '#qap-clock-style-group .qap-seg-btn',
+  );
+  const todoCheck = document.getElementById('qap-todo-enabled');
+  const quotesCheck = document.getElementById('qap-quotes-enabled');
+  const rssCheck = document.getElementById('qap-rss-enabled');
+  const pomodoroCheck = document.getElementById('qap-pomodoro-enabled');
+
+  const openFullSettingsBtn = document.getElementById(
+    'qap-open-full-settings',
+  );
+
+  if (!popover || !toggleBtn) return;
+
+  // Micro-tab switching
+  tabBtns.forEach((btn) => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const target = btn.dataset.qapTab;
+      tabBtns.forEach((b) =>
+        b.classList.toggle('active', b.dataset.qapTab === target),
+      );
+      tabPanes.forEach((p) =>
+        p.classList.toggle('active', p.dataset.qapPane === target),
+      );
+    });
+  });
+
+  const persistQuickPatch = (patch) => {
+    Object.assign(settingsState, patch);
     chrome.storage.sync.get(['extensionSettings'], (res) => {
-      const s = res.extensionSettings || {};
-      s.lockLayout = nextLocked;
+      const s = Object.assign({}, res.extensionSettings || {}, patch);
       chrome.storage.sync.set({ extensionSettings: s }, () => {
         syncBackupToChromeBookmarks();
       });
     });
-  }
+  };
 
-  function applyZenMode(enabled) {
-    document.body.classList.toggle('zen-mode', enabled === true);
-    // Cache local para aplicar sem flash na próxima aba (ver theme-cache.js)
-    localStorage.setItem('zenMode', enabled === true ? '1' : '0');
-    const zenBtn = document.getElementById('zen-mode-btn');
-    if (zenBtn) {
-      zenBtn.setAttribute('aria-pressed', String(enabled === true));
-      zenBtn.classList.toggle('active', enabled === true);
-    }
-  }
-
-  function toggleZenMode() {
-    const enabled = !document.body.classList.contains('zen-mode');
-    applyZenMode(enabled);
-    settingsState.zenMode = enabled;
-    chrome.storage.sync.get(['extensionSettings'], (res) => {
-      const s = res.extensionSettings || {};
-      s.zenMode = enabled;
-      chrome.storage.sync.set({ extensionSettings: s });
-    });
-  }
-
-  function openSettingsPopup() {
-    const width = Math.round(window.screen.availWidth * 0.42);
-    const height = Math.round(window.screen.availHeight * 0.82);
-    const left = Math.round((window.screen.availWidth - width) / 2);
-    const top = Math.round((window.screen.availHeight - height) / 2);
-
-    chrome.windows.create({
-      url: 'settings.html',
-      type: 'popup',
-      width: Math.max(width, 640),
-      height: Math.max(height, 600),
-      left: left,
-      top: top,
-    });
-  }
-
-  function setupQuickAppearancePopover() {
-    const popover = document.getElementById('quick-appearance-popover');
-    const toggleBtn = document.getElementById('theme-toggle-btn');
-    const swatchesContainer = document.getElementById('qap-theme-swatches');
-    const cardStyleBtns = document.querySelectorAll(
-      '#qap-card-style-group .qap-seg-btn',
-    );
-    const blurSlider = document.getElementById('qap-wallpaper-blur');
-    const blurVal = document.getElementById('qap-wallpaper-blur-val');
-    const opacitySlider = document.getElementById('qap-filter-opacity');
-    const opacityVal = document.getElementById('qap-filter-opacity-val');
-    const openFullSettingsBtn = document.getElementById(
-      'qap-open-full-settings',
-    );
-
-    if (!popover || !toggleBtn) return;
-
-    const persistQuickPatch = (patch) => {
-      Object.assign(settingsState, patch);
-      chrome.storage.sync.get(['extensionSettings'], (res) => {
-        const s = Object.assign({}, res.extensionSettings || {}, patch);
-        chrome.storage.sync.set({ extensionSettings: s }, () => {
-          syncBackupToChromeBookmarks();
+  const syncPopoverControls = () => {
+    // Tab 1: Aparência
+    if (swatchesContainer) {
+      swatchesContainer
+        .querySelectorAll('.qap-theme-chip')
+        .forEach((chip) => {
+          chip.classList.toggle(
+            'active',
+            chip.dataset.theme === (settingsState.themePreset || 'dark'),
+          );
         });
-      });
-    };
+    }
+    cardStyleBtns.forEach((btn) => {
+      btn.classList.toggle(
+        'active',
+        btn.dataset.style === (settingsState.cardStyle || 'card'),
+      );
+    });
 
-    const syncPopoverControls = () => {
-      if (swatchesContainer) {
-        swatchesContainer
-          .querySelectorAll('.qap-theme-chip')
-          .forEach((chip) => {
-            chip.classList.toggle(
-              'active',
-              chip.dataset.theme === (settingsState.themePreset || 'dark'),
-            );
-          });
-      }
-      cardStyleBtns.forEach((btn) => {
+      const currentWpSource =
+        settingsState.wallpaperSource === 'local'
+          ? 'custom'
+          : settingsState.wallpaperSource || 'unsplash';
+      wpSourceBtns.forEach((btn) => {
         btn.classList.toggle(
           'active',
-          btn.dataset.style === (settingsState.cardStyle || 'card'),
+          btn.dataset.wpSource === currentWpSource,
         );
       });
-      if (blurSlider) {
-        blurSlider.value = settingsState.wallpaperBlur || 0;
+      if (refreshWpBtn) {
+        refreshWpBtn.style.display =
+          currentWpSource === 'unsplash' ? 'inline-flex' : 'none';
       }
-      if (blurVal) {
-        blurVal.textContent = `${settingsState.wallpaperBlur || 0}px`;
-      }
-      if (opacitySlider) {
-        opacitySlider.value =
-          settingsState.filterOpacity !== undefined
-            ? settingsState.filterOpacity
-            : 0.3;
-      }
-      if (opacityVal) {
-        opacityVal.textContent = Number(
-          settingsState.filterOpacity !== undefined
-            ? settingsState.filterOpacity
-            : 0.3,
-        ).toFixed(2);
-      }
-    };
+        if (customWpBox) {
+          customWpBox.style.display =
+            currentWpSource === 'custom' ? 'flex' : 'none';
+        }
 
-    if (swatchesContainer) {
-      swatchesContainer.innerHTML = '';
-      Object.entries(THEME_PALETTES).forEach(([themeKey, palette]) => {
-        const btn = document.createElement('button');
-        btn.type = 'button';
-        btn.className = 'qap-theme-chip';
-        btn.dataset.theme = themeKey;
-        btn.title = palette.label;
+          if (blurSlider) blurSlider.value = settingsState.wallpaperBlur || 0;
+          if (blurVal) blurVal.textContent = `${settingsState.wallpaperBlur || 0}px`;
 
-        const dot = document.createElement('span');
-        dot.className = 'qap-theme-dot';
-        dot.style.background = `linear-gradient(135deg, ${palette.swatch} 55%, ${palette.accent} 55%)`;
+          const op =
+            settingsState.filterOpacity !== undefined
+              ? settingsState.filterOpacity
+              : 0.3;
+          if (opacitySlider) opacitySlider.value = op;
+          if (opacityVal) opacityVal.textContent = `${Math.round(op * 100)}%`;
 
-        const name = document.createElement('span');
-        name.className = 'qap-theme-name';
-        name.textContent = palette.label;
+          if (solidSurfacesCheck) {
+            solidSurfacesCheck.checked = settingsState.solidSurfaces === true;
+          }
 
-        btn.appendChild(dot);
-        btn.appendChild(name);
+            // Tab 2: Grade & Cartões
+            const mode = settingsState.layoutMode || 'list';
+            layoutModeBtns.forEach((btn) => {
+              btn.classList.toggle('active', btn.dataset.layoutMode === mode);
+            });
+            if (columnsSection) {
+              columnsSection.style.display = mode === 'columns' ? 'flex' : 'none';
+            }
+            if (columnCountSlider) {
+              columnCountSlider.value = settingsState.columnCount || 3;
+            }
+            if (columnCountVal) {
+              columnCountVal.textContent = String(settingsState.columnCount || 3);
+            }
 
-        btn.addEventListener('click', (e) => {
-          e.stopPropagation();
-          applyTheme(themeKey);
-          const patch = {
-            themePreset: themeKey,
-            iconBgColor: palette.bg,
-            iconBorderColor: palette.border,
-            bookmarkFontColor: palette.text,
-            sectionBgColor: palette.sectionBg,
-            sectionLineColor: palette.sectionLine,
-            filterColor: palette.filter,
+            const iLayout = settingsState.iconLayout || 'row';
+            iconLayoutBtns.forEach((btn) => {
+              btn.classList.toggle('active', btn.dataset.iconLayout === iLayout);
+            });
+
+            if (iconSizeSlider) iconSizeSlider.value = settingsState.iconSize || 28;
+            if (iconSizeVal)
+              iconSizeVal.textContent = `${settingsState.iconSize || 28}px`;
+
+            if (cardWidthSlider)
+              cardWidthSlider.value = settingsState.bookmarkMinWidth || 150;
+            if (cardWidthVal)
+              cardWidthVal.textContent = `${settingsState.bookmarkMinWidth || 150}px`;
+
+            const cGap =
+              settingsState.categoryGap !== undefined
+                ? settingsState.categoryGap
+                : 12;
+            if (categoryGapSlider) categoryGapSlider.value = cGap;
+            if (categoryGapVal) categoryGapVal.textContent = `${cGap}px`;
+
+            // Tab 3: Widgets
+            const cStyle = settingsState.clockStyle || 'analog';
+            clockStyleBtns.forEach((btn) => {
+              btn.classList.toggle('active', btn.dataset.clockStyle === cStyle);
+            });
+            if (todoCheck) todoCheck.checked = settingsState.todoEnabled !== false;
+            if (quotesCheck)
+              quotesCheck.checked = settingsState.quotesEnabled !== false;
+            if (rssCheck) rssCheck.checked = settingsState.rssEnabled !== false;
+            if (pomodoroCheck)
+              pomodoroCheck.checked = settingsState.pomodoroEnabled === true;
           };
-          applyIconAppearance(
-            settingsState.iconBorderRadius,
-            palette.border,
-            palette.bg,
-            settingsState.iconBgOpacity,
-          );
-          applyBookmarkFontSettings(
-            settingsState.bookmarkFontFamily,
-            settingsState.bookmarkFontSize,
-            palette.text,
-          );
-          applySectionAppearance(
-            settingsState.sectionPadding,
-            palette.sectionBg,
-            settingsState.sectionBgOpacity,
-            palette.sectionLine,
-          );
-          applyBackgroundFilter(
-            palette.filter,
-            settingsState.filterOpacity,
-            settingsState.wallpaperBlur,
-          );
-          persistQuickPatch(patch);
-          syncPopoverControls();
+
+          // Theme Swatches
+          if (swatchesContainer) {
+            swatchesContainer.innerHTML = '';
+            Object.entries(THEME_PALETTES).forEach(([themeKey, palette]) => {
+              const btn = document.createElement('button');
+              btn.type = 'button';
+              btn.className = 'qap-theme-chip';
+              btn.dataset.theme = themeKey;
+              btn.title = palette.label;
+
+              const dot = document.createElement('span');
+              dot.className = 'qap-theme-dot';
+              dot.style.background = `linear-gradient(135deg, ${palette.swatch} 55%, ${palette.accent} 55%)`;
+
+              const name = document.createElement('span');
+              name.className = 'qap-theme-name';
+              name.textContent = palette.label;
+
+              btn.appendChild(dot);
+              btn.appendChild(name);
+
+              btn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                applyTheme(themeKey);
+                const patch = {
+                  themePreset: themeKey,
+                  useCustomColors: false,
+                  iconBgColor: palette.bg,
+                  iconBorderColor: palette.border,
+                  bookmarkFontColor: palette.text,
+                  sectionBgColor: palette.sectionBg,
+                  sectionLineColor: palette.sectionLine,
+                  filterColor: palette.filter,
+                };
+                applyIconAppearance(
+                  settingsState.iconBorderRadius,
+                  palette.border,
+                  palette.bg,
+                  settingsState.iconBgOpacity,
+                  false,
+                );
+                applyBookmarkFontSettings(
+                  settingsState.bookmarkFontFamily,
+                  settingsState.bookmarkFontSize,
+                  palette.text,
+                  false,
+                );
+                applySectionAppearance(
+                  settingsState.sectionPadding,
+                  palette.sectionBg,
+                  settingsState.sectionBgOpacity,
+                  palette.sectionLine,
+                  false,
+                );
+                applyBackgroundFilter(
+                  palette.filter,
+                  settingsState.filterOpacity,
+                  settingsState.wallpaperBlur,
+                );
+                persistQuickPatch(patch);
+                syncPopoverControls();
+              });
+
+              swatchesContainer.appendChild(btn);
+            });
+          }
+
+          // Card Style
+          cardStyleBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const style = btn.dataset.style || 'card';
+              applyCardStyleSetting(style);
+              persistQuickPatch({ cardStyle: style });
+              syncPopoverControls();
+            });
+          });
+
+          // Wallpaper Source & Upload
+          wpSourceBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const src = btn.dataset.wpSource || 'unsplash';
+              persistQuickPatch({ wallpaperSource: src });
+              manageWallpaper(settingsState);
+              syncPopoverControls();
+            });
+          });
+
+          if (refreshWpBtn) {
+            refreshWpBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              manageWallpaper(settingsState, true);
+            });
+          }
+
+          if (uploadWpBtn && uploadWpInput) {
+            uploadWpBtn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              uploadWpInput.click();
+            });
+            uploadWpInput.addEventListener('change', (e) => {
+              const file = e.target.files && e.target.files[0];
+              if (!file) return;
+              const reader = new FileReader();
+              reader.onload = (ev) => {
+                const dataUrl = ev.target.result;
+                chrome.storage.local.set({ customWallpaperData: dataUrl }, () => {
+                  persistQuickPatch({
+                    wallpaperSource: 'custom',
+                    customWallpaperUrl: '',
+                  });
+                  manageWallpaper(settingsState);
+                  syncPopoverControls();
+                });
+              };
+              reader.readAsDataURL(file);
+            });
+          }
+
+          // Blur & Opacity & Solid Surfaces
+          if (blurSlider) {
+            blurSlider.addEventListener('input', (e) => {
+              const val = Number(e.target.value) || 0;
+              if (blurVal) blurVal.textContent = `${val}px`;
+              applyWallpaperBlurSetting(val);
+              persistQuickPatch({ wallpaperBlur: val });
+            });
+          }
+
+          if (opacitySlider) {
+            opacitySlider.addEventListener('input', (e) => {
+              const val = Number(e.target.value);
+              if (opacityVal) opacityVal.textContent = `${Math.round(val * 100)}%`;
+              applyBackgroundFilter(
+                settingsState.filterColor || '#000000',
+                val,
+                settingsState.wallpaperBlur || 0,
+              );
+              persistQuickPatch({ filterOpacity: val });
+            });
+          }
+
+          if (solidSurfacesCheck) {
+            solidSurfacesCheck.addEventListener('change', (e) => {
+              const val = e.target.checked;
+              document.body.classList.toggle('solid-surfaces', val);
+              persistQuickPatch({ solidSurfaces: val });
+            });
+          }
+
+          // Tab 2: Grade & Cartões
+          layoutModeBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const mode = btn.dataset.layoutMode || 'list';
+              applyLayoutMode(mode, settingsState.columnCount || 3);
+              persistQuickPatch({ layoutMode: mode });
+              syncPopoverControls();
+            });
+          });
+
+          if (columnCountSlider) {
+            columnCountSlider.addEventListener('input', (e) => {
+              const val = Number(e.target.value) || 3;
+              if (columnCountVal) columnCountVal.textContent = String(val);
+              applyLayoutMode(settingsState.layoutMode || 'columns', val);
+              persistQuickPatch({ columnCount: val });
+            });
+          }
+
+          iconLayoutBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const iLayout = btn.dataset.iconLayout || 'row';
+              applyIconLayoutSetting(iLayout);
+              persistQuickPatch({ iconLayout: iLayout });
+              syncPopoverControls();
+            });
+          });
+
+          if (iconSizeSlider) {
+            iconSizeSlider.addEventListener('input', (e) => {
+              const val = Number(e.target.value) || 28;
+              if (iconSizeVal) iconSizeVal.textContent = `${val}px`;
+              applyIconSizeSetting(val);
+              persistQuickPatch({ iconSize: val });
+            });
+          }
+
+          if (cardWidthSlider) {
+            cardWidthSlider.addEventListener('input', (e) => {
+              const val = Number(e.target.value) || 150;
+              if (cardWidthVal) cardWidthVal.textContent = `${val}px`;
+              applyBookmarkMinWidthSetting(val);
+              persistQuickPatch({ bookmarkMinWidth: val });
+            });
+          }
+
+          if (categoryGapSlider) {
+            categoryGapSlider.addEventListener('input', (e) => {
+              const val = Number(e.target.value) || 0;
+              if (categoryGapVal) categoryGapVal.textContent = `${val}px`;
+              applyCategoryGapSetting(val);
+              persistQuickPatch({ categoryGap: val });
+            });
+          }
+
+          // Tab 3: Widgets
+          clockStyleBtns.forEach((btn) => {
+            btn.addEventListener('click', (e) => {
+              e.stopPropagation();
+              const cStyle = btn.dataset.clockStyle || 'analog';
+              persistQuickPatch({ clockStyle: cStyle });
+              syncPopoverControls();
+            });
+          });
+
+          if (todoCheck) {
+            todoCheck.addEventListener('change', (e) => {
+              persistQuickPatch({ todoEnabled: e.target.checked });
+            });
+          }
+          if (quotesCheck) {
+            quotesCheck.addEventListener('change', (e) => {
+              persistQuickPatch({ quotesEnabled: e.target.checked });
+            });
+          }
+          if (rssCheck) {
+            rssCheck.addEventListener('change', (e) => {
+              persistQuickPatch({ rssEnabled: e.target.checked });
+            });
+          }
+          if (pomodoroCheck) {
+            pomodoroCheck.addEventListener('change', (e) => {
+              persistQuickPatch({ pomodoroEnabled: e.target.checked });
+            });
+          }
+
+          if (openFullSettingsBtn) {
+            openFullSettingsBtn.addEventListener('click', () => {
+              popover.style.display = 'none';
+              openSettingsPopup();
+            });
+          }
+
+          toggleBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const isVisible = popover.style.display === 'flex';
+            if (isVisible) {
+              popover.style.display = 'none';
+              toggleBtn.classList.remove('active');
+            } else {
+              syncPopoverControls();
+              popover.style.display = 'flex';
+              toggleBtn.classList.add('active');
+            }
+          });
+
+          popover.addEventListener('click', (e) => e.stopPropagation());
+
+          window.addEventListener('click', () => {
+            if (popover.style.display === 'flex') {
+              popover.style.display = 'none';
+              toggleBtn.classList.remove('active');
+            }
+          });
+        }
+
+        function setupSidebarActions() {
+          // Zen Mode
+          const zenBtn = document.getElementById('zen-mode-btn');
+          if (zenBtn) {
+            zenBtn.addEventListener('click', toggleZenMode);
+          }
+          applyZenMode(settingsState.zenMode === true);
+
+          // Lock Layout Mode
+          const lockBtn = document.getElementById('lock-layout-btn');
+          if (lockBtn) {
+            lockBtn.addEventListener('click', toggleLockMode);
+          }
+          applyLockMode(settingsState.lockLayout === true);
+
+          window.addEventListener('keydown', (e) => {
+            const activeEl = document.activeElement;
+            const isTyping =
+              activeEl &&
+              (activeEl.tagName === 'INPUT' ||
+                activeEl.tagName === 'TEXTAREA' ||
+                activeEl.isContentEditable);
+            if (!isTyping && e.altKey && e.key.toLowerCase() === 'z') {
+              e.preventDefault();
+              toggleZenMode();
+            }
+            if (!isTyping && e.altKey && e.key.toLowerCase() === 'l') {
+              e.preventDefault();
+              toggleLockMode();
+            }
+          });
+
+          // Quick Appearance Popover
+          setupQuickAppearancePopover();
+
+          // Settings Button (Custom Size)
+          const settingsBtn = document.getElementById('settings-btn');
+          if (settingsBtn) {
+            const newSettingsBtn = settingsBtn.cloneNode(true);
+            settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
+
+            newSettingsBtn.addEventListener('click', openSettingsPopup);
+          }
+
+          // Chrome Shortcuts
+          const shortcuts = {
+            'chrome-bookmarks-btn': 'chrome://bookmarks',
+            'chrome-history-btn': 'chrome://history',
+            'chrome-downloads-btn': 'chrome://downloads',
+          };
+
+          Object.keys(shortcuts).forEach((id) => {
+            const btn = document.getElementById(id);
+            if (btn) {
+              btn.addEventListener('click', () => {
+                chrome.tabs.create({ url: shortcuts[id] });
+              });
+            }
+          });
+        }
+
+        // Restaura automaticamente do backup nos Bookmarks ou user-defaults.json caso o storage esteja limpo
+        restoreFromPersistentSourcesIfNeeded(() => {
+          loadSettings(settingsState, initialize);
         });
-
-        swatchesContainer.appendChild(btn);
       });
-    }
-
-    cardStyleBtns.forEach((btn) => {
-      btn.addEventListener('click', (e) => {
-        e.stopPropagation();
-        const style = btn.dataset.style || 'card';
-        applyCardStyleSetting(style);
-        persistQuickPatch({ cardStyle: style });
-        syncPopoverControls();
-      });
-    });
-
-    if (blurSlider) {
-      blurSlider.addEventListener('input', (e) => {
-        const val = Number(e.target.value) || 0;
-        if (blurVal) blurVal.textContent = `${val}px`;
-        applyWallpaperBlurSetting(val);
-        persistQuickPatch({ wallpaperBlur: val });
-      });
-    }
-
-    if (opacitySlider) {
-      opacitySlider.addEventListener('input', (e) => {
-        const val = Number(e.target.value);
-        if (opacityVal) opacityVal.textContent = val.toFixed(2);
-        applyBackgroundFilter(
-          settingsState.filterColor || '#000000',
-          val,
-          settingsState.wallpaperBlur || 0,
-        );
-        persistQuickPatch({ filterOpacity: val });
-      });
-    }
-
-    if (openFullSettingsBtn) {
-      openFullSettingsBtn.addEventListener('click', () => {
-        popover.style.display = 'none';
-        openSettingsPopup();
-      });
-    }
-
-    toggleBtn.addEventListener('click', (e) => {
-      e.stopPropagation();
-      const isVisible = popover.style.display === 'flex';
-      if (isVisible) {
-        popover.style.display = 'none';
-        toggleBtn.classList.remove('active');
-      } else {
-        syncPopoverControls();
-        popover.style.display = 'flex';
-        toggleBtn.classList.add('active');
-      }
-    });
-
-    popover.addEventListener('click', (e) => e.stopPropagation());
-
-    window.addEventListener('click', () => {
-      if (popover.style.display === 'flex') {
-        popover.style.display = 'none';
-        toggleBtn.classList.remove('active');
-      }
-    });
-  }
-
-  function setupSidebarActions() {
-    // Zen Mode
-    const zenBtn = document.getElementById('zen-mode-btn');
-    if (zenBtn) {
-      zenBtn.addEventListener('click', toggleZenMode);
-    }
-    applyZenMode(settingsState.zenMode === true);
-
-    // Lock Layout Mode
-    const lockBtn = document.getElementById('lock-layout-btn');
-    if (lockBtn) {
-      lockBtn.addEventListener('click', toggleLockMode);
-    }
-    applyLockMode(settingsState.lockLayout === true);
-
-    window.addEventListener('keydown', (e) => {
-      const activeEl = document.activeElement;
-      const isTyping =
-        activeEl &&
-        (activeEl.tagName === 'INPUT' ||
-          activeEl.tagName === 'TEXTAREA' ||
-          activeEl.isContentEditable);
-      if (!isTyping && e.altKey && e.key.toLowerCase() === 'z') {
-        e.preventDefault();
-        toggleZenMode();
-      }
-      if (!isTyping && e.altKey && e.key.toLowerCase() === 'l') {
-        e.preventDefault();
-        toggleLockMode();
-      }
-    });
-
-    // Quick Appearance Popover
-    setupQuickAppearancePopover();
-
-    // Settings Button (Custom Size)
-    const settingsBtn = document.getElementById('settings-btn');
-    if (settingsBtn) {
-      const newSettingsBtn = settingsBtn.cloneNode(true);
-      settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
-
-      newSettingsBtn.addEventListener('click', openSettingsPopup);
-    }
-
-    // Chrome Shortcuts
-    const shortcuts = {
-      'chrome-bookmarks-btn': 'chrome://bookmarks',
-      'chrome-history-btn': 'chrome://history',
-      'chrome-downloads-btn': 'chrome://downloads',
-    };
-
-    Object.keys(shortcuts).forEach((id) => {
-      const btn = document.getElementById(id);
-      if (btn) {
-        btn.addEventListener('click', () => {
-          chrome.tabs.create({ url: shortcuts[id] });
-        });
-      }
-    });
-  }
-
-  // Restaura automaticamente do backup nos Bookmarks ou user-defaults.json caso o storage esteja limpo
-  restoreFromPersistentSourcesIfNeeded(() => {
-    loadSettings(settingsState, initialize);
-  });
-});

@@ -9,6 +9,7 @@ Não crie categorias antecipadamente. Acrescente links quando páginas reais for
 - [Oportunidades de Melhoria da Página Inicial](oportunidades-melhoria.md) — Diagnóstico técnico e catálogo de melhorias de performance, UX, produtividade e código (`HUMAN_VALIDATED`).
 - [Plano: Ícones Inteligentes e Persistência Definitiva de Dados](plano-icones-e-persistencia.md) — Arquitetura e implementação do resolvedor automático de DashboardIcons com catálogo visual, travamento em 0ms (`Lock-on-First-Resolve`) e backup automático em `chrome.bookmarks` + `user-defaults.json` (`HUMAN_VALIDATED`).
 - [Plano: Evolução de Layout, UX, Configurações, Cores e Navegabilidade](plano-evolucao-ux-layout.md) — Roadmap técnico em 5 pilares (Navegabilidade `Ctrl+T`, Layout/Blur/Frameless, Novos Temas, Popover Rápido de Aparência e Trava de Layout) derivado do benchmark de mercado (`HUMAN_VALIDATED`).
+- [Plano: Diagnóstico de Configurações, Correções Estruturais e Quick Settings Popover](plano-diagnostico-configs-e-quick-popover.md) — Auditoria completa de `settings.html`, correção dos 6 problemas detectados (Wallpaper local/URL, preservação de cores nativas dos temas, reatividade em tempo real) e expansão do Quick Popover em 3 micro-abas (`AI_PROPOSED`).
 - [Referências e Inspirações de Design e Produto](referencias-e-inspiracoes.md) — Hub central de referências de mercado, benchmarks comparativos e ideias de UX/produto (`HUMAN_VALIDATED`):
   - [Aurora: Productive and cozy new tab](referencias/aurora.md)
   - [SquarePage](referencias/squarepage.md)

@@ -33,6 +33,17 @@ document.addEventListener('DOMContentLoaded', () => {
   const wallpaperUnsplashConfig = document.getElementById(
     'wallpaper-unsplash-config',
   );
+  const selectWallpaperFolderBtn = document.getElementById(
+    'select-wallpaper-folder-btn',
+  );
+  const uploadWallpaperInput = document.getElementById(
+    'upload-wallpaper-input',
+  );
+  const customWallpaperUrl = document.getElementById('custom-wallpaper-url');
+  const customWallpaperStatus = document.getElementById(
+    'custom-wallpaper-status',
+  );
+  const useCustomColors = document.getElementById('use-custom-colors');
   const toggleApiKeyBtn = document.getElementById('toggle-api-key-btn');
   const clearApiKeyBtn = document.getElementById('clear-api-key-btn');
 
@@ -177,19 +188,44 @@ document.addEventListener('DOMContentLoaded', () => {
   // Toggle Wallpaper configuration forms based on wallpaper source
   if (wallpaperSource) {
     wallpaperSource.addEventListener('change', () => {
-      if (wallpaperSource.value === 'local') {
-        if (wallpaperLocalConfig) wallpaperLocalConfig.style.display = 'block';
-        if (wallpaperUnsplashConfig)
-          wallpaperUnsplashConfig.style.display = 'none';
-      } else if (wallpaperSource.value === 'unsplash') {
-        if (wallpaperLocalConfig) wallpaperLocalConfig.style.display = 'none';
-        if (wallpaperUnsplashConfig)
-          wallpaperUnsplashConfig.style.display = 'block';
-      } else {
-        if (wallpaperLocalConfig) wallpaperLocalConfig.style.display = 'none';
-        if (wallpaperUnsplashConfig)
-          wallpaperUnsplashConfig.style.display = 'none';
-      }
+        if (
+          wallpaperSource.value === 'custom' ||
+          wallpaperSource.value === 'local'
+        ) {
+          if (wallpaperLocalConfig) wallpaperLocalConfig.style.display = 'block';
+          if (wallpaperUnsplashConfig)
+            wallpaperUnsplashConfig.style.display = 'none';
+        } else if (wallpaperSource.value === 'unsplash') {
+          if (wallpaperLocalConfig) wallpaperLocalConfig.style.display = 'none';
+          if (wallpaperUnsplashConfig)
+            wallpaperUnsplashConfig.style.display = 'block';
+        } else {
+          if (wallpaperLocalConfig) wallpaperLocalConfig.style.display = 'none';
+          if (wallpaperUnsplashConfig)
+            wallpaperUnsplashConfig.style.display = 'none';
+        }
+      });
+  }
+
+  if (selectWallpaperFolderBtn && uploadWallpaperInput) {
+    selectWallpaperFolderBtn.addEventListener('click', () => {
+      uploadWallpaperInput.click();
+    });
+    uploadWallpaperInput.addEventListener('change', (e) => {
+      const file = e.target.files && e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        const dataUrl = ev.target.result;
+        chrome.storage.local.set({ customWallpaperData: dataUrl }, () => {
+          if (customWallpaperUrl) customWallpaperUrl.value = '';
+          if (customWallpaperStatus) {
+            customWallpaperStatus.textContent = `✔️ Imagem "${file.name}" salva localmente!`;
+          }
+          saveSettings();
+        });
+      };
+      reader.readAsDataURL(file);
     });
   }
 
@@ -277,9 +313,25 @@ document.addEventListener('DOMContentLoaded', () => {
         wallpaperFrequency.value = settings.wallpaperFrequency || 1;
 
       if (wallpaperSource) {
-        wallpaperSource.value = settings.wallpaperSource || 'unsplash';
+        const src =
+          settings.wallpaperSource === 'local'
+            ? 'custom'
+            : settings.wallpaperSource || 'unsplash';
+        wallpaperSource.value = src;
         const event = new Event('change');
         wallpaperSource.dispatchEvent(event);
+      }
+
+      if (customWallpaperUrl) {
+        customWallpaperUrl.value = settings.customWallpaperUrl || '';
+      }
+      if (customWallpaperStatus) {
+        chrome.storage.local.get(['customWallpaperData'], (localRes) => {
+          if (localRes.customWallpaperData && !settings.customWallpaperUrl) {
+            customWallpaperStatus.textContent =
+              '✔️ Imagem local ativa na memória';
+          }
+        });
       }
 
       if (wallpaperTheme) {
@@ -333,6 +385,8 @@ document.addEventListener('DOMContentLoaded', () => {
         solidSurfaces.checked = settings.solidSurfaces === true;
       if (dynamicAccent)
         dynamicAccent.checked = settings.dynamicAccent === true;
+      if (useCustomColors)
+        useCustomColors.checked = settings.useCustomColors === true;
 
       updateFrequencyDisplay(settings.wallpaperFrequency);
       if (filterColor) filterColor.value = ensureFullHex(settings.filterColor);
@@ -555,6 +609,10 @@ document.addEventListener('DOMContentLoaded', () => {
         rssEnabled: rssEnabled ? rssEnabled.checked : true,
         solidSurfaces: solidSurfaces ? solidSurfaces.checked : false,
         dynamicAccent: dynamicAccent ? dynamicAccent.checked : false,
+        useCustomColors: useCustomColors ? useCustomColors.checked : false,
+        customWallpaperUrl: customWallpaperUrl
+          ? customWallpaperUrl.value.trim()
+          : '',
       };
 
       // Tokens de API nunca vão para o sync nem para o export
@@ -775,6 +833,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
       const colors = THEME_PALETTES[newTheme];
       if (colors) {
+        if (useCustomColors) useCustomColors.checked = false;
         if (iconBgColor) iconBgColor.value = colors.bg;
         if (iconBorderColor) iconBorderColor.value = colors.border;
         if (bookmarkFontColor) bookmarkFontColor.value = colors.text;
@@ -786,6 +845,25 @@ document.addEventListener('DOMContentLoaded', () => {
       saveSettings();
     });
   }
+
+  // Se o usuário editar manualmente uma cor de cartão/seção/texto, ativa useCustomColors
+  [
+    sectionBgColor,
+    sectionBgOpacity,
+    sectionLineColor,
+    iconBgColor,
+    iconBgOpacity,
+    iconBorderColor,
+    bookmarkFontColor,
+  ].forEach((colorInput) => {
+    if (colorInput) {
+      colorInput.addEventListener('input', () => {
+        if (!isInitializing && useCustomColors) {
+          useCustomColors.checked = true;
+        }
+      });
+    }
+  });
 
   if (layoutMode) {
     layoutMode.addEventListener('change', function () {
@@ -850,6 +928,8 @@ document.addEventListener('DOMContentLoaded', () => {
     rssEnabled,
     solidSurfaces,
     dynamicAccent,
+    useCustomColors,
+    customWallpaperUrl,
   ].forEach((element) => {
     if (element) {
       element.addEventListener('input', saveSettings);

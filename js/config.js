@@ -36,6 +36,8 @@ export const defaultSettings = {
   weatherCity: '',
   wallpaperSource: 'unsplash',
   wallpaperTheme: 'nature',
+  customWallpaperUrl: '',
+  useCustomColors: false,
   wallpaperApiKey: '',
   togglApiToken: '',
   pomodoroEnabled: false,
