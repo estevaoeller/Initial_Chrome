@@ -606,14 +606,37 @@
                   <label for="theme-preset">Selecione o Tema Base</label>
                   <select id="theme-preset">
                     <option value="auto">Auto (segue o sistema)</option>
+                    <option value="dark">🌙 Escuro (Slate)</option>
+                    <option value="catppuccin">🪻 Catppuccin Mocha</option>
+                    <option value="dracula">🧛 Dracula</option>
+                    <option value="nord">❄️ Nord</option>
+                    <option value="tokyonight">🌃 Tokyo Night</option>
+                    <option value="rosepine">🌹 Rosé Pine</option>
+                    <option value="solar">🌅 Solarized</option>
                     <option value="light">☀️ Claro (Padrão)</option>
-                    <option value="dark">🌙 Escuro</option>
-                    <option value="solar">🌅 Solar</option>
-                    <option value="minimal">⚪ Minimal</option>
+                    <option value="minimal">⚪ Minimalista</option>
                     <option value="custom_builder">
                       🎨 Criar Tema Customizado...
                     </option>
                   </select>
+                </div>
+                <div
+                  class="control-item"
+                  style="
+                    display: flex;
+                    flex-direction: row;
+                    align-items: center;
+                    justify-content: space-between;
+                    margin-bottom: 0;
+                  "
+                >
+                  <label for="lock-layout" style="font-size: 0.95rem"
+                    >🔒 Travar Layout (bloqueia arraste acidental e exclusão)</label
+                  >
+                  <label class="switch">
+                    <input type="checkbox" id="lock-layout" />
+                    <span class="slider round"></span>
+                  </label>
                 </div>
                 <div
                   class="control-item"
@@ -1288,6 +1311,18 @@
               <div class="group-title">Texto e Exibição</div>
               <div class="controls-grid">
                 <div class="control-item">
+                  <label for="card-style">Estilo Visual dos Cartões</label>
+                  <select id="card-style">
+                    <option value="card">🃏 Cartão Padrão (Com Borda e Fundo)</option>
+                    <option value="frameless">
+                      ✨ Sem Moldura (Frameless / Launchpad)
+                    </option>
+                    <option value="compact">
+                      💊 Compacto (Pílula Densa Horizontal)
+                    </option>
+                  </select>
+                </div>
+                <div class="control-item">
                   <label for="icon-layout">Orientação</label>
                   <select id="icon-layout">
                     <option value="row">➡️ Ícone ao Lado do Texto</option>
@@ -1689,7 +1724,7 @@
             </div>
 
             <div class="settings-group">
-              <div class="group-title">Filtro de Fundo (Overlay)</div>
+              <div class="group-title">Filtro e Desfoque de Fundo (Overlay)</div>
               <div class="controls-grid">
                 <div class="control-item">
                   <label for="filter-color">Cor da Camada</label>
@@ -1699,7 +1734,7 @@
                   </div>
                 </div>
                 <div class="control-item">
-                  <label for="filter-opacity">Opacidade</label>
+                  <label for="filter-opacity">Opacidade da Camada</label>
                   <div class="range-wrapper">
                     <input
                       type="range"
@@ -1713,6 +1748,27 @@
                       >0.30</span
                     >
                   </div>
+                </div>
+                <div class="control-item full-width">
+                  <label for="wallpaper-blur"
+                    >Desfoque do Papel de Parede (Blur)</label
+                  >
+                  <div class="range-wrapper">
+                    <input
+                      type="range"
+                      id="wallpaper-blur"
+                      min="0"
+                      max="24"
+                      step="1"
+                      value="0"
+                    />
+                    <span id="wallpaper-blur-value" class="range-value"
+                      >0px</span
+                    >
+                  </div>
+                  <p style="font-size: 0.8rem; opacity: 0.7; margin: 4px 0 0">
+                    Desfoca suavemente a foto de fundo para destacar os cartões e textos sem precisar escurecer a imagem.
+                  </p>
                 </div>
               </div>
             </div>
@@ -1822,9 +1878,19 @@
 
         <!-- Sticky Save Bar -->
         <div class="save-bar">
-          <span id="save-status">Alterações salvas!</span>
+          <span
+            style="
+              font-size: 0.82rem;
+              opacity: 0.8;
+              display: inline-flex;
+              align-items: center;
+              gap: 6px;
+            "
+            >⚡ Auto-save ativo (sincronizado nos Favoritos)</span
+          >
+          <span id="save-status">✓ Alterações salvas!</span>
           <button id="save-settings-btn" class="btn btn-primary">
-            Salvar Todas as Alterações
+            Salvar e Sincronizar Agora
           </button>
         </div>
       </div>

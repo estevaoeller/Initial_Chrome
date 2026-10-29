@@ -2,7 +2,11 @@ import { defaultSettings } from './config.js';
 import { SettingsQuickLinksManager } from './features/settings-quick-links.js';
 import { SettingsDataManager } from './features/settings-data.js';
 import { ThemeBuilderManager } from './features/theme-builder.js';
-import { applyTheme, syncBackupToChromeBookmarks } from './modules.js';
+import {
+  applyTheme,
+  THEME_PALETTES,
+  syncBackupToChromeBookmarks,
+} from './modules.js';
 import {
   loadApiTokens,
   saveApiTokens,
@@ -36,6 +40,10 @@ document.addEventListener('DOMContentLoaded', () => {
   const filterColor = document.getElementById('filter-color');
   const filterOpacity = document.getElementById('filter-opacity');
   const filterOpacityValue = document.getElementById('filter-opacity-value');
+  const wallpaperBlur = document.getElementById('wallpaper-blur');
+  const wallpaperBlurValue = document.getElementById('wallpaper-blur-value');
+  const cardStyle = document.getElementById('card-style');
+  const lockLayout = document.getElementById('lock-layout');
 
   // Icon Size & Spacing Settings
   const iconSize = document.getElementById('icon-size');
@@ -333,6 +341,19 @@ document.addEventListener('DOMContentLoaded', () => {
           settings.filterOpacity !== undefined ? settings.filterOpacity : 0.3;
         updateOpacityDisplay(filterOpacity.value);
       }
+      if (wallpaperBlur) {
+        wallpaperBlur.value =
+          settings.wallpaperBlur !== undefined ? settings.wallpaperBlur : 0;
+        if (wallpaperBlurValue) {
+          wallpaperBlurValue.textContent = `${wallpaperBlur.value}px`;
+        }
+      }
+      if (cardStyle) {
+        cardStyle.value = settings.cardStyle || 'card';
+      }
+      if (lockLayout) {
+        lockLayout.checked = settings.lockLayout === true;
+      }
       if (iconSize) {
         iconSize.value = settings.iconSize || 28;
         updateIconSizeDisplay(iconSize.value);
@@ -468,6 +489,9 @@ document.addEventListener('DOMContentLoaded', () => {
           : 1,
         filterColor: filterColor ? filterColor.value : '#000000',
         filterOpacity: filterOpacity ? parseFloat(filterOpacity.value) : 0.3,
+        wallpaperBlur: wallpaperBlur ? parseInt(wallpaperBlur.value) || 0 : 0,
+        cardStyle: cardStyle ? cardStyle.value : 'card',
+        lockLayout: lockLayout ? lockLayout.checked : false,
         iconSize: iconSize ? parseInt(iconSize.value) : 28,
         iconSpacing: iconSpacing ? parseInt(iconSpacing.value) : 8,
         iconGap: iconGap ? parseInt(iconGap.value) : 8,
@@ -635,6 +659,21 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  if (wallpaperBlur) {
+    wallpaperBlur.addEventListener('input', function () {
+      if (wallpaperBlurValue) wallpaperBlurValue.textContent = `${this.value}px`;
+      saveSettings();
+    });
+  }
+
+  if (cardStyle) {
+    cardStyle.addEventListener('change', saveSettings);
+  }
+
+  if (lockLayout) {
+    lockLayout.addEventListener('change', saveSettings);
+  }
+
   if (iconSize) {
     iconSize.addEventListener('input', function () {
       updateIconSizeDisplay(this.value);
@@ -734,42 +773,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newTheme = this.value;
       applyTheme(newTheme);
 
-      const themeColors = {
-        light: {
-          bg: '#ffffff',
-          border: '#e2e8f0',
-          text: '#333333',
-          sectionBg: '#f8fafc',
-          sectionLine: '#3b82f6',
-          filter: '#ffffff',
-        },
-        dark: {
-          bg: '#334155',
-          border: '#475569',
-          text: '#e2e8f0',
-          sectionBg: '#1e293b',
-          sectionLine: '#38bdf8',
-          filter: '#000000',
-        },
-        solar: {
-          bg: '#002b36',
-          border: '#073642',
-          text: '#839496',
-          sectionBg: '#073642',
-          sectionLine: '#b58900',
-          filter: '#002b36',
-        },
-        minimal: {
-          bg: '#ffffff',
-          border: '#eeeeee',
-          text: '#111111',
-          sectionBg: '#fafafa',
-          sectionLine: '#dddddd',
-          filter: '#ffffff',
-        },
-      };
-
-      const colors = themeColors[newTheme];
+      const colors = THEME_PALETTES[newTheme];
       if (colors) {
         if (iconBgColor) iconBgColor.value = colors.bg;
         if (iconBorderColor) iconBorderColor.value = colors.border;

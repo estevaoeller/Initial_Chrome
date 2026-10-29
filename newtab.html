@@ -241,12 +241,13 @@
       <!-- RIGHT ACTION SIDEBAR -->
       <aside id="action-sidebar">
         <div class="action-top">
-          <!-- Theme Toggle -->
+          <!-- Theme & Appearance Quick Popover -->
           <button
             id="theme-toggle-btn"
             class="action-btn"
-            title="Alternar Tema"
-            aria-label="Alternar tema visual"
+            title="Aparência Rápida: Temas, Estilo e Desfoque"
+            aria-label="Abrir painel de aparência rápida"
+            aria-haspopup="dialog"
           >
             <svg
               xmlns="http://www.w3.org/2000/svg"
@@ -263,6 +264,30 @@
               <path
                 d="M12 1v2M12 21v2M4.22 4.22l1.42 1.42M18.36 18.36l1.42 1.42M1 12h2M21 12h2M4.22 19.78l1.42-1.42M18.36 5.64l1.42-1.42"
               />
+            </svg>
+          </button>
+
+          <!-- Lock Layout Mode -->
+          <button
+            id="lock-layout-btn"
+            class="action-btn"
+            title="Travar/Destravar Edição e Arraste (Alt+L)"
+            aria-label="Travar ou destravar edição de cartões"
+            aria-pressed="false"
+          >
+            <svg
+              xmlns="http://www.w3.org/2000/svg"
+              width="22"
+              height="22"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+            >
+              <rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect>
+              <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
             </svg>
           </button>
 
@@ -563,6 +588,84 @@
             <path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"></path>
           </svg>
         </button>
+      </div>
+
+      <!-- Quick Appearance Popover (Live Customization on New Tab) -->
+      <div
+        id="quick-appearance-popover"
+        class="quick-appearance-popover"
+        style="display: none"
+        role="dialog"
+        aria-label="Aparência rápida"
+      >
+        <div class="qap-header">
+          <span class="qap-title">✨ Aparência Rápida</span>
+          <span class="qap-autosave-badge">✓ Salvo ao vivo</span>
+        </div>
+
+        <div class="qap-section">
+          <label class="qap-label">Tema de Cores</label>
+          <div id="qap-theme-swatches" class="qap-theme-grid"></div>
+        </div>
+
+        <div class="qap-section">
+          <label class="qap-label">Estilo dos Cartões</label>
+          <div class="qap-segmented" id="qap-card-style-group">
+            <button type="button" class="qap-seg-btn" data-style="card">
+              Cartão
+            </button>
+            <button type="button" class="qap-seg-btn" data-style="frameless">
+              Sem Moldura
+            </button>
+            <button type="button" class="qap-seg-btn" data-style="compact">
+              Compacto
+            </button>
+          </div>
+        </div>
+
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-wallpaper-blur"
+              >Desfoque do Fundo (Blur)</label
+            >
+            <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
+          </div>
+          <input
+            type="range"
+            id="qap-wallpaper-blur"
+            min="0"
+            max="24"
+            step="1"
+            value="0"
+          />
+        </div>
+
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-filter-opacity"
+              >Contraste / Filtro do Fundo</label
+            >
+            <span id="qap-filter-opacity-val" class="qap-val">0.30</span>
+          </div>
+          <input
+            type="range"
+            id="qap-filter-opacity"
+            min="0"
+            max="0.95"
+            step="0.05"
+            value="0.3"
+          />
+        </div>
+
+        <div class="qap-footer">
+          <button
+            type="button"
+            id="qap-open-full-settings"
+            class="qap-settings-link"
+          >
+            ⚙️ Abrir todas as configurações...
+          </button>
+        </div>
       </div>
     </div>
 

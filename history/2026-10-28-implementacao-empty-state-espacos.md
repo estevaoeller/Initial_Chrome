@@ -7,7 +7,7 @@ agent_version: unknown
 provider: Google DeepMind
 model: Gemini 3.8 Flash (Medium)
 tasks: [ACT-003, AGT-006]
-validation: AI_PROPOSED
+validation: HUMAN_VALIDATED
 ---
 
 # Implementação de Empty State para Espaços Vazios

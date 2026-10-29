@@ -3,9 +3,15 @@ import { defaultSettings } from './config.js';
 export function applyIconSizeSetting(size) {
   document.documentElement.style.setProperty('--icon-size', `${size}px`);
   document.querySelectorAll('.bookmark-favicon').forEach((img) => {
-    if (img.dataset.url && img.getAttribute('data-is-custom') !== 'true') {
+    if (
+      img.dataset.url &&
+      img.getAttribute('data-is-custom') !== 'true' &&
+      img.src &&
+      img.src.includes('google.com/s2/favicons')
+    ) {
       if (size > 0) {
-        img.src = `https://www.google.com/s2/favicons?domain=${img.dataset.url}&sz=${size}`;
+        const fetchSize = Math.max(size * 2, 64);
+        img.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(img.dataset.url)}&sz=${fetchSize}`;
       } else {
         img.src = '';
       }
@@ -114,13 +120,66 @@ export function applySectionAppearance(padding, bgColor, bgOpacity, lineColor) {
   }
 }
 
-export function applyBackgroundFilter(color, opacity) {
+export function applyBackgroundFilter(color, opacity, blur) {
   const filter = document.getElementById('background-filter');
   if (filter) {
-    const r = parseInt(color.slice(1, 3), 16);
-    const g = parseInt(color.slice(3, 5), 16);
-    const b = parseInt(color.slice(5, 7), 16);
-    filter.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    if (color && opacity !== undefined) {
+      const r = parseInt(color.slice(1, 3), 16) || 0;
+      const g = parseInt(color.slice(3, 5), 16) || 0;
+      const b = parseInt(color.slice(5, 7), 16) || 0;
+      filter.style.backgroundColor = `rgba(${r}, ${g}, ${b}, ${opacity})`;
+    }
+    if (blur !== undefined) {
+      const blurVal = Number(blur) || 0;
+      filter.style.backdropFilter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+      filter.style.webkitBackdropFilter =
+        blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+      document.documentElement.style.setProperty(
+        '--wallpaper-blur',
+        `${blurVal}px`,
+      );
+    }
+  }
+}
+
+export function applyWallpaperBlurSetting(blur) {
+  const filter = document.getElementById('background-filter');
+  const blurVal = Number(blur) || 0;
+  document.documentElement.style.setProperty(
+    '--wallpaper-blur',
+    `${blurVal}px`,
+  );
+  if (filter) {
+    filter.style.backdropFilter = blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+    filter.style.webkitBackdropFilter =
+      blurVal > 0 ? `blur(${blurVal}px)` : 'none';
+  }
+}
+
+export function applyCardStyleSetting(style = 'card') {
+  document.body.classList.remove(
+    'card-style-frameless',
+    'card-style-compact',
+  );
+  if (style === 'frameless') {
+    document.body.classList.add('card-style-frameless');
+  } else if (style === 'compact') {
+    document.body.classList.add('card-style-compact');
+  }
+  try {
+    localStorage.setItem('cardStyle', style || 'card');
+  } catch {
+    // ignore
+  }
+}
+
+export function applyLockLayoutSetting(locked = false) {
+  const isLocked = Boolean(locked);
+  document.body.classList.toggle('layout-locked', isLocked);
+  try {
+    localStorage.setItem('lockLayout', isLocked ? '1' : '0');
+  } catch {
+    // ignore
   }
 }
 
@@ -215,8 +274,15 @@ export function loadSettings(state, callback) {
     applyLayoutMode(state.layoutMode, state.columnCount);
 
     if (state.filterColor !== undefined) {
-      applyBackgroundFilter(state.filterColor, state.filterOpacity);
+      applyBackgroundFilter(
+        state.filterColor,
+        state.filterOpacity,
+        state.wallpaperBlur,
+      );
     }
+    applyWallpaperBlurSetting(state.wallpaperBlur || 0);
+    applyCardStyleSetting(state.cardStyle || 'card');
+    applyLockLayoutSetting(state.lockLayout === true);
 
     if (callback) callback();
   });

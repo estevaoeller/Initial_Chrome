@@ -64,6 +64,56 @@ body.minimal-theme {
   --icon-border-color: #e5e5e5;
 }
 
+body.catppuccin-theme {
+  --bg: #1e1e2e;
+  --card: #313244;
+  --text: #cdd6f4;
+  --accent: #cba6f7;
+  --icon-bg-color: #313244;
+  --icon-border-color: #45475a;
+  --on-accent: #1e1e2e;
+}
+
+body.dracula-theme {
+  --bg: #282a36;
+  --card: #44475a;
+  --text: #f8f8f2;
+  --accent: #bd93f9;
+  --icon-bg-color: #44475a;
+  --icon-border-color: #6272a4;
+  --on-accent: #282a36;
+}
+
+body.nord-theme {
+  --bg: #2e3440;
+  --card: #3b4252;
+  --text: #eceff4;
+  --accent: #88c0d0;
+  --icon-bg-color: #3b4252;
+  --icon-border-color: #4c566a;
+  --on-accent: #2e3440;
+}
+
+body.tokyonight-theme {
+  --bg: #1a1b26;
+  --card: #24283b;
+  --text: #c0caf5;
+  --accent: #7aa2f7;
+  --icon-bg-color: #24283b;
+  --icon-border-color: #414868;
+  --on-accent: #1a1b26;
+}
+
+body.rosepine-theme {
+  --bg: #191724;
+  --card: #26233a;
+  --text: #e0def4;
+  --accent: #ebbcba;
+  --icon-bg-color: #26233a;
+  --icon-border-color: #403d52;
+  --on-accent: #191724;
+}
+
 body {
   font-family: var(--font-ui);
   margin: 0;
@@ -2730,3 +2780,358 @@ body.zen-mode #action-sidebar:focus-within {
     animation: none;
   }
 }
+
+/* ========== EVOLUÇÃO UX, LAYOUT, NAVEGABILIDADE & TEMAS (ACT-010..ACT-014) ========== */
+
+/* 1. Quick Links Superiores com Ícones */
+.quick-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-link-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+/* 2. Badges de Atalho (1..9) nos Espaços da Sidebar */
+.space-shortcut-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+  color: var(--text);
+  opacity: 0.5;
+  font-family: monospace;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.space-item:hover .space-shortcut-badge,
+.space-item.active .space-shortcut-badge {
+  opacity: 0.9;
+}
+
+#sidebar.collapsed .space-shortcut-badge {
+  display: none;
+}
+
+/* 3. Contador e Botão "Abrir Todos" no Cabeçalho do Grupo */
+.category-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.group-count-badge {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 1px 7px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--text) 10%, transparent);
+  color: var(--text);
+  opacity: 0.65;
+}
+
+.group-open-all-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  background: color-mix(in srgb, var(--text) 7%, transparent);
+  border: 1px solid var(--surface-border);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 3px 8px;
+  font-size: 11px;
+  font-family: inherit;
+  cursor: pointer;
+  opacity: 0;
+  transform: translateY(1px);
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    border-color var(--dur-fast) var(--ease-out);
+}
+
+.bookmark-category:hover .group-open-all-btn,
+.group-open-all-btn:focus-visible {
+  opacity: 0.85;
+}
+
+.group-open-all-btn:hover {
+  opacity: 1 !important;
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+  border-color: var(--accent);
+}
+
+/* 4. Estilos de Cartão: Frameless (Launchpad) e Compacto (Pílula Densa) */
+body.card-style-frameless .bookmark-item {
+  background: transparent !important;
+  border-color: transparent !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+  flex-direction: column !important;
+  justify-content: center;
+  text-align: center;
+  padding: 10px 6px !important;
+  gap: 7px !important;
+}
+
+body.card-style-frameless .bookmark-item:hover {
+  background: color-mix(in srgb, var(--card) 55%, transparent) !important;
+  border-color: var(--surface-border) !important;
+  transform: translateY(-3px);
+}
+
+body.card-style-frameless .bookmark-favicon {
+  width: calc(var(--icon-size, 28px) * 1.25) !important;
+  height: calc(var(--icon-size, 28px) * 1.25) !important;
+  filter: drop-shadow(0 4px 8px rgba(0, 0, 0, 0.28));
+  transition: transform var(--dur-fast) var(--ease-spring);
+}
+
+body.card-style-frameless .bookmark-item:hover .bookmark-favicon {
+  transform: scale(1.08);
+}
+
+body.card-style-frameless .bookmark-name {
+  text-align: center;
+  font-weight: 500;
+  text-shadow: 0 1px 4px rgba(0, 0, 0, 0.45);
+}
+
+body.card-style-compact .bookmarks-grid {
+  grid-template-columns: repeat(
+    auto-fill,
+    minmax(calc(var(--bookmark-min-width, 150px) * 0.82), 1fr)
+  ) !important;
+  gap: 6px !important;
+}
+
+body.card-style-compact .bookmark-item {
+  padding: 5px 10px !important;
+  min-height: 32px !important;
+  border-radius: var(--radius-full) !important;
+  gap: 7px !important;
+}
+
+body.card-style-compact .bookmark-favicon {
+  width: 18px !important;
+  height: 18px !important;
+}
+
+body.card-style-compact .bookmark-name {
+  white-space: nowrap !important;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: block !important;
+  -webkit-line-clamp: 1 !important;
+}
+
+/* 5. Modo Trava de Layout (Lock Mode — ACT-014) */
+body.layout-locked .delete-bookmark-btn,
+body.layout-locked .edit-bookmark-btn,
+body.layout-locked .group-drag-handle,
+body.layout-locked .new-group-container,
+body.layout-locked #add-space-btn {
+  display: none !important;
+}
+
+#lock-layout-btn.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
+/* 6. Popover Rápido de Aparência na Nova Aba (#quick-appearance-popover) */
+.quick-appearance-popover {
+  position: fixed;
+  top: 16px;
+  right: 68px;
+  width: 300px;
+  background: var(--surface-strong);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--surface-border);
+  border-radius: var(--radius-lg);
+  padding: 16px;
+  box-shadow: var(--shadow-lg);
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+  color: var(--text);
+  animation: qapFadeIn 0.16s var(--ease-out);
+}
+
+@keyframes qapFadeIn {
+  from {
+    opacity: 0;
+    transform: translateX(8px) scale(0.98);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+.qap-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.qap-title {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.qap-autosave-badge {
+  font-size: 11px;
+  color: var(--success, #10b981);
+  font-weight: 600;
+}
+
+.qap-section {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.qap-label {
+  font-size: 11px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  opacity: 0.7;
+}
+
+.qap-theme-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 6px;
+}
+
+.qap-theme-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--surface-border);
+  background: color-mix(in srgb, var(--text) 4%, transparent);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11px;
+  cursor: pointer;
+  text-align: left;
+  transition: all 0.15s ease;
+  overflow: hidden;
+}
+
+.qap-theme-chip:hover {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+.qap-theme-chip.active {
+  border-color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 20%, transparent);
+  font-weight: 600;
+}
+
+.qap-theme-dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+}
+
+.qap-theme-name {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.qap-segmented {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 4px;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  padding: 3px;
+  border-radius: 8px;
+}
+
+.qap-seg-btn {
+  border: none;
+  background: transparent;
+  color: var(--text);
+  font-family: inherit;
+  font-size: 11.5px;
+  padding: 6px 4px;
+  border-radius: 6px;
+  cursor: pointer;
+  opacity: 0.75;
+  transition: all 0.15s ease;
+}
+
+.qap-seg-btn:hover {
+  opacity: 1;
+}
+
+.qap-seg-btn.active {
+  background: var(--accent);
+  color: var(--on-accent, #ffffff);
+  opacity: 1;
+  font-weight: 600;
+}
+
+.qap-slider-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.qap-val {
+  font-size: 11px;
+  font-family: monospace;
+  opacity: 0.85;
+}
+
+.quick-appearance-popover input[type='range'] {
+  width: 100%;
+  accent-color: var(--accent);
+  cursor: pointer;
+}
+
+.qap-footer {
+  padding-top: 6px;
+  border-top: 1px solid var(--surface-border);
+}
+
+.qap-settings-link {
+  width: 100%;
+  background: color-mix(in srgb, var(--text) 6%, transparent);
+  border: 1px solid var(--surface-border);
+  color: var(--text);
+  border-radius: 8px;
+  padding: 7px 10px;
+  font-family: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.qap-settings-link:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+

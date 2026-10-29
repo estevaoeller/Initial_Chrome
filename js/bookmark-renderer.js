@@ -216,10 +216,21 @@ export function renderBookmarks(
       categoryTitle.className = 'category-title';
       categoryTitle.title = 'Duplo clique para renomear este grupo';
 
+      const countBadge = document.createElement('span');
+      countBadge.className = 'group-count-badge';
+
+      const openAllBtn = document.createElement('button');
+      openAllBtn.type = 'button';
+      openAllBtn.className = 'group-open-all-btn';
+      openAllBtn.innerHTML =
+        '<svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/><polyline points="15 3 21 3 21 9"/><line x1="10" y1="14" x2="21" y2="3"/></svg><span>Abrir todos</span>';
+
       titleContainer.appendChild(dragHandle);
       titleContainer.appendChild(toggleBtn);
       titleContainer.appendChild(categoryTitle);
+      titleContainer.appendChild(countBadge);
       headerDiv.appendChild(titleContainer);
+      headerDiv.appendChild(openAllBtn);
       categoryDiv.appendChild(headerDiv);
 
       // Double Click Rename Event
@@ -276,6 +287,37 @@ export function renderBookmarks(
 
     // Update values
     categoryTitle.textContent = category.name;
+    const countBadgeEl = headerDiv.querySelector('.group-count-badge');
+    if (countBadgeEl) {
+      countBadgeEl.textContent = String((category.links || []).length);
+    }
+    const openAllBtnEl = headerDiv.querySelector('.group-open-all-btn');
+    if (openAllBtnEl) {
+      const linkCount = (category.links || []).length;
+      openAllBtnEl.style.display = linkCount > 0 ? 'inline-flex' : 'none';
+      openAllBtnEl.title = `Abrir todos os ${linkCount} links de "${category.name}" em novas abas`;
+      openAllBtnEl.onclick = (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        const linksToOpen = category.links || [];
+        if (linksToOpen.length === 0) return;
+        if (
+          linksToOpen.length > 8 &&
+          !confirm(
+            `Deseja abrir todos os ${linksToOpen.length} links do grupo "${category.name}" em novas abas?`,
+          )
+        ) {
+          return;
+        }
+        linksToOpen.forEach((lnk) => {
+          if (typeof chrome !== 'undefined' && chrome.tabs?.create) {
+            chrome.tabs.create({ url: lnk.url, active: false });
+          } else {
+            window.open(lnk.url, '_blank');
+          }
+        });
+      };
+    }
     toggleBtn.classList.toggle('collapsed', isCollapsed);
     toggleBtn.setAttribute(
       'aria-label',
@@ -590,7 +632,9 @@ export function renderBookmarks(
             animation: 150,
             delay: 200,
             delayOnTouchOnly: true,
+            onMove: () => !document.body.classList.contains('layout-locked'),
             onEnd: function (evt) {
+              if (document.body.classList.contains('layout-locked')) return;
               if (evt.from === evt.to && evt.oldIndex === evt.newIndex) return;
 
               const itemEl = evt.item;
@@ -681,7 +725,9 @@ export function renderBookmarks(
           handle: '.group-drag-handle',
           filter: '.new-group-container',
           draggable: '.bookmark-category',
+          onMove: () => !document.body.classList.contains('layout-locked'),
           onEnd: function (evt) {
+            if (document.body.classList.contains('layout-locked')) return;
             if (evt.oldIndex === evt.newIndex) return;
 
             const itemEl = evt.item;

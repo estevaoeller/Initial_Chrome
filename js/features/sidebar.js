@@ -147,7 +147,9 @@ export class SidebarManager {
           draggable: '.space-item',
           ghostClass: 'sortable-ghost',
           chosenClass: 'sortable-chosen',
+          onMove: () => !document.body.classList.contains('layout-locked'),
           onEnd: (evt) => {
+            if (document.body.classList.contains('layout-locked')) return;
             if (evt.oldIndex === evt.newIndex) return;
             const spaceId = evt.item.dataset.spaceId;
             this.handleMoveSpace(spaceId, evt.newIndex);
@@ -300,7 +302,7 @@ export class SidebarManager {
   renderSpacesList(spaces) {
     if (!this.spacesList) return;
     this.spacesList.innerHTML = '';
-    spaces.forEach((space) => {
+    spaces.forEach((space, index) => {
       const spaceItem = document.createElement('button');
       spaceItem.className = 'space-item';
       if (space.id === this.activeSpaceId) {
@@ -308,8 +310,9 @@ export class SidebarManager {
       }
       spaceItem.dataset.spaceId = space.id;
 
-      // Tooltip com o nome (útil no modo mini-rail, onde só o ícone aparece)
-      spaceItem.title = space.name;
+      // Tooltip com o nome e atalho Alt+1..9
+      const shortcutHint = index < 9 ? ` (Alt+${index + 1})` : '';
+      spaceItem.title = `${space.name}${shortcutHint}`;
 
       const spaceIconSpan = document.createElement('span');
       spaceIconSpan.className = 'space-icon';
@@ -321,6 +324,13 @@ export class SidebarManager {
 
       spaceItem.appendChild(spaceIconSpan);
       spaceItem.appendChild(spaceNameSpan);
+
+      if (index < 9) {
+        const badgeSpan = document.createElement('span');
+        badgeSpan.className = 'space-shortcut-badge';
+        badgeSpan.textContent = String(index + 1);
+        spaceItem.appendChild(badgeSpan);
+      }
 
       // Left click to select
       spaceItem.addEventListener('click', () => this.selectSpace(space.id));

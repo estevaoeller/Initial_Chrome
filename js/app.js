@@ -1,5 +1,6 @@
 import {
   applyTheme,
+  THEME_PALETTES,
   loadGroupsFromSpace,
   checkAndMigrateToSpaces,
   manageWallpaper,
@@ -7,6 +8,7 @@ import {
   updateGreeting,
   updateWeather,
   restoreFromPersistentSourcesIfNeeded,
+  syncBackupToChromeBookmarks,
 } from './modules.js';
 import {
   loadSettings,
@@ -22,6 +24,9 @@ import {
   applySidebarWidthSetting,
   applyBookmarkFontSettings,
   applyBackgroundFilter,
+  applyWallpaperBlurSetting,
+  applyCardStyleSetting,
+  applyLockLayoutSetting,
   applyLayoutMode,
   applySectionAppearance,
 } from './settings-handlers.js';
@@ -62,6 +67,9 @@ document.addEventListener('DOMContentLoaded', () => {
     bookmarkMinWidth: 150,
     filterColor: '#000000',
     filterOpacity: 0.3,
+    wallpaperBlur: 0,
+    cardStyle: 'card',
+    lockLayout: false,
     iconLayout: 'row',
     defaultIconSource: 'dashboardicons',
     nameDisplay: 'always',
@@ -489,39 +497,50 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         if (
+          newSettings.wallpaperBlur !== undefined &&
+          newSettings.wallpaperBlur !== settingsState.wallpaperBlur
+        ) {
+          settingsState.wallpaperBlur = newSettings.wallpaperBlur;
+          applyWallpaperBlurSetting(settingsState.wallpaperBlur);
+        }
+
+        if (
+          newSettings.cardStyle !== undefined &&
+          newSettings.cardStyle !== settingsState.cardStyle
+        ) {
+          settingsState.cardStyle = newSettings.cardStyle;
+          applyCardStyleSetting(settingsState.cardStyle);
+        }
+
+        if (
+          newSettings.lockLayout !== undefined &&
+          newSettings.lockLayout !== settingsState.lockLayout
+        ) {
+          settingsState.lockLayout = newSettings.lockLayout;
+          applyLockMode(settingsState.lockLayout === true);
+        }
+
+        if (
           newSettings.themePreset &&
           newSettings.themePreset !== settingsState.themePreset
         ) {
           settingsState.themePreset = newSettings.themePreset;
           applyTheme(settingsState.themePreset);
 
-          const DARK_TEXT = '#333333';
-          const LIGHT_TEXT = '#e2e8f0';
-
-          if (
-            settingsState.themePreset === 'dark' ||
-            settingsState.themePreset === 'solar'
-          ) {
-            if (settingsState.bookmarkFontColor === DARK_TEXT) {
-              settingsState.bookmarkFontColor = LIGHT_TEXT;
-              applyBookmarkFontSettings(
-                settingsState.bookmarkFontFamily,
-                settingsState.bookmarkFontSize,
-                settingsState.bookmarkFontColor,
-              );
-            }
-          } else if (
-            settingsState.themePreset === 'light' ||
-            settingsState.themePreset === 'minimal'
-          ) {
-            if (settingsState.bookmarkFontColor === LIGHT_TEXT) {
-              settingsState.bookmarkFontColor = DARK_TEXT;
-              applyBookmarkFontSettings(
-                settingsState.bookmarkFontFamily,
-                settingsState.bookmarkFontSize,
-                settingsState.bookmarkFontColor,
-              );
-            }
+          const palette = THEME_PALETTES[settingsState.themePreset];
+          if (palette) {
+            settingsState.iconBgColor = palette.bg;
+            settingsState.iconBorderColor = palette.border;
+            settingsState.bookmarkFontColor = palette.text;
+            settingsState.sectionBgColor = palette.sectionBg;
+            settingsState.sectionLineColor = palette.sectionLine;
+            settingsState.filterColor = palette.filter;
+            applySectionAppearance(
+              settingsState.sectionPadding,
+              settingsState.sectionBgColor,
+              settingsState.sectionBgOpacity,
+              settingsState.sectionLineColor,
+            );
           }
         }
         if (
@@ -697,12 +716,42 @@ document.addEventListener('DOMContentLoaded', () => {
         applyBackgroundFilter(
           settingsState.filterColor,
           settingsState.filterOpacity,
+          settingsState.wallpaperBlur,
         );
       }
 
       if (area === 'sync' && changes.quickLinks) {
-        quickLinksManager.renderQuickLinks(changes.quickLinks.newValue || []);
+        quickLinksManager.renderQuickLinks(
+          changes.quickLinks.newValue || [],
+          settingsState.defaultIconSource || 'dashboardicons',
+        );
       }
+    });
+  }
+
+  function applyLockMode(locked) {
+    const isLocked = Boolean(locked);
+    applyLockLayoutSetting(isLocked);
+    const lockBtn = document.getElementById('lock-layout-btn');
+    if (lockBtn) {
+      lockBtn.setAttribute('aria-pressed', String(isLocked));
+      lockBtn.classList.toggle('active', isLocked);
+      lockBtn.title = isLocked
+        ? 'Layout Travado — Clique para permitir arrastar/excluir (Alt+L)'
+        : 'Layout Destravado — Clique para travar contra esbarrões (Alt+L)';
+    }
+  }
+
+  function toggleLockMode() {
+    const nextLocked = !document.body.classList.contains('layout-locked');
+    applyLockMode(nextLocked);
+    settingsState.lockLayout = nextLocked;
+    chrome.storage.sync.get(['extensionSettings'], (res) => {
+      const s = res.extensionSettings || {};
+      s.lockLayout = nextLocked;
+      chrome.storage.sync.set({ extensionSettings: s }, () => {
+        syncBackupToChromeBookmarks();
+      });
     });
   }
 
@@ -728,6 +777,211 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function openSettingsPopup() {
+    const width = Math.round(window.screen.availWidth * 0.42);
+    const height = Math.round(window.screen.availHeight * 0.82);
+    const left = Math.round((window.screen.availWidth - width) / 2);
+    const top = Math.round((window.screen.availHeight - height) / 2);
+
+    chrome.windows.create({
+      url: 'settings.html',
+      type: 'popup',
+      width: Math.max(width, 640),
+      height: Math.max(height, 600),
+      left: left,
+      top: top,
+    });
+  }
+
+  function setupQuickAppearancePopover() {
+    const popover = document.getElementById('quick-appearance-popover');
+    const toggleBtn = document.getElementById('theme-toggle-btn');
+    const swatchesContainer = document.getElementById('qap-theme-swatches');
+    const cardStyleBtns = document.querySelectorAll(
+      '#qap-card-style-group .qap-seg-btn',
+    );
+    const blurSlider = document.getElementById('qap-wallpaper-blur');
+    const blurVal = document.getElementById('qap-wallpaper-blur-val');
+    const opacitySlider = document.getElementById('qap-filter-opacity');
+    const opacityVal = document.getElementById('qap-filter-opacity-val');
+    const openFullSettingsBtn = document.getElementById(
+      'qap-open-full-settings',
+    );
+
+    if (!popover || !toggleBtn) return;
+
+    const persistQuickPatch = (patch) => {
+      Object.assign(settingsState, patch);
+      chrome.storage.sync.get(['extensionSettings'], (res) => {
+        const s = Object.assign({}, res.extensionSettings || {}, patch);
+        chrome.storage.sync.set({ extensionSettings: s }, () => {
+          syncBackupToChromeBookmarks();
+        });
+      });
+    };
+
+    const syncPopoverControls = () => {
+      if (swatchesContainer) {
+        swatchesContainer
+          .querySelectorAll('.qap-theme-chip')
+          .forEach((chip) => {
+            chip.classList.toggle(
+              'active',
+              chip.dataset.theme === (settingsState.themePreset || 'dark'),
+            );
+          });
+      }
+      cardStyleBtns.forEach((btn) => {
+        btn.classList.toggle(
+          'active',
+          btn.dataset.style === (settingsState.cardStyle || 'card'),
+        );
+      });
+      if (blurSlider) {
+        blurSlider.value = settingsState.wallpaperBlur || 0;
+      }
+      if (blurVal) {
+        blurVal.textContent = `${settingsState.wallpaperBlur || 0}px`;
+      }
+      if (opacitySlider) {
+        opacitySlider.value =
+          settingsState.filterOpacity !== undefined
+            ? settingsState.filterOpacity
+            : 0.3;
+      }
+      if (opacityVal) {
+        opacityVal.textContent = Number(
+          settingsState.filterOpacity !== undefined
+            ? settingsState.filterOpacity
+            : 0.3,
+        ).toFixed(2);
+      }
+    };
+
+    if (swatchesContainer) {
+      swatchesContainer.innerHTML = '';
+      Object.entries(THEME_PALETTES).forEach(([themeKey, palette]) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'qap-theme-chip';
+        btn.dataset.theme = themeKey;
+        btn.title = palette.label;
+
+        const dot = document.createElement('span');
+        dot.className = 'qap-theme-dot';
+        dot.style.background = `linear-gradient(135deg, ${palette.swatch} 55%, ${palette.accent} 55%)`;
+
+        const name = document.createElement('span');
+        name.className = 'qap-theme-name';
+        name.textContent = palette.label;
+
+        btn.appendChild(dot);
+        btn.appendChild(name);
+
+        btn.addEventListener('click', (e) => {
+          e.stopPropagation();
+          applyTheme(themeKey);
+          const patch = {
+            themePreset: themeKey,
+            iconBgColor: palette.bg,
+            iconBorderColor: palette.border,
+            bookmarkFontColor: palette.text,
+            sectionBgColor: palette.sectionBg,
+            sectionLineColor: palette.sectionLine,
+            filterColor: palette.filter,
+          };
+          applyIconAppearance(
+            settingsState.iconBorderRadius,
+            palette.border,
+            palette.bg,
+            settingsState.iconBgOpacity,
+          );
+          applyBookmarkFontSettings(
+            settingsState.bookmarkFontFamily,
+            settingsState.bookmarkFontSize,
+            palette.text,
+          );
+          applySectionAppearance(
+            settingsState.sectionPadding,
+            palette.sectionBg,
+            settingsState.sectionBgOpacity,
+            palette.sectionLine,
+          );
+          applyBackgroundFilter(
+            palette.filter,
+            settingsState.filterOpacity,
+            settingsState.wallpaperBlur,
+          );
+          persistQuickPatch(patch);
+          syncPopoverControls();
+        });
+
+        swatchesContainer.appendChild(btn);
+      });
+    }
+
+    cardStyleBtns.forEach((btn) => {
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        const style = btn.dataset.style || 'card';
+        applyCardStyleSetting(style);
+        persistQuickPatch({ cardStyle: style });
+        syncPopoverControls();
+      });
+    });
+
+    if (blurSlider) {
+      blurSlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value) || 0;
+        if (blurVal) blurVal.textContent = `${val}px`;
+        applyWallpaperBlurSetting(val);
+        persistQuickPatch({ wallpaperBlur: val });
+      });
+    }
+
+    if (opacitySlider) {
+      opacitySlider.addEventListener('input', (e) => {
+        const val = Number(e.target.value);
+        if (opacityVal) opacityVal.textContent = val.toFixed(2);
+        applyBackgroundFilter(
+          settingsState.filterColor || '#000000',
+          val,
+          settingsState.wallpaperBlur || 0,
+        );
+        persistQuickPatch({ filterOpacity: val });
+      });
+    }
+
+    if (openFullSettingsBtn) {
+      openFullSettingsBtn.addEventListener('click', () => {
+        popover.style.display = 'none';
+        openSettingsPopup();
+      });
+    }
+
+    toggleBtn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const isVisible = popover.style.display === 'flex';
+      if (isVisible) {
+        popover.style.display = 'none';
+        toggleBtn.classList.remove('active');
+      } else {
+        syncPopoverControls();
+        popover.style.display = 'flex';
+        toggleBtn.classList.add('active');
+      }
+    });
+
+    popover.addEventListener('click', (e) => e.stopPropagation());
+
+    window.addEventListener('click', () => {
+      if (popover.style.display === 'flex') {
+        popover.style.display = 'none';
+        toggleBtn.classList.remove('active');
+      }
+    });
+  }
+
   function setupSidebarActions() {
     // Zen Mode
     const zenBtn = document.getElementById('zen-mode-btn');
@@ -735,6 +989,14 @@ document.addEventListener('DOMContentLoaded', () => {
       zenBtn.addEventListener('click', toggleZenMode);
     }
     applyZenMode(settingsState.zenMode === true);
+
+    // Lock Layout Mode
+    const lockBtn = document.getElementById('lock-layout-btn');
+    if (lockBtn) {
+      lockBtn.addEventListener('click', toggleLockMode);
+    }
+    applyLockMode(settingsState.lockLayout === true);
+
     window.addEventListener('keydown', (e) => {
       const activeEl = document.activeElement;
       const isTyping =
@@ -746,29 +1008,14 @@ document.addEventListener('DOMContentLoaded', () => {
         e.preventDefault();
         toggleZenMode();
       }
+      if (!isTyping && e.altKey && e.key.toLowerCase() === 'l') {
+        e.preventDefault();
+        toggleLockMode();
+      }
     });
 
-    // Theme Toggle
-    const themeToggleBtn = document.getElementById('theme-toggle-btn');
-    if (themeToggleBtn) {
-      themeToggleBtn.addEventListener('click', () => {
-        const themes = ['light', 'dark', 'solar', 'minimal'];
-        const currentClass = Array.from(document.body.classList).find((c) =>
-          c.endsWith('-theme'),
-        );
-        const current = currentClass
-          ? currentClass.replace('-theme', '')
-          : 'light';
-        const nextIndex = (themes.indexOf(current) + 1) % themes.length;
-        const nextTheme = themes[nextIndex];
-
-        chrome.storage.sync.get(['extensionSettings'], (res) => {
-          const s = res.extensionSettings || {};
-          s.themePreset = nextTheme;
-          chrome.storage.sync.set({ extensionSettings: s });
-        });
-      });
-    }
+    // Quick Appearance Popover
+    setupQuickAppearancePopover();
 
     // Settings Button (Custom Size)
     const settingsBtn = document.getElementById('settings-btn');
@@ -776,21 +1023,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const newSettingsBtn = settingsBtn.cloneNode(true);
       settingsBtn.parentNode.replaceChild(newSettingsBtn, settingsBtn);
 
-      newSettingsBtn.addEventListener('click', () => {
-        const width = Math.round(window.screen.availWidth * 0.35);
-        const height = Math.round(window.screen.availHeight * 0.8);
-        const left = Math.round((window.screen.availWidth - width) / 2);
-        const top = Math.round((window.screen.availHeight - height) / 2);
-
-        chrome.windows.create({
-          url: 'settings.html',
-          type: 'popup',
-          width: width,
-          height: height,
-          left: left,
-          top: top,
-        });
-      });
+      newSettingsBtn.addEventListener('click', openSettingsPopup);
     }
 
     // Chrome Shortcuts

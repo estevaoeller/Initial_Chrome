@@ -1,3 +1,5 @@
+import { THEME_LIST } from '../modules.js';
+
 export class ThemeBuilderManager {
   constructor() {
     this.presetSelect = null;
@@ -155,7 +157,7 @@ export class ThemeBuilderManager {
     }
 
     // Prevent overwriting built-in themes
-    const builtIns = ['light', 'dark', 'solar', 'minimal', 'custom_builder'];
+    const builtIns = ['auto', ...THEME_LIST, 'custom_builder'];
     if (builtIns.includes(themeName.toLowerCase())) {
       alert('Este nome é reservado para temas padrões. Escolha outro nome.');
       return;
@@ -177,7 +179,7 @@ export class ThemeBuilderManager {
 
   deleteTheme() {
     const selected = this.presetSelect.value;
-    const builtIns = ['light', 'dark', 'solar', 'minimal', 'custom_builder'];
+    const builtIns = ['auto', ...THEME_LIST, 'custom_builder'];
 
     if (builtIns.includes(selected)) {
       alert('Não é possível excluir temas padrões.');
@@ -272,19 +274,11 @@ export class ThemeBuilderManager {
       const selectEl = this.presetSelect;
 
       // Collect built-in option elements
+      const builtInSet = new Set(['auto', ...THEME_LIST, 'custom_builder']);
       const builtInOptions = [];
       for (let i = 0; i < selectEl.options.length; i++) {
         const opt = selectEl.options[i];
-        if (
-          [
-            'auto',
-            'light',
-            'dark',
-            'solar',
-            'minimal',
-            'custom_builder',
-          ].includes(opt.value)
-        ) {
+        if (builtInSet.has(opt.value)) {
           builtInOptions.push({
             value: opt.value,
             text: opt.text,

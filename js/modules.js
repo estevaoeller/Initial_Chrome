@@ -473,8 +473,128 @@ export function handleDeleteBookmark(
   }
 }
 
-const THEME_LIST = ['light', 'dark', 'solar', 'minimal'];
+export const THEME_LIST = [
+  'light',
+  'dark',
+  'catppuccin',
+  'dracula',
+  'nord',
+  'tokyonight',
+  'rosepine',
+  'solar',
+  'minimal',
+];
+
+export const THEME_PALETTES = {
+  dark: {
+    label: 'Escuro (Slate)',
+    swatch: '#0f172a',
+    accent: '#38bdf8',
+    bg: '#334155',
+    border: '#475569',
+    text: '#e2e8f0',
+    sectionBg: '#1e293b',
+    sectionLine: '#38bdf8',
+    filter: '#000000',
+  },
+  catppuccin: {
+    label: 'Catppuccin Mocha',
+    swatch: '#1e1e2e',
+    accent: '#cba6f7',
+    bg: '#313244',
+    border: '#45475a',
+    text: '#cdd6f4',
+    sectionBg: '#1e1e2e',
+    sectionLine: '#cba6f7',
+    filter: '#11111b',
+  },
+  dracula: {
+    label: 'Dracula',
+    swatch: '#282a36',
+    accent: '#bd93f9',
+    bg: '#44475a',
+    border: '#6272a4',
+    text: '#f8f8f2',
+    sectionBg: '#282a36',
+    sectionLine: '#bd93f9',
+    filter: '#191a21',
+  },
+  nord: {
+    label: 'Nord',
+    swatch: '#2e3440',
+    accent: '#88c0d0',
+    bg: '#3b4252',
+    border: '#4c566a',
+    text: '#eceff4',
+    sectionBg: '#2e3440',
+    sectionLine: '#88c0d0',
+    filter: '#242933',
+  },
+  tokyonight: {
+    label: 'Tokyo Night',
+    swatch: '#1a1b26',
+    accent: '#7aa2f7',
+    bg: '#24283b',
+    border: '#414868',
+    text: '#c0caf5',
+    sectionBg: '#1a1b26',
+    sectionLine: '#7aa2f7',
+    filter: '#16161e',
+  },
+  rosepine: {
+    label: 'Rosé Pine',
+    swatch: '#191724',
+    accent: '#ebbcba',
+    bg: '#26233a',
+    border: '#403d52',
+    text: '#e0def4',
+    sectionBg: '#191724',
+    sectionLine: '#ebbcba',
+    filter: '#1f1d2e',
+  },
+  solar: {
+    label: 'Solarized',
+    swatch: '#002b36',
+    accent: '#268bd2',
+    bg: '#073642',
+    border: '#586e75',
+    text: '#eee8d5',
+    sectionBg: '#002b36',
+    sectionLine: '#b58900',
+    filter: '#002b36',
+  },
+  light: {
+    label: 'Claro',
+    swatch: '#f4f4f5',
+    accent: '#5558e3',
+    bg: '#ffffff',
+    border: '#e2e8f0',
+    text: '#27272a',
+    sectionBg: '#f8fafc',
+    sectionLine: '#3b82f6',
+    filter: '#ffffff',
+  },
+  minimal: {
+    label: 'Minimalista',
+    swatch: '#fafafa',
+    accent: '#d81b60',
+    bg: '#ffffff',
+    border: '#eeeeee',
+    text: '#111111',
+    sectionBg: '#fafafa',
+    sectionLine: '#d81b60',
+    filter: '#ffffff',
+  },
+};
 const THEME_CLASSES = THEME_LIST.map((t) => `${t}-theme`);
+const DARK_THEME_CLASSES = [
+  'dark-theme',
+  'catppuccin-theme',
+  'dracula-theme',
+  'nord-theme',
+  'tokyonight-theme',
+  'rosepine-theme',
+];
 
 // Tema "auto": segue o prefers-color-scheme do sistema operacional
 const systemThemeQuery =
@@ -778,7 +898,9 @@ export function applyDynamicAccent(hexColor, enabled) {
   const { h, s } = hexToHsl(hexColor);
   // Satura o suficiente para funcionar como acento e ajusta a luminosidade
   // conforme o tema: claro no dark, escuro nos temas claros (contraste AA)
-  const isDark = document.body.classList.contains('dark-theme');
+  const isDark = DARK_THEME_CLASSES.some((cls) =>
+    document.body.classList.contains(cls),
+  );
   const sat = Math.round(Math.max(s, 0.45) * 100);
   const light = isDark ? 62 : 38;
   document.body.style.setProperty(

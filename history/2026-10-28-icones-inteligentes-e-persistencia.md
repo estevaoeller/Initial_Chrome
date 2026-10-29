@@ -6,7 +6,7 @@
 - **Provedor:** Google DeepMind
 - **Modelo configurado/reportado:** Gemini 4 Argon (Medium)
 - **Identificação da tarefa:** `ACT-008`, `ACT-009` (`AGT-008`)
-- **Status de validação:** `AI_PROPOSED`
+- **Status de validação:** `HUMAN_VALIDATED`
 
 ## Contexto e Motivação
 

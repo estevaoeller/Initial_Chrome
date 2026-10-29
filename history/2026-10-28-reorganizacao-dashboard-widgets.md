@@ -7,7 +7,7 @@ agent_version: unknown
 provider: Google DeepMind
 model: Gemini 3.8 Flash (Medium)
 tasks: [ACT-004, AGT-007]
-validation: AI_PROPOSED
+validation: HUMAN_VALIDATED
 ---
 
 # Reorganização dos Widgets Superiores em Dashboard Modular

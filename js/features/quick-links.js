@@ -1,3 +1,5 @@
+import { resolveIconUrls, attachIconCascade } from '../icon-resolver.js';
+
 export class QuickLinksManager {
   constructor() {
     this.quickLinksBar = document.getElementById('quick-links-bar');
@@ -14,35 +16,52 @@ export class QuickLinksManager {
   }
 
   init() {
-    chrome.storage.sync.get(['quickLinks'], (result) => {
-      if (result.quickLinks && result.quickLinks.length > 0) {
-        this.renderQuickLinks(result.quickLinks);
-      } else {
-        this.renderQuickLinks(this.DEFAULT_QUICK_LINKS);
-        chrome.storage.sync.set({ quickLinks: this.DEFAULT_QUICK_LINKS });
-      }
-    });
-
-    // Load Initial Font Size
-    chrome.storage.sync.get(['extensionSettings'], (res) => {
-      const settings = res.extensionSettings || {};
+    chrome.storage.sync.get(['quickLinks', 'extensionSettings'], (result) => {
+      const settings = result.extensionSettings || {};
       if (settings.quickLinksSize) {
         document.documentElement.style.setProperty(
           '--quick-links-size',
           settings.quickLinksSize + 'px',
         );
       }
+      const defaultSource = settings.defaultIconSource || 'dashboardicons';
+      if (result.quickLinks && result.quickLinks.length > 0) {
+        this.renderQuickLinks(result.quickLinks, defaultSource);
+      } else {
+        this.renderQuickLinks(this.DEFAULT_QUICK_LINKS, defaultSource);
+        chrome.storage.sync.set({ quickLinks: this.DEFAULT_QUICK_LINKS });
+      }
     });
   }
 
-  renderQuickLinks(links) {
+  renderQuickLinks(links, defaultIconSource = 'dashboardicons') {
     if (!this.quickLinksBar) return;
     this.quickLinksBar.innerHTML = '';
     links.forEach((link) => {
       const a = document.createElement('a');
       a.href = link.url;
-      a.textContent = link.name;
       a.className = 'quick-link';
+
+      const img = document.createElement('img');
+      img.className = 'quick-link-icon';
+      img.alt = '';
+      const candidateUrls = resolveIconUrls(
+        link,
+        null,
+        defaultIconSource,
+        16,
+      );
+      attachIconCascade(img, candidateUrls, null, {
+        url: link.url,
+        source: defaultIconSource,
+        isCustom: false,
+      });
+
+      const span = document.createElement('span');
+      span.textContent = link.name;
+
+      a.appendChild(img);
+      a.appendChild(span);
       this.quickLinksBar.appendChild(a);
     });
   }

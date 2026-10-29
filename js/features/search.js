@@ -52,6 +52,7 @@ export class SearchManager {
           activeEl &&
           (activeEl.tagName === 'INPUT' ||
             activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
             activeEl.isContentEditable)
         ) {
           return;
@@ -59,6 +60,34 @@ export class SearchManager {
         e.preventDefault();
         this.open();
         return;
+      }
+
+      // Type-to-Search instantâneo no Ctrl+T:
+      // Se nenhum input nem outro modal estiver aberto, digitar qualquer letra/número
+      // ou '>' (Command Palette) abre a busca já com o caractere inserido!
+      if (
+        !this.isOpen &&
+        !e.ctrlKey &&
+        !e.altKey &&
+        !e.metaKey &&
+        e.key.length === 1 &&
+        (/^[a-zA-Z0-9]$/.test(e.key) || e.key === '>')
+      ) {
+        const activeEl = document.activeElement;
+        const isTypingInField =
+          activeEl &&
+          (activeEl.tagName === 'INPUT' ||
+            activeEl.tagName === 'TEXTAREA' ||
+            activeEl.tagName === 'SELECT' ||
+            activeEl.isContentEditable);
+        const isOtherModalOpen = Boolean(
+          document.querySelector('.modal-overlay.show'),
+        );
+        if (!isTypingInField && !isOtherModalOpen) {
+          e.preventDefault();
+          this.open(e.key);
+          return;
+        }
       }
 
       // Close with Escape key when open
@@ -142,20 +171,24 @@ export class SearchManager {
     }
   }
 
-  open() {
+  open(initialQuery = '') {
     this.previouslyFocusedElement = document.activeElement;
     this.isOpen = true;
     this.modal.style.display = 'flex';
     // Add class for anims (needs a tiny delay for browser transitions)
     setTimeout(() => this.modal.classList.add('show'), 10);
 
-    this.input.value = '';
+    this.input.value = typeof initialQuery === 'string' ? initialQuery : '';
     this.selectedIndex = 0;
     this.activeSpaceFilter = 'all';
     this.resultsList.innerHTML = '';
     this.noResults.style.display = 'none';
 
     this.input.focus();
+    if (this.input.value) {
+      const len = this.input.value.length;
+      this.input.setSelectionRange(len, len);
+    }
 
     // Load data
     this.fetchBookmarksAndSpaces();
