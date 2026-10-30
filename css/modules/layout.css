@@ -1,0 +1,570 @@
+/* ==========================================================================
+   css/modules/layout.css
+   Estrutura Macro (#app-container, #main-wrapper, #content-area), Sidebar Esquerda,
+   Action Sidebar Direita, Quick Links Superiores, Relógio/Header e Lock Mode.
+   ========================================================================== */
+
+/* Barra superior (quick links à esquerda, Toggl à direita) */
+.top-bar {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  margin-bottom: var(--space-5);
+  font-size: var(--quick-links-size, 13px);
+}
+
+#top-right-bar {
+  display: flex;
+  gap: var(--space-4);
+}
+
+#toggl-toggle-btn {
+  text-decoration: none;
+}
+
+/* ========== APP CONTAINER (Flexbox Layout) ========== */
+#app-container {
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* ========== SIDEBAR ========== */
+#sidebar {
+  width: var(--sidebar-width);
+  min-width: var(--sidebar-width);
+  background-color: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  border-right: 1px solid var(--surface-border);
+  display: flex;
+  flex-direction: column;
+  transition:
+    width var(--dur-slow) var(--ease-out),
+    min-width var(--dur-slow) var(--ease-out);
+  position: relative;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+/* Colapsada = mini-rail de ícones (em vez de sumir por completo) */
+#sidebar.collapsed {
+  width: 64px;
+  min-width: 64px;
+  overflow: hidden;
+}
+
+#sidebar.collapsed .sidebar-header {
+  justify-content: center;
+  padding-left: var(--space-2);
+  padding-right: var(--space-2);
+}
+
+#sidebar.collapsed .sidebar-header h3 {
+  display: none;
+}
+
+#sidebar.collapsed .space-name {
+  display: none;
+}
+
+#sidebar.collapsed .space-item {
+  justify-content: center;
+  padding-left: 0;
+  padding-right: 0;
+  gap: 0;
+}
+
+#sidebar.collapsed .space-icon {
+  margin: 0;
+}
+
+/* Space sem emoji: mostra um ponto no lugar para o rail não ficar vazio */
+#sidebar.collapsed .space-icon:empty::before {
+  content: '•';
+  opacity: 0.6;
+}
+
+.sidebar-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: var(--space-4) var(--space-5);
+  border-bottom: 1px solid var(--surface-border);
+}
+
+.sidebar-header h3 {
+  margin: 0;
+  font-size: 14px;
+  font-weight: 600;
+  color: var(--text);
+  opacity: 0.7;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+#add-space-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  font-size: 20px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: 4px;
+  transition: background-color 0.2s ease;
+}
+
+#add-space-btn:hover {
+  background-color: var(--surface-hover);
+}
+
+#spaces-list {
+  flex: 1;
+  overflow-y: auto;
+  padding: var(--space-2) var(--space-2);
+}
+
+.space-item {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 10px 12px;
+  cursor: pointer;
+  transition:
+    background-color var(--dur-fast) var(--ease-out),
+    transform var(--dur-fast) var(--ease-out);
+  color: var(--text);
+  text-decoration: none;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+  font-size: var(--text-base);
+  border-radius: var(--radius-md);
+  box-sizing: border-box;
+  margin-bottom: 2px;
+}
+
+.space-item:hover {
+  background-color: var(--surface-hover);
+}
+
+.space-item:active {
+  transform: scale(0.98);
+}
+
+.space-item.active {
+  background-color: color-mix(in srgb, var(--accent) 18%, transparent);
+  color: color-mix(in srgb, var(--accent) 60%, var(--text));
+  font-weight: 600;
+}
+
+.space-icon {
+  font-size: 18px;
+  width: 24px;
+  text-align: center;
+}
+
+.space-name {
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Badges de Atalho (1..9) nos Espaços da Sidebar */
+.space-shortcut-badge {
+  margin-left: auto;
+  font-size: 10px;
+  font-weight: 600;
+  padding: 1px 6px;
+  border-radius: 6px;
+  background: color-mix(in srgb, var(--text) 9%, transparent);
+  color: var(--text);
+  opacity: 0.5;
+  font-family: monospace;
+  transition: opacity var(--dur-fast) var(--ease-out);
+}
+
+.space-item:hover .space-shortcut-badge,
+.space-item.active .space-shortcut-badge {
+  opacity: 0.9;
+}
+
+#sidebar.collapsed .space-shortcut-badge {
+  display: none;
+}
+
+#sidebar-toggle {
+  position: fixed;
+  left: var(--sidebar-width);
+  top: 50%;
+  transform: translateY(-50%);
+  width: 24px;
+  height: 48px;
+  background-color: var(--surface-strong);
+  backdrop-filter: blur(var(--surface-blur));
+  border: 1px solid var(--surface-border);
+  border-left: none;
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--text);
+  opacity: 0.7;
+  transition:
+    opacity var(--dur-fast) var(--ease-out),
+    background-color var(--dur-fast) var(--ease-out),
+    left var(--dur-slow) var(--ease-out);
+  z-index: 101;
+}
+
+#sidebar-toggle svg {
+  transition: transform var(--dur-base) var(--ease-out);
+}
+
+#sidebar-toggle.collapsed svg {
+  transform: rotate(180deg);
+}
+
+#sidebar-toggle:hover {
+  opacity: 1;
+  background-color: var(--surface-hover);
+}
+
+/* When sidebar is collapsed (mini-rail), keep toggle at the rail edge */
+#sidebar.collapsed~#sidebar-toggle {
+  left: 64px;
+}
+
+/* ========== MAIN WRAPPER ========== */
+#main-wrapper {
+  flex: 1;
+  overflow-y: auto;
+  padding: 20px;
+  position: relative;
+}
+
+#background-filter {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.3);
+  z-index: -1;
+}
+
+/* Profundidade: escurecimento progressivo sutil no topo e na base do wallpaper */
+#background-filter::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom,
+      rgba(0, 0, 0, 0.18) 0%,
+      transparent 22%,
+      transparent 78%,
+      rgba(0, 0, 0, 0.22) 100%);
+  pointer-events: none;
+}
+
+/* ===== Scrollbars finas e discretas ===== */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--text) 25%, transparent) transparent;
+}
+
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--text) 22%, transparent);
+  border-radius: var(--radius-full);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--text) 40%, transparent);
+  border: 2px solid transparent;
+  background-clip: padding-box;
+}
+
+/* ========== ACTION SIDEBAR (Right) ========== */
+#action-sidebar {
+  width: 40px;
+  background-color: var(--surface);
+  backdrop-filter: blur(var(--surface-blur));
+  border-left: 1px solid var(--surface-border);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 15px;
+  padding-bottom: 20px;
+  justify-content: space-between;
+  z-index: 100;
+  flex-shrink: 0;
+}
+
+.action-top,
+.action-bottom {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 15px;
+  width: 100%;
+}
+
+.action-btn {
+  background: transparent;
+  border: none;
+  color: var(--text);
+  padding: 8px;
+  cursor: pointer;
+  border-radius: 50%;
+  transition: all 0.2s ease;
+  opacity: 0.6;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.action-btn svg {
+  width: 16px;
+  height: 16px;
+}
+
+.action-btn:hover {
+  background-color: var(--surface-hover);
+  opacity: 1;
+  transform: scale(1.1);
+  color: var(--accent);
+}
+
+/* ========== CLOCK AREA (Redesigned) ========== */
+#top-header {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 10px 0 20px;
+  width: 100%;
+}
+
+.modern-clock {
+  text-align: center;
+  color: var(--text);
+  text-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+}
+
+.clock-time {
+  font-size: var(--text-display);
+  font-weight: 200;
+  line-height: 1;
+  letter-spacing: -2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.digital-time {
+  font-variant-numeric: tabular-nums;
+}
+
+.clock-date {
+  font-size: 1.2rem;
+  font-weight: 400;
+  margin-top: 5px;
+  opacity: 0.9;
+  text-transform: capitalize;
+}
+
+.mini-calendar {
+  display: none;
+}
+
+/* Estilos para Relógio, Data e Calendário */
+#clock-area {
+  background-color: var(--card);
+  border-radius: 8px;
+  padding: 15px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  min-width: 200px;
+  color: var(--text);
+}
+
+#analog-clock-placeholder {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  color: var(--text);
+  background-color: var(--card);
+  padding: 10px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+#date-placeholder {
+  font-size: 14px;
+  text-align: center;
+  color: var(--text);
+  background-color: var(--card);
+  padding: 8px;
+  border-radius: 6px;
+  margin-bottom: 10px;
+}
+
+#calendar-placeholder {
+  background-color: var(--card);
+  padding: 10px;
+  border-radius: 6px;
+  color: var(--text);
+}
+
+#calendar-placeholder h3 {
+  margin: 0 0 10px 0;
+  font-size: 16px;
+  text-align: center;
+  color: var(--text);
+}
+
+#calendar-placeholder table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+
+#calendar-placeholder th,
+#calendar-placeholder td {
+  padding: 4px;
+  text-align: center;
+  border: 1px solid var(--icon-border-color);
+}
+
+#calendar-placeholder th {
+  background-color: var(--bg);
+  font-weight: bold;
+  color: var(--text);
+}
+
+#calendar-placeholder a {
+  color: var(--accent);
+  text-decoration: none;
+  font-size: 12px;
+}
+
+/* Overrides for clean look */
+#clock-area,
+#analog-clock-placeholder,
+#date-placeholder {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  padding: 0 !important;
+}
+
+/* ========== CONTENT AREA ========== */
+#content-area {
+  margin-top: 20px;
+  padding: 20px;
+  padding-top: 20px;
+  position: relative;
+  z-index: 10;
+  display: block;
+}
+
+#content-area.layout-columns {
+  display: block;
+  column-count: var(--column-count, 3);
+  column-gap: 20px;
+}
+
+/* Evitar quebra de categorias dentro das colunas */
+#content-area.layout-columns .bookmark-category {
+  break-inside: avoid;
+  margin-bottom: var(--category-gap, 20px);
+  display: inline-block;
+  width: 100%;
+}
+
+/* QUICK LINKS BAR */
+#quick-links-bar {
+  position: fixed;
+  top: 0;
+  left: var(--sidebar-width);
+  width: calc(100% - var(--sidebar-width));
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  gap: 20px;
+  padding: 15px 30px;
+  z-index: 900;
+  pointer-events: none;
+  transition:
+    left 0.3s ease,
+    width 0.3s ease;
+}
+
+#quick-links-bar a {
+  pointer-events: auto;
+}
+
+#sidebar.collapsed~#main-wrapper #quick-links-bar {
+  left: 64px;
+  width: calc(100% - 64px);
+}
+
+.quick-link {
+  color: var(--text);
+  text-decoration: none;
+  font-size: var(--quick-links-size, 13px);
+  font-weight: 500;
+  opacity: 0.7;
+  transition: all 0.2s ease;
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.quick-link:hover {
+  opacity: 1;
+  transform: translateY(-1px);
+}
+
+.quick-link-icon {
+  width: 15px;
+  height: 15px;
+  object-fit: contain;
+  flex-shrink: 0;
+  border-radius: 3px;
+}
+
+#unsplash-link span {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  opacity: 0.9;
+}
+
+#unsplash-link span:hover {
+  opacity: 1;
+}
+
+/* Modo Trava de Layout (Lock Mode — ACT-014) */
+body.layout-locked .delete-bookmark-btn,
+body.layout-locked .edit-bookmark-btn,
+body.layout-locked .group-drag-handle,
+body.layout-locked .new-group-container,
+body.layout-locked #add-space-btn {
+  display: none !important;
+}
+
+#lock-layout-btn.active {
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 18%, transparent);
+}
+
