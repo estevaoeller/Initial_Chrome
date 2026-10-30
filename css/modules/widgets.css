@@ -191,6 +191,16 @@
   filter: brightness(1.2);
 }
 
+/* Accessibility Focus Ring Styles (Phase 4) */
+button:focus-visible,
+a:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
 /* ========== WIDGETS DASHBOARD WRAPPER ========== */
 .widgets-dashboard-wrapper {
   width: 100%;
@@ -694,16 +704,6 @@
   #content-area.layout-columns {
     column-count: var(--column-count, 4) !important;
   }
-}
-
-/* Accessibility Focus Ring Styles (Phase 4) */
-button:focus-visible,
-a:focus-visible,
-input:focus-visible,
-select:focus-visible,
-textarea:focus-visible {
-  outline: 2px solid var(--accent);
-  outline-offset: 2px;
 }
 
 /* Premium Animations & Effects (Phase 4) */

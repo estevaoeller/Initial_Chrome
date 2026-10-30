@@ -176,9 +176,7 @@ body.text-behavior-expand .bookmark-name {
   overflow: visible;
   -webkit-line-clamp: unset;
   line-clamp: unset;
-  -webkit-box-orient: unset;
   max-height: none;
-  text-overflow: clip;
 }
 
 /* Modo: Apenas ao passar o mouse (Name Display Setting) */
@@ -186,7 +184,6 @@ body.name-display-hover .bookmark-name {
   opacity: 0;
   position: absolute;
   pointer-events: none;
-  display: none;
 }
 
 body.name-display-hover .bookmark-item:hover .bookmark-name {
@@ -195,14 +192,6 @@ body.name-display-hover .bookmark-item:hover .bookmark-name {
   margin-top: var(--icon-gap);
   display: -webkit-box;
   animation: fadeIn 0.2s ease;
-}
-
-body.name-display-hover.icon-layout-column .bookmark-item:hover .bookmark-name {
-  margin-top: 8px;
-}
-
-body.name-display-hover:not(.icon-layout-column) .bookmark-item:hover .bookmark-name {
-  margin-left: 8px;
 }
 
 @keyframes fadeIn {
@@ -265,6 +254,40 @@ body.name-display-hover:not(.icon-layout-column) .bookmark-item:hover .bookmark-
   text-align: center;
   -webkit-line-clamp: 3;
   line-clamp: 3;
+}
+
+/* NAME DISPLAY LOGIC */
+body.name-display-hover .bookmark-name {
+  display: none;
+}
+
+body.name-display-hover .bookmark-item:hover .bookmark-name {
+  display: -webkit-box;
+  animation: fadeIn 0.2s ease;
+}
+
+body.name-display-hover.icon-layout-column .bookmark-item:hover .bookmark-name {
+  margin-top: 8px;
+}
+
+body.name-display-hover:not(.icon-layout-column) .bookmark-item:hover .bookmark-name {
+  margin-left: 8px;
+}
+
+/* TEXT BEHAVIOR LOGIC */
+body.text-behavior-expand .bookmark-name {
+  display: block;
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  -webkit-box-orient: unset;
+  white-space: normal;
+  overflow: visible;
+  text-overflow: clip;
+}
+
+body.text-behavior-single .bookmark-name {
+  -webkit-line-clamp: 1;
+  line-clamp: 1;
 }
 
 /* Estilo para o campo de input durante a edição do nome do bookmark */

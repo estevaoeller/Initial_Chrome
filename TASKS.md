@@ -3,7 +3,7 @@
 ## Atividades do projeto
 
 | ID | Atividade | Responsável | Status | Prazo | Próximo passo |
-|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- |
 | ACT-001 | Priorizar e selecionar oportunidades de melhoria | estev | DONE | — | Prioridades definidas (P0, P1, P2) |
 | ACT-002 | Implementar cache no widget de clima (Open-Meteo) | Antigravity | DONE | — | Cache local com TTL de 45 min e Stale-While-Revalidate em `modules.js` |
 | ACT-003 | Criar Empty State para Espaços sem marcadores | Antigravity | DONE | — | Painel glassmorphism com CTA para criar primeiro grupo em `bookmark-renderer.js` |
@@ -25,7 +25,7 @@
 ## Fila dos agentes
 
 | ID | Solicitação | Solicitado por | Agente | Modelo | Status da execução | Validação | Evidência |
-|---|---|---|---|---|---|---|---|
+| --- | --- | --- | --- | --- | --- | --- | --- |
 | AGT-001 | Instalação e adaptação do Project Memory v3 | estev | Antigravity | Gemini 3.8 Flash (Medium) | DONE | HUMAN_VALIDATED | [`history/2026-10-28-instalacao-project-memory.md`](history/2026-10-28-instalacao-project-memory.md) |
 | AGT-002 | Diagnóstico e registro de oportunidades de melhoria na memória | estev | Antigravity | Gemini 3.8 Flash (Medium) | DONE | HUMAN_VALIDATED | [`wiki/oportunidades-melhoria.md`](wiki/oportunidades-melhoria.md) |
 | AGT-003 | Consolidação da memória histórica, decisões e referências | estev | Antigravity | Gemini 3.8 Flash (Medium) | DONE | HUMAN_VALIDATED | [`history/`](history/), [`wiki/`](wiki/) |
@@ -37,7 +37,7 @@
 | AGT-009 | Benchmark de extensões/dashboards na Wiki e plano de evolução (Layout, UX, Cores, Configs, Navegabilidade) | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`wiki/referencias-e-inspiracoes.md`](wiki/referencias-e-inspiracoes.md), [`wiki/plano-evolucao-ux-layout.md`](wiki/plano-evolucao-ux-layout.md) |
 | AGT-010 | Implementação dos 5 pacotes de evolução (`ACT-010` a `ACT-014`: Navegabilidade, Layout, Temas, Quick Popover e Lock Mode) | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`history/2026-10-29-evolucao-ux-layout-temas-navegabilidade.md`](history/2026-10-29-evolucao-ux-layout-temas-navegabilidade.md), [`walkthrough.md`](file:///C:/Users/estev/.gemini/antigravity/brain/97701578-d609-474f-adba-a10b8f1934c9/walkthrough.md) |
 | AGT-011 | Diagnóstico completo das Configurações, correção dos 6 defeitos e expansão do Quick Settings Popover em 3 micro-abas | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`wiki/plano-diagnostico-configs-e-quick-popover.md`](wiki/plano-diagnostico-configs-e-quick-popover.md), [`history/2026-10-29-diagnostico-configs-e-quick-popover.md`](history/2026-10-29-diagnostico-configs-e-quick-popover.md) |
-| AGT-012 | Higiene documental (`_wiki/` → `wiki/`), saneamento de merge, atualização do `README.md`/`PROJECT.md` e modularização completa do CSS (`ACT-007`) | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | AI_PROPOSED | [`wiki/plano-modularizacao-css.md`](wiki/plano-modularizacao-css.md), [`css/modules/`](css/modules/), [`README.md`](README.md) |
+| AGT-012 | Higiene documental (`_wiki/` → `wiki/`), saneamento de merge, atualização do `README.md`/`PROJECT.md` e modularização completa do CSS (`ACT-007`) | estev | Antigravity | Gemini 4 Argon (Medium) | DONE | HUMAN_VALIDATED | [`wiki/plano-modularizacao-css.md`](wiki/plano-modularizacao-css.md), [`css/modules/`](css/modules/), [`README.md`](README.md) |
 
 ## Status de execução
 
