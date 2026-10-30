@@ -626,9 +626,7 @@
                     justify-content: space-between;
                     margin-bottom: 0;
                   ">
-                <label for="dynamic-accent" style="font-size: 0.95rem">Acento dinamico (cor extraida do
-                  wallpaper)</label>Acento dinâmico (cor extraída do wallpaper — requer API Key no Unsplash ou Imagem do
-                PC)</label>
+                <label for="dynamic-accent" style="font-size: 0.95rem">Acento dinâmico (cor extraída do wallpaper — requer API Key no Unsplash ou Imagem do PC)</label>
                 <label class="switch">
                   <input type="checkbox" id="dynamic-accent" />
                   <span class="slider round"></span>
@@ -958,7 +956,7 @@
                 <div class="range-wrapper">
                   <input type="range" id="bookmark-min-width" min="50" max="150" step="5" value="100" min="80" max="260"
                     step="10" value="150" />
-                  <span id="bookmark-min-width-value" class="range-value">100px</span>150px</span>
+                  <span id="bookmark-min-width-value" class="range-value">150px</span>
                 </div>
               </div>
             </div>
@@ -1252,7 +1250,6 @@
               <div class="control-item full-width">
                 <label for="wallpaper-source">Origem do Wallpaper</label>
                 <select id="wallpaper-source">
-                  <option value="local">Pasta Local do PC</option>
                   <option value="unsplash">Internet (Unsplash Diário)</option>
                   <option value="custom">
                     🖼️ Imagem do PC (Upload) ou URL Direta
@@ -1262,8 +1259,7 @@
               </div>
 
               <div class="control-item full-width" id="wallpaper-local-config" style="display: none">
-                <label for="wallpaper-folder-path">Caminho da Pasta de Wallpapers</label <label>Imagem Personalizada de
-                Fundo</label>
+                <label>Imagem Personalizada de Fundo</label>
                 <div style="
                       display: flex;
                       gap: 10px;
@@ -1271,23 +1267,18 @@
                       flex-wrap: wrap;
                       margin-bottom: 10px;
                     ">
-                  <div style="display: flex; gap: 10px">
-                    <input type="text" id="wallpaper-folder-path" value="C:\Users\estev\OneDrive\Imagens\Wallpapers"
-                      readonly style="flex: 1" />
-                    <button type="button" id="select-wallpaper-folder-btn" class="btn btn-secondary"
-                      class="btn btn-primary">
-                      Selecionar
-                      📁 Escolher Imagem do Computador...
-                    </button>
-                    <input type="file" id="upload-wallpaper-input" accept="image/*" style="display: none" />
-                    <span id="custom-wallpaper-status" style="font-size: 0.85rem; opacity: 0.8"></span>
-                  </div>
-                  <label for="custom-wallpaper-url">Ou cole a URL direta de uma imagem (https://...)</label>
-                  <input type="text" id="custom-wallpaper-url"
-                    placeholder="Ex: https://images.unsplash.com/photo-..." />
+                  <button type="button" id="select-wallpaper-folder-btn" class="btn btn-primary">
+                    📁 Escolher Imagem do Computador...
+                  </button>
+                  <input type="file" id="upload-wallpaper-input" accept="image/*" style="display: none" />
+                  <span id="custom-wallpaper-status" style="font-size: 0.85rem; opacity: 0.8"></span>
                 </div>
+                <label for="custom-wallpaper-url">Ou cole a URL direta de uma imagem (https://...)</label>
+                <input type="text" id="custom-wallpaper-url"
+                  placeholder="Ex: https://images.unsplash.com/photo-..." />
+              </div>
 
-                <div class="control-item full-width" id="wallpaper-unsplash-config" style="display: none">
+              <div class="control-item full-width" id="wallpaper-unsplash-config" style="display: none">
                   <div style="display: flex; gap: 15px">
                     <div style="flex: 1">
                       <label for="wallpaper-api-key">Chave da API (Access Key)</label>

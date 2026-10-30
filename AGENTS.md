@@ -8,8 +8,8 @@ Antes de trabalhar, leia somente:
 2. `NOW.md`;
 3. `TASKS.md`.
 
-Não leia integralmente `_wiki/`, `history/`, arquivos de dados ou outras pastas.
-Consulte `_wiki/INDEX.md` somente quando a tarefa exigir conhecimento adicional.
+Não leia integralmente `wiki/`, `history/`, arquivos de dados ou outras pastas.
+Consulte `wiki/INDEX.md` somente quando a tarefa exigir conhecimento adicional.
 Pesquise o histórico apenas para localizar precedente, decisão, erro ou execução relevante.
 
 ## Execução
@@ -19,7 +19,7 @@ Pesquise o histórico apenas para localizar precedente, decisão, erro ou execu�
 - Diferencie fatos, inferências, sugestões e itens pendentes de validação.
 - Faça alterações proporcionais à tarefa atual.
 - Evite criar documentação sem utilidade futura concreta.
-- Salve planos técnicos, arquiteturais e roadmaps de implementação em `_wiki/` (ex: `_wiki/plano-*.md`), indexando-os em `_wiki/INDEX.md` e vinculando-os em `TASKS.md`.
+- Salve planos técnicos, arquiteturais e roadmaps de implementação em `wiki/` (ex: `wiki/plano-*.md`), indexando-os em `wiki/INDEX.md` e vinculando-os em `TASKS.md`.
 
 ## Organização adaptativa
 
@@ -41,7 +41,7 @@ Após trabalho relevante:
 
 - atualize `NOW.md` com estado, bloqueios e próximos passos;
 - atualize as linhas afetadas de `TASKS.md`;
-- atualize `_wiki/INDEX.md` se criar conhecimento durável;
+- atualize `wiki/INDEX.md` se criar conhecimento durável;
 - crie registro curto em `history/` apenas quando houver valor de continuidade ou auditoria.
 
 Não registre conversas triviais nem replique conteúdo já preservado em outro lugar.

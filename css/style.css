@@ -732,7 +732,8 @@ body {
   flex-grow: 1;
   font-family: var(--bookmark-font-family);
   font-size: var(--bookmark-font-size);
-  color: var(--bookmark-font-color);
+  font-weight: 500;
+  color: var(--bookmark-font-color, var(--text));
   text-align: left;
   white-space: normal;
   word-break: break-word;
@@ -742,8 +743,8 @@ body {
   -webkit-box-orient: vertical;
   overflow: hidden;
   text-overflow: ellipsis;
-  line-height: 1.2;
-  max-height: 2.4em;
+  line-height: 1.25;
+  max-height: 2.5em;
   /* 2 lines */
 }
 
@@ -3024,30 +3025,24 @@ body.layout-locked #add-space-btn {
   background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
 
-/* 6. Popover Rápido de Aparência na Nova Aba (#quick-appearance-popover) */
 /* 6. Popover Rápido de Aparência e Ajustes na Nova Aba (#quick-appearance-popover) */
 .quick-appearance-popover {
   position: fixed;
   top: 16px;
   right: 68px;
-  width: 300px;
   width: 320px;
   max-height: calc(100vh - 36px);
   overflow-y: auto;
   background: var(--surface-strong);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
   backdrop-filter: blur(22px);
   -webkit-backdrop-filter: blur(22px);
   border: 1px solid var(--surface-border);
   border-radius: var(--radius-lg);
-  padding: 16px;
   padding: 15px;
   box-shadow: var(--shadow-lg);
   z-index: 1200;
   display: flex;
   flex-direction: column;
-  gap: 14px;
   gap: 12px;
   color: var(--text);
   animation: qapFadeIn 0.16s var(--ease-out);
@@ -3069,7 +3064,6 @@ body.layout-locked #add-space-btn {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding-bottom: 8px;
   border-bottom: 1px solid var(--surface-border);
   padding-bottom: 6px;
 }
@@ -3142,7 +3136,6 @@ body.layout-locked #add-space-btn {
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.5px;
-  opacity: 0.7;
   opacity: 0.72;
 }
 
@@ -3195,8 +3188,6 @@ body.layout-locked #add-space-btn {
 }
 
 .qap-segmented {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
   display: flex;
   gap: 4px;
   background: color-mix(in srgb, var(--text) 6%, transparent);

@@ -331,31 +331,32 @@
       </button>
     </div>
 
-    <!-- Quick Appearance Popover (Live Customization on New Tab) -->
     <!-- Quick Appearance & Settings Popover (Live Customization on New Tab) -->
     <div id="quick-appearance-popover" class="quick-appearance-popover" style="display: none" role="dialog"
-      aria-label="Aparência rápida" aria-label="Ajustes rápidos">
+      aria-label="Ajustes rápidos">
       <div class="qap-header">
-        <span class="qap-title">✨ Aparência Rápida</span>
-        <span class="qap-autosave-badge">✓ Salvo ao vivo</span>
         <span class="qap-title">⚡ Ajustes Rápidos</span>
         <span class="qap-autosave-badge">✓ Ao vivo</span>
       </div>
 
-      <div class="qap-section">
-        <label class="qap-label">Tema de Cores</label>
-        <div id="qap-theme-swatches" class="qap-theme-grid"></div>
-        <!-- Micro-tabs Navigation -->
-        <div class="qap-tabs" role="tablist">
-          <button type="button" class="qap-tab-btn active" data-qap-tab="appearance" role="tab">
-            🎨 Aparência
-          </button>
-          <button type="button" class="qap-tab-btn" data-qap-tab="grid" role="tab">
-            📐 Grade
-          </button>
-          <button type="button" class="qap-tab-btn" data-qap-tab="widgets" role="tab">
-            ✨ Widgets
-          </button>
+      <!-- Micro-tabs Navigation -->
+      <div class="qap-tabs" role="tablist">
+        <button type="button" class="qap-tab-btn active" data-qap-tab="appearance" role="tab">
+          🎨 Aparência
+        </button>
+        <button type="button" class="qap-tab-btn" data-qap-tab="grid" role="tab">
+          📐 Grade
+        </button>
+        <button type="button" class="qap-tab-btn" data-qap-tab="widgets" role="tab">
+          ✨ Widgets
+        </button>
+      </div>
+
+      <!-- PANE 1: APARÊNCIA -->
+      <div class="qap-pane active" data-qap-pane="appearance">
+        <div class="qap-section">
+          <label class="qap-label">Tema de Cores</label>
+          <div id="qap-theme-swatches" class="qap-theme-grid"></div>
         </div>
 
         <div class="qap-section">
@@ -370,189 +371,157 @@
             <button type="button" class="qap-seg-btn" data-style="compact">
               Compacto
             </button>
-            <!-- PANE 1: APARÊNCIA -->
-            <div class="qap-pane active" data-qap-pane="appearance">
-              <div class="qap-section">
-                <label class="qap-label">Tema de Cores</label>
-                <div id="qap-theme-swatches" class="qap-theme-grid"></div>
-              </div>
-            </div>
+          </div>
+        </div>
 
-            <div class="qap-section">
-              <div class="qap-slider-header">
-                <label class="qap-label" for="qap-wallpaper-blur">Desfoque do Fundo (Blur)</label <div
-                  class="qap-section">
-                <label class="qap-label">Estilo dos Cartões</label>
-                <div class="qap-segmented" id="qap-card-style-group">
-                  <button type="button" class="qap-seg-btn" data-style="card">
-                    Cartão
-                  </button>
-                  <button type="button" class="qap-seg-btn" data-style="frameless">
-                    Sem Moldura
-                  </button>
-                  <button type="button" class="qap-seg-btn" data-style="compact">
-                    Compacto
-                  </button>
-                </div>
-              </div>
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label">Papel de Parede</label>
+            <button type="button" id="qap-refresh-wallpaper-btn" class="qap-mini-action-btn"
+              title="Sortear nova foto do Unsplash">
+              🔄 Trocar foto
+            </button>
+          </div>
+          <div class="qap-segmented" id="qap-wallpaper-source-group">
+            <button type="button" class="qap-seg-btn" data-wp-source="unsplash">
+              Unsplash
+            </button>
+            <button type="button" class="qap-seg-btn" data-wp-source="custom">
+              Imagem/URL
+            </button>
+            <button type="button" class="qap-seg-btn" data-wp-source="none">
+              Cor Sólida
+            </button>
+          </div>
+          <div id="qap-custom-wallpaper-box" class="qap-custom-wp-box" style="display: none">
+            <button type="button" id="qap-upload-wp-btn" class="qap-upload-btn">
+              📁 Escolher Imagem do PC
+            </button>
+            <input type="file" id="qap-upload-wp-input" accept="image/*" style="display: none" />
+          </div>
+        </div>
 
-              <div class="qap-section">
-                <div class="qap-slider-header">
-                  <label class="qap-label">Papel de Parede</label>
-                  <button type="button" id="qap-refresh-wallpaper-btn" class="qap-mini-action-btn"
-                    title="Sortear nova foto do Unsplash">
-                    🔄 Trocar foto
-                  </button>
-                </div>
-                <div class="qap-segmented" id="qap-wallpaper-source-group">
-                  <button type="button" class="qap-seg-btn" data-wp-source="unsplash">
-                    Unsplash
-                  </button>
-                  <button type="button" class="qap-seg-btn" data-wp-source="custom">
-                    Imagem/URL
-                  </button>
-                  <button type="button" class="qap-seg-btn" data-wp-source="none">
-                    Cor Sólida
-                  </button>
-                </div>
-                <div id="qap-custom-wallpaper-box" class="qap-custom-wp-box" style="display: none">
-                  <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
-                  <button type="button" id="qap-upload-wp-btn" class="qap-upload-btn">
-                    📁 Escolher Imagem do PC
-                  </button>
-                  <input type="file" id="qap-upload-wp-input" accept="image/*" style="display: none" />
-                </div>
-              </div>
-              <input type="range" id="qap-wallpaper-blur" min="0" max="24" step="1" value="0" />
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-wallpaper-blur">Desfoque do Fundo (Blur)</label>
+            <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
+          </div>
+          <input type="range" id="qap-wallpaper-blur" min="0" max="24" step="1" value="0" />
+        </div>
 
-              <div class="qap-section">
-                <div class="qap-slider-header">
-                  <label class="qap-label" for="qap-wallpaper-blur">Desfoque do Fundo (Blur)</label>
-                  <span id="qap-wallpaper-blur-val" class="qap-val">0px</span>
-                </div>
-                <input type="range" id="qap-wallpaper-blur" min="0" max="24" step="1" value="0" />
-              </div>
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-filter-opacity">Contraste / Filtro Escuro</label>
+            <span id="qap-filter-opacity-val" class="qap-val">30%</span>
+          </div>
+          <input type="range" id="qap-filter-opacity" min="0" max="0.95" step="0.05" value="0.3" />
+        </div>
 
-              <div class="qap-section">
-                <div class="qap-slider-header">
-                  <label class="qap-label" for="qap-filter-opacity">Contraste / Filtro Escuro</label>
-                  <span id="qap-filter-opacity-val" class="qap-val">30%</span>
-                </div>
-                <input type="range" id="qap-filter-opacity" min="0" max="0.95" step="0.05" value="0.3" />
-              </div>
+        <div class="qap-toggle-row">
+          <span>Modo Sólido (desligar vidro)</span>
+          <input type="checkbox" id="qap-solid-surfaces" />
+        </div>
+      </div>
 
-              <div class="qap-toggle-row">
-                <span>Modo Sólido (desligar vidro)</span>
-                <input type="checkbox" id="qap-solid-surfaces" />
-              </div>
-            </div>
+      <!-- PANE 2: GRADE & CARTÕES -->
+      <div class="qap-pane" data-qap-pane="grid">
+        <div class="qap-section">
+          <label class="qap-label">Disposição dos Grupos</label>
+          <div class="qap-segmented" id="qap-layout-mode-group">
+            <button type="button" class="qap-seg-btn" data-layout-mode="list">
+              ☰ Lista Vertical
+            </button>
+            <button type="button" class="qap-seg-btn" data-layout-mode="columns">
+              ☷ Colunas
+            </button>
+          </div>
+        </div>
 
-            <div class="qap-section">
-              <div class="qap-slider-header">
-                <label class="qap-label" for="qap-filter-opacity">Contraste / Filtro do Fundo</label>
-                <span id="qap-filter-opacity-val" class="qap-val">0.30</span>
-                <!-- PANE 2: GRADE & CARTÕES -->
-                <div class="qap-pane" data-qap-pane="grid">
-                  <div class="qap-section">
-                    <label class="qap-label">Disposição dos Grupos</label>
-                    <div class="qap-segmented" id="qap-layout-mode-group">
-                      <button type="button" class="qap-seg-btn" data-layout-mode="list">
-                        ☰ Lista Vertical
-                      </button>
-                      <button type="button" class="qap-seg-btn" data-layout-mode="columns">
-                        ☷ Colunas
-                      </button>
-                    </div>
-                  </div>
-                  <input type="range" id="qap-filter-opacity" min="0" max="0.95" step="0.05" value="0.3" />
+        <div class="qap-section" id="qap-columns-section" style="display: none">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-column-count">Número de Colunas</label>
+            <span id="qap-column-count-val" class="qap-val">3</span>
+          </div>
+          <input type="range" id="qap-column-count" min="1" max="6" step="1" value="3" />
+        </div>
 
-                  <div class="qap-section" id="qap-columns-section" style="display: none">
-                    <div class="qap-slider-header">
-                      <label class="qap-label" for="qap-column-count">Número de Colunas</label>
-                      <span id="qap-column-count-val" class="qap-val">3</span>
-                    </div>
-                    <input type="range" id="qap-column-count" min="1" max="6" step="1" value="3" />
-                  </div>
+        <div class="qap-section">
+          <label class="qap-label">Orientação do Ícone</label>
+          <div class="qap-segmented" id="qap-icon-layout-group">
+            <button type="button" class="qap-seg-btn" data-icon-layout="row">
+              ➡️ Ao Lado
+            </button>
+            <button type="button" class="qap-seg-btn" data-icon-layout="column">
+              ⬇️ Acima
+            </button>
+          </div>
+        </div>
 
-                  <div class="qap-section">
-                    <label class="qap-label">Orientação do Ícone</label>
-                    <div class="qap-segmented" id="qap-icon-layout-group">
-                      <button type="button" class="qap-seg-btn" data-icon-layout="row">
-                        ➡️ Ao Lado
-                      </button>
-                      <button type="button" class="qap-seg-btn" data-icon-layout="column">
-                        ⬇️ Acima
-                      </button>
-                    </div>
-                  </div>
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-icon-size">Tamanho dos Ícones</label>
+            <span id="qap-icon-size-val" class="qap-val">28px</span>
+          </div>
+          <input type="range" id="qap-icon-size" min="16" max="64" step="2" value="28" />
+        </div>
 
-                  <div class="qap-section">
-                    <div class="qap-slider-header">
-                      <label class="qap-label" for="qap-icon-size">Tamanho dos Ícones</label>
-                      <span id="qap-icon-size-val" class="qap-val">28px</span>
-                    </div>
-                    <input type="range" id="qap-icon-size" min="16" max="64" step="2" value="28" />
-                  </div>
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-card-width">Largura Mínima do Cartão</label>
+            <span id="qap-card-width-val" class="qap-val">150px</span>
+          </div>
+          <input type="range" id="qap-card-width" min="80" max="260" step="10" value="150" />
+        </div>
 
-                  <div class="qap-section">
-                    <div class="qap-slider-header">
-                      <label class="qap-label" for="qap-card-width">Largura Mínima do Cartão</label>
-                      <span id="qap-card-width-val" class="qap-val">150px</span>
-                    </div>
-                    <input type="range" id="qap-card-width" min="80" max="260" step="10" value="150" />
-                  </div>
+        <div class="qap-section">
+          <div class="qap-slider-header">
+            <label class="qap-label" for="qap-category-gap">Espaço entre Grupos</label>
+            <span id="qap-category-gap-val" class="qap-val">12px</span>
+          </div>
+          <input type="range" id="qap-category-gap" min="0" max="48" step="2" value="12" />
+        </div>
+      </div>
 
-                  <div class="qap-section">
-                    <div class="qap-slider-header">
-                      <label class="qap-label" for="qap-category-gap">Espaço entre Grupos</label>
-                      <span id="qap-category-gap-val" class="qap-val">12px</span>
-                    </div>
-                    <input type="range" id="qap-category-gap" min="0" max="48" step="2" value="12" />
-                  </div>
-                </div>
+      <!-- PANE 3: WIDGETS -->
+      <div class="qap-pane" data-qap-pane="widgets">
+        <div class="qap-section">
+          <label class="qap-label">Estilo do Relógio</label>
+          <div class="qap-segmented" id="qap-clock-style-group">
+            <button type="button" class="qap-seg-btn" data-clock-style="analog">
+              ⏱️ Analógico
+            </button>
+            <button type="button" class="qap-seg-btn" data-clock-style="digital">
+              💻 Digital
+            </button>
+          </div>
+        </div>
 
-                <!-- PANE 3: WIDGETS -->
-                <div class="qap-pane" data-qap-pane="widgets">
-                  <div class="qap-section">
-                    <label class="qap-label">Estilo do Relógio</label>
-                    <div class="qap-segmented" id="qap-clock-style-group">
-                      <button type="button" class="qap-seg-btn" data-clock-style="analog">
-                        ⏱️ Analógico
-                      </button>
-                      <button type="button" class="qap-seg-btn" data-clock-style="digital">
-                        💻 Digital
-                      </button>
-                    </div>
-                  </div>
+        <div class="qap-toggles-list">
+          <label class="qap-toggle-row" for="qap-todo-enabled">
+            <span>📋 Lista de Tarefas (To-Do)</span>
+            <input type="checkbox" id="qap-todo-enabled" checked />
+          </label>
+          <label class="qap-toggle-row" for="qap-quotes-enabled">
+            <span>💬 Citações Motivacionais</span>
+            <input type="checkbox" id="qap-quotes-enabled" checked />
+          </label>
+          <label class="qap-toggle-row" for="qap-rss-enabled">
+            <span>📰 Feed de Notícias (RSS)</span>
+            <input type="checkbox" id="qap-rss-enabled" checked />
+          </label>
+          <label class="qap-toggle-row" for="qap-pomodoro-enabled">
+            <span>🍅 Timer Foco (Pomodoro / Toggl)</span>
+            <input type="checkbox" id="qap-pomodoro-enabled" />
+          </label>
+        </div>
+      </div>
 
-                  <div class="qap-toggles-list">
-                    <label class="qap-toggle-row" for="qap-todo-enabled">
-                      <span>📋 Lista de Tarefas (To-Do)</span>
-                      <input type="checkbox" id="qap-todo-enabled" checked />
-                    </label>
-                    <label class="qap-toggle-row" for="qap-quotes-enabled">
-                      <span>💬 Citações Motivacionais</span>
-                      <input type="checkbox" id="qap-quotes-enabled" checked />
-                    </label>
-                    <label class="qap-toggle-row" for="qap-rss-enabled">
-                      <span>📰 Feed de Notícias (RSS)</span>
-                      <input type="checkbox" id="qap-rss-enabled" checked />
-                    </label>
-                    <label class="qap-toggle-row" for="qap-pomodoro-enabled">
-                      <span>🍅 Timer Foco (Pomodoro / Toggl)</span>
-                      <input type="checkbox" id="qap-pomodoro-enabled" />
-                    </label>
-                  </div>
-                </div>
-
-                <div class="qap-footer">
-                  <button type="button" id="qap-open-full-settings" class="qap-settings-link">
-                    ⚙️ Abrir todas as configurações...
-                    ⚙️ Configurações avançadas (Links, APIs e Backup)...
-                  </button>
-                </div>
-              </div>
-            </div>
+      <div class="qap-footer">
+        <button type="button" id="qap-open-full-settings" class="qap-settings-link">
+          ⚙️ Configurações avançadas (Links, APIs e Backup)...
+        </button>
+      </div>
+    </div>
 
             <!-- Edit Link Modal -->
             <div id="edit-link-modal" class="modal-overlay" style="display: none" role="dialog" aria-modal="true"
